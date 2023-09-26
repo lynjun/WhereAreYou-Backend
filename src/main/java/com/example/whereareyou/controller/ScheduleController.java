@@ -1,15 +1,13 @@
 package com.example.whereareyou.controller;
 
 import com.example.whereareyou.service.ScheduleService;
+import com.example.whereareyou.vo.request.schedule.RequestModifySchedule;
 import com.example.whereareyou.vo.request.schedule.RequestSaveSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseSaveSchedule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * packageName    : project.whereareyou.controller
@@ -43,5 +41,18 @@ public class ScheduleController {
         ResponseSaveSchedule savedSchedule = scheduleService.save(requestSaveSchedule);
 
         return ResponseEntity.status(HttpStatus.OK).body(savedSchedule);
+    }
+
+    /**
+     * 일정 수정
+     *
+     * @param requestModifySchedule the request modify schedule
+     * @return the response entity
+     */
+    @PutMapping()
+    public ResponseEntity<Void> modifySchedule(@RequestBody RequestModifySchedule requestModifySchedule){
+        scheduleService.modifySchedule(requestModifySchedule);
+
+        return ResponseEntity.noContent().build();
     }
 }
