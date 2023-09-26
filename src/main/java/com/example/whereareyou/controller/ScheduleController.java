@@ -3,6 +3,7 @@ package com.example.whereareyou.controller;
 import com.example.whereareyou.service.ScheduleService;
 import com.example.whereareyou.vo.request.schedule.RequestModifySchedule;
 import com.example.whereareyou.vo.request.schedule.RequestSaveSchedule;
+import com.example.whereareyou.vo.response.schedule.ResponseMonthlySchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseSaveSchedule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -54,5 +55,24 @@ public class ScheduleController {
         scheduleService.modifySchedule(requestModifySchedule);
 
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 월별 일정 정보
+     *
+     * @param memberId the member id
+     * @param year     the year
+     * @param month    the month
+     * @return the response entity
+     */
+    @GetMapping("/month")
+    public ResponseEntity<ResponseMonthlySchedule> getMonthSchedule(@RequestParam
+                                                                    String memberId,
+                                                                    Integer year,
+                                                                    Integer month){
+        ResponseMonthlySchedule responseMonthlySchedule
+                = scheduleService.getMonthSchedule(memberId, year, month);
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseMonthlySchedule);
     }
 }
