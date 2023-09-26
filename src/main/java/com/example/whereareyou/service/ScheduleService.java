@@ -8,6 +8,7 @@ import com.example.whereareyou.exception.customexception.*;
 import com.example.whereareyou.repository.MemberRepository;
 import com.example.whereareyou.repository.MemberScheduleRepository;
 import com.example.whereareyou.repository.ScheduleRepository;
+import com.example.whereareyou.vo.request.schedule.RequestDeleteSchedule;
 import com.example.whereareyou.vo.request.schedule.RequestModifySchedule;
 import com.example.whereareyou.vo.request.schedule.RequestSaveSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseMonthlySchedule;
@@ -189,13 +190,13 @@ public class ScheduleService {
      * @return the response monthly schedule
      */
     public ResponseMonthlySchedule getMonthSchedule(String memberId, Integer year, Integer month){
-    /*
-     예외처리
-     404 UserNotFoundException: MemberId Not Found
-     400 InvalidYearOrMonthOrDateException: Invalid Year or Month or Date
-     401: Unauthorized (추후에 추가할 예정)
-     500: Server
-    */
+        /*
+         예외처리
+         404 UserNotFoundException: MemberId Not Found
+         400 InvalidYearOrMonthOrDateException: Invalid Year or Month or Date
+         401: Unauthorized (추후에 추가할 예정)
+         500: Server
+        */
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
 
@@ -235,5 +236,24 @@ public class ScheduleService {
         }
 
         return responseMonthlySchedule;
+    }
+
+    /**
+     * Delete schedule.
+     *
+     * @param requestDeleteSchedule the request delete schedule
+     */
+    public void deleteSchedule(RequestDeleteSchedule requestDeleteSchedule){
+        /*
+         예외처리
+         404: ScheduleId Not Found
+         401: Unauthorized (추후에 추가할 예정)
+         500: Server
+        */
+        Schedule schedule = scheduleRepository.findById(requestDeleteSchedule.getScheduleId())
+                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
+
+        memberScheduleRepository.deleteAllBySchedule(schedule);
+        scheduleRepository.deleteById(requestDeleteSchedule.getScheduleId());
     }
 }
