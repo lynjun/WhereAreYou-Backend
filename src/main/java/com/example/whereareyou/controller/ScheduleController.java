@@ -1,6 +1,7 @@
 package com.example.whereareyou.controller;
 
 import com.example.whereareyou.service.ScheduleService;
+import com.example.whereareyou.vo.request.schedule.RequestDeleteSchedule;
 import com.example.whereareyou.vo.request.schedule.RequestModifySchedule;
 import com.example.whereareyou.vo.request.schedule.RequestSaveSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseMonthlySchedule;
@@ -74,5 +75,18 @@ public class ScheduleController {
                 = scheduleService.getMonthSchedule(memberId, year, month);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseMonthlySchedule);
+    }
+
+    /**
+     * 일정 삭제
+     *
+     * @param requestDeleteSchedule the request delete schedule
+     * @return the response entity
+     */
+    @DeleteMapping()
+    public ResponseEntity<Void> deleteSchedule(@RequestBody RequestDeleteSchedule requestDeleteSchedule){
+        scheduleService.deleteSchedule(requestDeleteSchedule);
+
+        return ResponseEntity.noContent().build();
     }
 }
