@@ -3,6 +3,7 @@ package com.example.whereareyou.service;
 import com.example.whereareyou.domain.Member;
 import com.example.whereareyou.domain.MemberSchedule;
 import com.example.whereareyou.domain.Schedule;
+import com.example.whereareyou.dto.BriefDateScheduleDTO;
 import com.example.whereareyou.dto.MonthlyScheduleResponseDTO;
 import com.example.whereareyou.exception.customexception.*;
 import com.example.whereareyou.repository.MemberRepository;
@@ -11,9 +12,12 @@ import com.example.whereareyou.repository.ScheduleRepository;
 import com.example.whereareyou.vo.request.schedule.RequestDeleteSchedule;
 import com.example.whereareyou.vo.request.schedule.RequestModifySchedule;
 import com.example.whereareyou.vo.request.schedule.RequestSaveSchedule;
+import com.example.whereareyou.vo.response.schedule.ResponseBriefDateSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseMonthlySchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseSaveSchedule;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -255,5 +259,50 @@ public class ScheduleService {
 
         memberScheduleRepository.deleteAllBySchedule(schedule);
         scheduleRepository.deleteById(requestDeleteSchedule.getScheduleId());
+    }
+
+    /**
+     * Get brief date schedule response brief date schedule.
+     *
+     * @param memberId the member id
+     * @param year     the year
+     * @param month    the month
+     * @param date     the date
+     * @return the response brief date schedule
+     */
+    public ResponseBriefDateSchedule getBriefDateSchedule(String memberId, Integer year, Integer month, Integer date){
+        /*
+         예외처리
+         404: MemberId Not Found
+         400: Invalid Year or Month or Date
+         401: Unauthorized (추후에 추가할 예정)
+         500: Server
+        */
+        Member findMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+
+        // Response할 객체 생성
+        ResponseBriefDateSchedule responseBriefDateSchedule = new ResponseBriefDateSchedule();
+        responseBriefDateSchedule.setBriefDateScheduleDTOList(new ArrayList<>());
+
+        // Member를 통해 ScheduleList 반환
+        List<Schedule> scheduleList = findMember.getScheduleList();
+        for(Schedule schedule : scheduleList){
+            // 스케줄의 시작날짜가 입력한 연, 월, 일과 일치하는지 확인
+            if(schedule.getStart().getYear() == year
+                    && schedule.getStart().getMonthValue() == month
+                    && schedule.getStart().getDayOfMonth() == date){
+
+                // ModelMapper를 사용하여 BriefDateScheduleDTO로 변환
+                ModelMapper mapper = new ModelMapper();
+                mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+
+                BriefDateScheduleDTO briefDateScheduleDTO = mapper.map(schedule, BriefDateScheduleDTO.class);
+                briefDateScheduleDTO.setScheduleId(schedule.getId());
+                responseBriefDateSchedule.getBriefDateScheduleDTOList().add(briefDateScheduleDTO);
+            }
+        }
+
+        return responseBriefDateSchedule;
     }
 }
