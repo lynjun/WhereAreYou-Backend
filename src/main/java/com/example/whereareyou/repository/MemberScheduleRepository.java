@@ -1,8 +1,16 @@
 package com.example.whereareyou.repository;
 
+import com.example.whereareyou.domain.Member;
 import com.example.whereareyou.domain.MemberSchedule;
+import com.example.whereareyou.domain.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import javax.transaction.Transactional;
+import java.util.List;
 
 /**
  * packageName    : project.whereareyou.repository
@@ -17,5 +25,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface MemberScheduleRepository extends JpaRepository<MemberSchedule, String> {
-
+    void deleteAllBySchedule(Schedule schedule);
 }
