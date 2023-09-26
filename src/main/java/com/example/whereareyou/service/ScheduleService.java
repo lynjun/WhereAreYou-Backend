@@ -3,18 +3,23 @@ package com.example.whereareyou.service;
 import com.example.whereareyou.domain.Member;
 import com.example.whereareyou.domain.MemberSchedule;
 import com.example.whereareyou.domain.Schedule;
+import com.example.whereareyou.dto.MonthlyScheduleResponseDTO;
 import com.example.whereareyou.exception.customexception.*;
 import com.example.whereareyou.repository.MemberRepository;
 import com.example.whereareyou.repository.MemberScheduleRepository;
 import com.example.whereareyou.repository.ScheduleRepository;
 import com.example.whereareyou.vo.request.schedule.RequestModifySchedule;
 import com.example.whereareyou.vo.request.schedule.RequestSaveSchedule;
+import com.example.whereareyou.vo.response.schedule.ResponseMonthlySchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseSaveSchedule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -173,5 +178,62 @@ public class ScheduleService {
                     .build();
             memberScheduleRepository.save(newMemberSchedule);
         }
+    }
+
+    /**
+     * Get month schedule response monthly schedule.
+     *
+     * @param memberId the member id
+     * @param year     the year
+     * @param month    the month
+     * @return the response monthly schedule
+     */
+    public ResponseMonthlySchedule getMonthSchedule(String memberId, Integer year, Integer month){
+    /*
+     예외처리
+     404 UserNotFoundException: MemberId Not Found
+     400 InvalidYearOrMonthOrDateException: Invalid Year or Month or Date
+     401: Unauthorized (추후에 추가할 예정)
+     500: Server
+    */
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+
+        if(month < 1 || month > 12)
+            throw new InvalidYearOrMonthOrDateException("월이 올바르지 않습니다.");
+
+        // 해당 Member가 생성한 Schedule 반환
+        List<Schedule> scheduleList = member.getScheduleList();
+
+        // Response 객체 생성
+        ResponseMonthlySchedule responseMonthlySchedule = new ResponseMonthlySchedule();
+        responseMonthlySchedule.setYear(year);
+        responseMonthlySchedule.setMonth(month);
+        responseMonthlySchedule.setSchedules(new ArrayList<>());
+
+        // Month의 최대 일수 구하기
+        YearMonth yearMonthObject = YearMonth.of(year, month);
+        int daysInMonth = yearMonthObject.lengthOfMonth();
+
+        // 일별로 스케줄이 있는지 확인
+        for (int day = 1; day <= daysInMonth; day++) {
+            MonthlyScheduleResponseDTO monthlyScheduleResponseDTO = new MonthlyScheduleResponseDTO();
+            monthlyScheduleResponseDTO.setDate(day);
+
+            int finalDay = day;
+            List<Schedule> schedulesForTheDay = scheduleList.stream().filter(schedule -> {
+                LocalDate currentDate = LocalDate.of(year, month, finalDay);
+                LocalDate scheduleStartDate = schedule.getStart().toLocalDate();
+                LocalDate scheduleEndDate = schedule.getEnd().toLocalDate();
+                return (currentDate.isEqual(scheduleStartDate) || currentDate.isAfter(scheduleStartDate)) &&
+                        (currentDate.isEqual(scheduleEndDate) || currentDate.isBefore(scheduleEndDate));
+            }).collect(Collectors.toList());
+
+            monthlyScheduleResponseDTO.setHasSchedule(!schedulesForTheDay.isEmpty());
+            monthlyScheduleResponseDTO.setAmountSchedule(schedulesForTheDay.size());
+            responseMonthlySchedule.getSchedules().add(monthlyScheduleResponseDTO);
+        }
+
+        return responseMonthlySchedule;
     }
 }
