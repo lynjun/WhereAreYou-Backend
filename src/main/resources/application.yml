@@ -1,0 +1,91 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  profiles:
+    active: local
+    group:
+      local: profiles-local
+      dev: profiles-dev
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: WhereAreYou828282@gmail.com
+    password: bmzqcxawerqlpqni
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://whereareyou-db.cu1vkvjwoqqo.ap-northeast-2.rds.amazonaws.com:3306/whereareyou_db
+    username: admin
+    password: whereareyou1!
+
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+
+  main:
+    allow-circular-references: true
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+# s3 ??
+---
+# AWS ??
+cloud:
+  aws:
+    region:
+      static: ap-northeast-2  # AWS ?? ??? ??
+    stack:
+      auto: false
+
+logging:
+  level:
+    com:
+      amazonaws:
+        util:
+          EC2MetadataUtils: error
+
+---
+# Multipart ??
+spring:
+  servlet:
+    multipart:
+      max-file-size: 100MB # ??? ?? ? ?? ??
+      max-request-size: 100MB # ??? ?? ??? ??
+
+---
+# LOCAL ??
+cloud:
+  aws:
+    s3:
+      bucket: whereareyous3
+    credentials:
+      access-key: AKIAVY33B6PJZDQ3UH7S
+      secret-key: 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
+    region:
+      static: ap-northeast-2
+      auto: false
+    stack:
+      auto: false
+
