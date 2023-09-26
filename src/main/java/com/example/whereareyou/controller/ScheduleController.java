@@ -4,6 +4,7 @@ import com.example.whereareyou.service.ScheduleService;
 import com.example.whereareyou.vo.request.schedule.RequestDeleteSchedule;
 import com.example.whereareyou.vo.request.schedule.RequestModifySchedule;
 import com.example.whereareyou.vo.request.schedule.RequestSaveSchedule;
+import com.example.whereareyou.vo.response.schedule.ResponseBriefDateSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseMonthlySchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseSaveSchedule;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,5 +89,25 @@ public class ScheduleController {
         scheduleService.deleteSchedule(requestDeleteSchedule);
 
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 일별 일정 간략 정보
+     *
+     * @param memberId the member id
+     * @param year     the year
+     * @param month    the month
+     * @param date     the date
+     * @return the response entity
+     */
+    @GetMapping("/date")
+    public ResponseEntity<ResponseBriefDateSchedule> getBriefDateSchedule(@RequestParam
+                                                                          String memberId,
+                                                                          Integer year,
+                                                                          Integer month,
+                                                                          Integer date){
+        ResponseBriefDateSchedule briefDateSchedule = scheduleService.getBriefDateSchedule(memberId, year, month, date);
+
+        return ResponseEntity.status(HttpStatus.OK).body(briefDateSchedule);
     }
 }
