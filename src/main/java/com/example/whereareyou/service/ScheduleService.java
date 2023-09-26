@@ -3,14 +3,14 @@ package com.example.whereareyou.service;
 import com.example.whereareyou.domain.Member;
 import com.example.whereareyou.domain.MemberSchedule;
 import com.example.whereareyou.domain.Schedule;
-import com.example.whereareyou.exception.customexception.FriendListNotFoundException;
-import com.example.whereareyou.exception.customexception.MemberIdCannotBeInFriendListException;
-import com.example.whereareyou.exception.customexception.UserNotFoundException;
+import com.example.whereareyou.exception.customexception.*;
 import com.example.whereareyou.repository.MemberRepository;
 import com.example.whereareyou.repository.MemberScheduleRepository;
 import com.example.whereareyou.repository.ScheduleRepository;
+import com.example.whereareyou.vo.request.schedule.RequestModifySchedule;
 import com.example.whereareyou.vo.request.schedule.RequestSaveSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseSaveSchedule;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,14 +69,14 @@ public class ScheduleService {
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
 
         List<String> friendList = requestSaveSchedule.getMemberIdList();
-        if(friendList == null || friendList.isEmpty())
+        if (friendList == null || friendList.isEmpty())
             throw new FriendListNotFoundException("일정 추가 시 친구 설정은 필수 입니다.");
 
-        if(friendList.contains(creator.getId()))
+        if (friendList.contains(creator.getId()))
             throw new MemberIdCannotBeInFriendListException("일정 친구 추가 시 본인의 ID는 들어갈 수 없습니다.");
 
         List<Member> friends = memberRepository.findAllById(friendList);
-        if(friends.size() != friendList.size()) {
+        if (friends.size() != friendList.size()) {
             throw new UserNotFoundException("존재하지 않는 memberId입니다.");
         }
 
@@ -110,5 +110,68 @@ public class ScheduleService {
         responseSaveSchedule.setScheduleId(schedule.getId());
 
         return responseSaveSchedule;
+    }
+
+    /**
+     * Modify schedule.
+     *
+     * @param requestModifySchedule the request modify schedule
+     */
+    public void modifySchedule(RequestModifySchedule requestModifySchedule) {
+        /*
+         예외처리
+         404 ScheduleNotFoundException: ScheduleId Not Found
+         404 UserNotFoundException: MemberId Not Found
+         400 FriendListNotFoundException: FriendListNot Found
+         400 MemberIdCannotBeInFriendListException: FriendList have creatorId
+         401: Unauthorized (추후에 추가할 예정)
+         500 updateQueryException: update Fail
+         500: Server
+        */
+        Member modifier = memberRepository.findById(requestModifySchedule.getMemberId())
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        Schedule savedSchedule = scheduleRepository.findById(requestModifySchedule.getScheduleId())
+                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
+
+        List<String> friendList = requestModifySchedule.getMemberIdList();
+        if (friendList == null || friendList.isEmpty())
+            throw new FriendListNotFoundException("일정 추가 시 친구 설정은 필수 입니다.");
+
+        if (friendList.contains(modifier.getId()))
+            throw new MemberIdCannotBeInFriendListException("일정 친구 추가 시 본인의 ID는 들어갈 수 없습니다.");
+
+        List<Member> friends = memberRepository.findAllById(friendList);
+        if (friends.size() != friendList.size())
+            throw new UserNotFoundException("존재하지 않는 memberId입니다.");
+
+        // Schedule 변경
+        int updatedCount = scheduleRepository.updateSchedule(
+                requestModifySchedule.getStart(),
+                requestModifySchedule.getEnd(),
+                requestModifySchedule.getTitle(),
+                requestModifySchedule.getPlace(),
+                requestModifySchedule.getMemo(),
+                savedSchedule.getClosed(),
+                modifier,
+                savedSchedule.getId()
+        );
+
+        if (updatedCount == 0)
+            throw new UpdateQueryException("업데이트 실패");
+
+        // 기존의 MemberSchedule을 모두 삭제
+        memberScheduleRepository.deleteAllBySchedule(savedSchedule);
+
+        // friendList에 대한 MemberSchedule 생성 및 저장
+        for (String memberId : friendList) {
+            Member scheduleMember = memberRepository.findById(memberId).orElseThrow(
+                    () -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+            MemberSchedule newMemberSchedule = MemberSchedule.builder()
+                    .schedule(savedSchedule)
+                    .member(scheduleMember)
+                    .accept(false)
+                    .build();
+            memberScheduleRepository.save(newMemberSchedule);
+        }
     }
 }
