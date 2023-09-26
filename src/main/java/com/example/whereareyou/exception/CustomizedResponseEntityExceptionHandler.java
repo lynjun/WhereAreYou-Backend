@@ -1,9 +1,6 @@
 package com.example.whereareyou.exception;
 
-import com.example.whereareyou.exception.customexception.FriendListNotFoundException;
-import com.example.whereareyou.exception.customexception.InvalidYearOrMonthOrDateException;
-import com.example.whereareyou.exception.customexception.MemberIdCannotBeInFriendListException;
-import com.example.whereareyou.exception.customexception.UserNotFoundException;
+import com.example.whereareyou.exception.customexception.*;
 import com.example.whereareyou.vo.ExceptionResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,5 +63,21 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
                 new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
 
         return new ResponseEntity(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UpdateQueryException.class)
+    public final ResponseEntity<Object> updateQueryException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(ScheduleNotFoundException.class)
+    public final ResponseEntity<Object> scheduleNotFoundException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse, HttpStatus.NOT_FOUND);
     }
 }
