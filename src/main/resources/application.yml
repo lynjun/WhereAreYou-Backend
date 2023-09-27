@@ -49,13 +49,18 @@ spring:
       ddl-auto: update
     show-sql: true
 
-# s3 ??
+jwt:
+  secret: YOUR_SECRET_KEY
+  accessTokenExpiration: 7200000 # 2시간 (밀리초 단위)
+  refreshTokenExpiration: 2592000000 # 30일 (밀리초 단위)
+
+# s3
 ---
-# AWS ??
+# AWS
 cloud:
   aws:
     region:
-      static: ap-northeast-2  # AWS ?? ??? ??
+      static: ap-northeast-2
     stack:
       auto: false
 
@@ -67,15 +72,15 @@ logging:
           EC2MetadataUtils: error
 
 ---
-# Multipart ??
+# Multipart
 spring:
   servlet:
     multipart:
-      max-file-size: 100MB # ??? ?? ? ?? ??
-      max-request-size: 100MB # ??? ?? ??? ??
+      max-file-size: 100MB
+      max-request-size: 100MB
 
 ---
-# LOCAL ??
+# LOCAL
 cloud:
   aws:
     s3:
