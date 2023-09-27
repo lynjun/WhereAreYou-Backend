@@ -12,6 +12,7 @@ import com.example.whereareyou.repository.ScheduleRepository;
 import com.example.whereareyou.vo.request.schedule.RequestDeleteSchedule;
 import com.example.whereareyou.vo.request.schedule.RequestModifySchedule;
 import com.example.whereareyou.vo.request.schedule.RequestSaveSchedule;
+import com.example.whereareyou.vo.request.schedule.RequestScheduleAccept;
 import com.example.whereareyou.vo.response.schedule.ResponseBriefDateSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseDetailSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseMonthlySchedule;
@@ -346,5 +347,30 @@ public class ScheduleService {
                 .memo(findSchedule.getMemo())
                 .friendsIdListDTO(friendsIdList)
                 .build();
+    }
+
+    /**
+     * Schedule accept.
+     *
+     * @param requestScheduleAccept the request schedule accept
+     */
+    public void scheduleAccept(RequestScheduleAccept requestScheduleAccept){
+        /*
+         예외처리
+         404 UserNotFoundException: MemberId Not Found
+         404 ScheduleNotFoundException: scheduleId Not Found
+         401: Unauthorized (추후에 추가할 예정)
+         500 updateQueryException: update Fail
+         500: Server
+        */
+        Member acceptMember = memberRepository.findById(requestScheduleAccept.getAcceptMemberId())
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        Schedule findSchedule = scheduleRepository.findById(requestScheduleAccept.getScheduleId())
+                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
+
+        int updateCnt
+                = memberScheduleRepository.setAcceptTrueForMemberAndSchedule(acceptMember.getId(), findSchedule.getId());
+        if(updateCnt == 0)
+            throw new UpdateQueryException("업데이트 실패");
     }
 }
