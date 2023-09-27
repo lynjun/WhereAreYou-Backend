@@ -13,6 +13,7 @@ import com.example.whereareyou.vo.request.schedule.RequestDeleteSchedule;
 import com.example.whereareyou.vo.request.schedule.RequestModifySchedule;
 import com.example.whereareyou.vo.request.schedule.RequestSaveSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseBriefDateSchedule;
+import com.example.whereareyou.vo.response.schedule.ResponseDetailSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseMonthlySchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseSaveSchedule;
 import lombok.extern.slf4j.Slf4j;
@@ -304,5 +305,46 @@ public class ScheduleService {
         }
 
         return responseBriefDateSchedule;
+    }
+
+    /**
+     * Get detail schedule response detail schedule.
+     *
+     * @param memberId   the member id
+     * @param scheduleId the schedule id
+     * @return the response detail schedule
+     */
+    public ResponseDetailSchedule getDetailSchedule(String memberId, String scheduleId){
+        /*
+         예외처리
+         404 UserNotFoundException: MemberId Not Found
+         404 ScheduleNotFoundException: scheduleId Not Found
+         400 NotCreatedScheduleByMemberException: This is not a user-created schedule
+         401: Unauthorized (추후에 추가할 예정)
+         500: Server
+        */
+        Member findMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        Schedule findSchedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
+
+        List<Schedule> scheduleList = findMember.getScheduleList();
+        if(!scheduleList.contains(findSchedule))
+            throw new NotCreatedScheduleByMemberException("회원이 만든 일정이 아닙니다.");
+
+        // 친구의 ID 목록 추출
+        List<String> friendsIdList = findSchedule.getMemberScheduleList().stream()
+                .map(memberSchedule -> memberSchedule.getMember().getId())
+                .collect(Collectors.toList());
+
+        // ResponseDetailSchedule 객체 반환
+        return ResponseDetailSchedule.builder()
+                .start(findSchedule.getStart())
+                .end(findSchedule.getEnd())
+                .title(findSchedule.getTitle())
+                .place(findSchedule.getPlace())
+                .memo(findSchedule.getMemo())
+                .friendsIdListDTO(friendsIdList)
+                .build();
     }
 }
