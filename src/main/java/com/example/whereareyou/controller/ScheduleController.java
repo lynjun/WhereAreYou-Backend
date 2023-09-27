@@ -5,6 +5,7 @@ import com.example.whereareyou.vo.request.schedule.RequestDeleteSchedule;
 import com.example.whereareyou.vo.request.schedule.RequestModifySchedule;
 import com.example.whereareyou.vo.request.schedule.RequestSaveSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseBriefDateSchedule;
+import com.example.whereareyou.vo.response.schedule.ResponseDetailSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseMonthlySchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseSaveSchedule;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,5 +110,21 @@ public class ScheduleController {
         ResponseBriefDateSchedule briefDateSchedule = scheduleService.getBriefDateSchedule(memberId, year, month, date);
 
         return ResponseEntity.status(HttpStatus.OK).body(briefDateSchedule);
+    }
+
+    /**
+     * 일별 일정 상세 정보
+     *
+     * @param memberId   the member id
+     * @param scheduleId the schedule id
+     * @return the response entity
+     */
+    @GetMapping("/details")
+    public ResponseEntity<ResponseDetailSchedule> getDetailSchedule(@RequestParam
+                                                                    String memberId,
+                                                                    String scheduleId){
+        ResponseDetailSchedule responseDetailSchedule = scheduleService.getDetailSchedule(memberId, scheduleId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseDetailSchedule);
     }
 }
