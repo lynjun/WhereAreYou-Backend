@@ -4,6 +4,7 @@ import com.example.whereareyou.service.ScheduleService;
 import com.example.whereareyou.vo.request.schedule.RequestDeleteSchedule;
 import com.example.whereareyou.vo.request.schedule.RequestModifySchedule;
 import com.example.whereareyou.vo.request.schedule.RequestSaveSchedule;
+import com.example.whereareyou.vo.request.schedule.RequestScheduleAccept;
 import com.example.whereareyou.vo.response.schedule.ResponseBriefDateSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseDetailSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseMonthlySchedule;
@@ -126,5 +127,18 @@ public class ScheduleController {
         ResponseDetailSchedule responseDetailSchedule = scheduleService.getDetailSchedule(memberId, scheduleId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDetailSchedule);
+    }
+
+    /**
+     * 일정 수락
+     *
+     * @param requestScheduleAccept the request schedule accept
+     * @return the response entity
+     */
+    @PutMapping("/accept")
+    public ResponseEntity<Boolean> scheduleAccept(@RequestBody RequestScheduleAccept requestScheduleAccept){
+        scheduleService.scheduleAccept(requestScheduleAccept);
+
+        return ResponseEntity.status(HttpStatus.OK).body(true);
     }
 }
