@@ -1,12 +1,16 @@
 package com.example.whereareyou.service;
 
 import com.example.whereareyou.domain.Member;
+import com.example.whereareyou.dto.FindIdRequest;
 import com.example.whereareyou.dto.MemberLoginRequest;
 import com.example.whereareyou.dto.TokenDto;
+import com.example.whereareyou.dto.resetPasswordDto;
 import com.example.whereareyou.exception.customexception.*;
 import com.example.whereareyou.repository.MemberRepository;
 import com.example.whereareyou.vo.response.member.ResponseCheckEmail;
 import com.example.whereareyou.vo.response.member.ResponseCheckId;
+import com.example.whereareyou.vo.response.member.ResponseFindId;
+import com.example.whereareyou.vo.response.member.ResponseResetPassword;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -132,4 +136,17 @@ public class MemberService {
             throw new InvalidCode("코드가 일치하지 않습니다.");
         }
     }
+
+    public ResponseFindId findId(FindIdRequest request){
+        Optional<Member> emailOptional = memberRepository.findByEmail(request.getEmail());
+
+        Member member = emailOptional.orElseThrow(() -> new EmailNotFoundException("이메일 없음"));
+
+        ResponseFindId responseFindId = new ResponseFindId();
+        responseFindId.setUserId(member.getUserId());
+
+        return responseFindId;
+
+    }
+
 }
