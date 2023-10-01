@@ -152,4 +152,12 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
 
         return new ResponseEntity(exceptionResponse,HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(EmailNotFoundException.class)
+    public final ResponseEntity<Object> EmailNotFoundException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.NOT_FOUND);
+    }
 }
