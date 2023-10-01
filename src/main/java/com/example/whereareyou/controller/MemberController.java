@@ -5,6 +5,8 @@ import com.example.whereareyou.service.JwtTokenService;
 import com.example.whereareyou.service.MemberService;
 import com.example.whereareyou.vo.response.member.ResponseCheckEmail;
 import com.example.whereareyou.vo.response.member.ResponseCheckId;
+import com.example.whereareyou.vo.response.member.ResponseFindId;
+import com.example.whereareyou.vo.response.member.ResponseResetPassword;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -66,7 +68,14 @@ public class MemberController {
         tokenDto = jwtTokenService.reissueToken(tokenDto);
 
         return ResponseEntity.ok().body(tokenDto);
+    }
 
+    @PostMapping("/findId")
+    public ResponseEntity<ResponseFindId> findId(@RequestBody FindIdRequest request){
+
+        ResponseFindId id = memberService.findId(request);
+
+        return ResponseEntity.ok().body(id);
     }
 
 }
