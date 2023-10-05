@@ -1,4 +1,4 @@
-name: petqua-application
+name: whereareyou-application
 
 on:
   push:
