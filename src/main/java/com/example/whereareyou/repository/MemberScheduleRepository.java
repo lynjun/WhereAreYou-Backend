@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * packageName    : project.whereareyou.repository
@@ -30,4 +31,8 @@ public interface MemberScheduleRepository extends JpaRepository<MemberSchedule, 
     @Modifying
     @Query("UPDATE MemberSchedule ms SET ms.accept = true WHERE ms.member.id = :memberId AND ms.schedule.id = :scheduleId")
     int setAcceptTrueForMemberAndSchedule(@Param("memberId") String memberId, @Param("scheduleId") String scheduleId);
+
+    @Modifying
+    @Query("UPDATE MemberSchedule ms SET ms.arrived = true WHERE ms.member.id = :memberId AND ms.schedule.id = :scheduleId")
+    int setArrivedTrue(@Param("memberId") String memberId, @Param("scheduleId") String scheduleId);
 }

@@ -43,4 +43,6 @@ public class MemberSchedule {
     private Schedule schedule;
 
     private Boolean accept;
+
+    private Boolean arrived;
 }

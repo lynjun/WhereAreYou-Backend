@@ -151,4 +151,17 @@ public class ScheduleController {
 
         return ResponseEntity.status(HttpStatus.OK).body(true);
     }
+
+    /**
+     * 도착 여부
+     *
+     * @param requestScheduleArrived the request schedule arrived
+     * @return the response entity
+     */
+    @PutMapping("/arrived")
+    public ResponseEntity<Boolean> scheduleArrived(@RequestBody RequestScheduleArrived requestScheduleArrived){
+        scheduleService.scheduleArrived(requestScheduleArrived);
+
+        return ResponseEntity.status(HttpStatus.OK).body(true);
+    }
 }
