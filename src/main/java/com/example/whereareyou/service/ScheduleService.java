@@ -89,6 +89,8 @@ public class ScheduleService {
             throw new UserNotFoundException("존재하지 않는 memberId입니다.");
         }
 
+        friends.add(creator);
+
         // Schedule Entity 생성
         Schedule schedule = Schedule.builder()
                 .start(requestSaveSchedule.getStart())
@@ -109,6 +111,7 @@ public class ScheduleService {
                         .schedule(schedule)
                         .member(friend)
                         .accept(false)
+                        .arrived(false)
                         .build())
                 .collect(Collectors.toList());
         // MemberSchedule 저장
@@ -179,6 +182,7 @@ public class ScheduleService {
                     .schedule(savedSchedule)
                     .member(scheduleMember)
                     .accept(false)
+                    .arrived(false)
                     .build();
             memberScheduleRepository.save(newMemberSchedule);
         }
@@ -396,6 +400,36 @@ public class ScheduleService {
 
         int updateCnt = scheduleRepository.closeSchedule(findSchedule.getId());
         if(updateCnt == 0)
+            throw new UpdateQueryException("업데이트 실패");
+    }
+
+    /**
+     * Schedule arrived.
+     *
+     * @param requestScheduleArrived the request schedule arrived
+     */
+    public void scheduleArrived(RequestScheduleArrived requestScheduleArrived){
+        /*
+         예외처리
+         404 ScheduleNotFoundException: scheduleId Not Found
+         400 NotCreatedScheduleByMemberException: This is not a user-created schedule
+         401: Unauthorized (추후에 추가할 예정)
+         500 updateQueryException: update Fail
+         500: Server
+        */
+        Member arrivedMember = memberRepository.findById(requestScheduleArrived.getArrivedMemberId())
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        Schedule findSchedule = scheduleRepository.findById(requestScheduleArrived.getScheduleId())
+                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
+        boolean isMemberPartOfSchedule = findSchedule.getMemberScheduleList()
+                .stream()
+                .anyMatch(ms -> ms.getMember().getId().equals(arrivedMember.getId()));
+        if (!isMemberPartOfSchedule) {
+            throw new UserNotFoundException("해당 Member는 Schedule에 존재하지 않습니다.");
+        }
+
+        int update = memberScheduleRepository.setArrivedTrue(arrivedMember.getId(), findSchedule.getId());
+        if(update == 0)
             throw new UpdateQueryException("업데이트 실패");
     }
 }
