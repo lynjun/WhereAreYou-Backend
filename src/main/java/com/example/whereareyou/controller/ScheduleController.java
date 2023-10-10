@@ -1,10 +1,7 @@
 package com.example.whereareyou.controller;
 
 import com.example.whereareyou.service.ScheduleService;
-import com.example.whereareyou.vo.request.schedule.RequestDeleteSchedule;
-import com.example.whereareyou.vo.request.schedule.RequestModifySchedule;
-import com.example.whereareyou.vo.request.schedule.RequestSaveSchedule;
-import com.example.whereareyou.vo.request.schedule.RequestScheduleAccept;
+import com.example.whereareyou.vo.request.schedule.*;
 import com.example.whereareyou.vo.response.schedule.ResponseBriefDateSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseDetailSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseMonthlySchedule;
@@ -138,6 +135,19 @@ public class ScheduleController {
     @PutMapping("/accept")
     public ResponseEntity<Boolean> scheduleAccept(@RequestBody RequestScheduleAccept requestScheduleAccept){
         scheduleService.scheduleAccept(requestScheduleAccept);
+
+        return ResponseEntity.status(HttpStatus.OK).body(true);
+    }
+
+    /**
+     * 일정 종료
+     *
+     * @param requestScheduleClosed the request schedule closed
+     * @return the response entity
+     */
+    @PutMapping("/closed")
+    public ResponseEntity<Boolean> scheduleClosed(@RequestBody RequestScheduleClosed requestScheduleClosed){
+        scheduleService.scheduleClosed(requestScheduleClosed);
 
         return ResponseEntity.status(HttpStatus.OK).body(true);
     }
