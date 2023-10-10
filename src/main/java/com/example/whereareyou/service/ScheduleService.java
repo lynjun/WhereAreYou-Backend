@@ -9,10 +9,7 @@ import com.example.whereareyou.exception.customexception.*;
 import com.example.whereareyou.repository.MemberRepository;
 import com.example.whereareyou.repository.MemberScheduleRepository;
 import com.example.whereareyou.repository.ScheduleRepository;
-import com.example.whereareyou.vo.request.schedule.RequestDeleteSchedule;
-import com.example.whereareyou.vo.request.schedule.RequestModifySchedule;
-import com.example.whereareyou.vo.request.schedule.RequestSaveSchedule;
-import com.example.whereareyou.vo.request.schedule.RequestScheduleAccept;
+import com.example.whereareyou.vo.request.schedule.*;
 import com.example.whereareyou.vo.response.schedule.ResponseBriefDateSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseDetailSchedule;
 import com.example.whereareyou.vo.response.schedule.ResponseMonthlySchedule;
@@ -370,6 +367,34 @@ public class ScheduleService {
 
         int updateCnt
                 = memberScheduleRepository.setAcceptTrueForMemberAndSchedule(acceptMember.getId(), findSchedule.getId());
+        if(updateCnt == 0)
+            throw new UpdateQueryException("업데이트 실패");
+    }
+
+
+    /**
+     * Schedule closed.
+     *
+     * @param requestScheduleClosed the request schedule closed
+     */
+    public void scheduleClosed(RequestScheduleClosed requestScheduleClosed){
+        /*
+         예외처리
+         404 ScheduleNotFoundException: scheduleId Not Found
+         400 NotCreatedScheduleByMemberException: This is not a user-created schedule
+         401: Unauthorized (추후에 추가할 예정)
+         500 updateQueryException: update Fail
+         500: Server
+        */
+        Schedule findSchedule = scheduleRepository.findById(requestScheduleClosed.getScheduleId())
+                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
+        Member creator = memberRepository.findById(requestScheduleClosed.getCreatorId())
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+
+        if(!findSchedule.getCreator().getId().equals(creator.getId()))
+            throw new NotCreatedScheduleByMemberException("회원이 만든 일정이 아닙니다.");
+
+        int updateCnt = scheduleRepository.closeSchedule(findSchedule.getId());
         if(updateCnt == 0)
             throw new UpdateQueryException("업데이트 실패");
     }
