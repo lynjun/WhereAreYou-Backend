@@ -36,6 +36,14 @@ public class MemberInfoService {
     }
 
     public void setMemberInfo(RequestMemberInfo requestMemberInfo){
+        /*
+         예외처리
+         404 UserNotFoundException: memberId Not Found
+         401: Unauthorized (추후에 추가할 예정)
+         500 updateQueryException: update Fail
+         500: Server
+        */
+
         memberRepository.findById(requestMemberInfo.getMemberId())
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
 
