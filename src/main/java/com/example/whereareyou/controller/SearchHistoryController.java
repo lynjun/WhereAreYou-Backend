@@ -2,13 +2,13 @@ package com.example.whereareyou.controller;
 
 import com.example.whereareyou.service.SearchHistoryService;
 import com.example.whereareyou.vo.request.searchHistory.RequestSearchHistory;
+import com.example.whereareyou.vo.response.searchHistory.ResponseSearchHistory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * packageName    : com.example.whereareyou.controller
@@ -42,5 +42,18 @@ public class SearchHistoryController {
         searchHistoryService.setSearchHistory(requestSearchHistory);
 
         return ResponseEntity.status(HttpStatus.OK).body(true);
+    }
+
+    /**
+     * 사용자 검색 기록 조회
+     *
+     * @param memberId the member id
+     * @return the response entity
+     */
+    @GetMapping()
+    public ResponseEntity<ResponseSearchHistory> getSearchHistory(@RequestParam String memberId){
+        ResponseSearchHistory responseSearchHistory = searchHistoryService.getSearchHistory(memberId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseSearchHistory);
     }
 }
