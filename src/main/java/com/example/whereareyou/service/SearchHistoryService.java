@@ -6,10 +6,14 @@ import com.example.whereareyou.exception.customexception.UserNotFoundException;
 import com.example.whereareyou.repository.MemberRepository;
 import com.example.whereareyou.repository.SearchHistoryRepository;
 import com.example.whereareyou.vo.request.searchHistory.RequestSearchHistory;
+import com.example.whereareyou.vo.response.searchHistory.ResponseSearchHistory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * packageName    : com.example.whereareyou.service
@@ -55,5 +59,32 @@ public class SearchHistoryService {
                 .build();
 
         searchHistoryRepository.save(searchHistory);
+    }
+
+    /**
+     * Gets search history.
+     *
+     * @param memberId the member id
+     * @return the search history
+     */
+    public ResponseSearchHistory getSearchHistory(String memberId) {
+        /*
+         예외처리
+         404 ScheduleNotFoundException: scheduleId Not Found
+         401: Unauthorized (추후에 추가할 예정)
+         500: Server
+        */
+        Member findMember = memberRepository.findById(memberId)
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+
+        List<SearchHistory> histories = searchHistoryRepository.findByMember(findMember);
+        List<String> searchHistoryList = histories.stream()
+                .map(SearchHistory::getSearchHistory)
+                .collect(Collectors.toList());
+
+        ResponseSearchHistory response = new ResponseSearchHistory();
+        response.setSearchHistoryList(new ArrayList<>(searchHistoryList));
+
+        return response;
     }
 }
