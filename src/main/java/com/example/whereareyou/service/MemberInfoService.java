@@ -7,6 +7,9 @@ import com.example.whereareyou.exception.customexception.UserNotFoundException;
 import com.example.whereareyou.repository.MemberInfoRepository;
 import com.example.whereareyou.repository.MemberRepository;
 import com.example.whereareyou.vo.request.memberInfo.RequestMemberInfo;
+import com.example.whereareyou.vo.response.memberInfo.ResponseMemberInfo;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -69,5 +72,30 @@ public class MemberInfoService {
 
             memberInfoRepository.save(memberInfo);
         }
+    }
+
+    /**
+     * Get member info response member info.
+     *
+     * @param memberId the member id
+     * @return the response member info
+     */
+    public ResponseMemberInfo getMemberInfo(String memberId){
+        /*
+         예외처리
+         404 UserNotFoundException: memberId Not Found
+         401: Unauthorized (추후에 추가할 예정)
+         500: Server
+        */
+        memberRepository.findById(memberId)
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+
+        MemberInfo memberInfo = memberInfoRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+
+        ModelMapper mapper = new ModelMapper();
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+
+        return mapper.map(memberInfo, ResponseMemberInfo.class);
     }
 }
