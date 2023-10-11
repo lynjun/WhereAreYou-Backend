@@ -1,7 +1,9 @@
 package com.example.whereareyou.controller;
 
 import com.example.whereareyou.service.SearchHistoryService;
+import com.example.whereareyou.vo.request.searchHistory.RequestDeleteSearchHistory;
 import com.example.whereareyou.vo.request.searchHistory.RequestSearchHistory;
+import com.example.whereareyou.vo.response.searchHistory.ResponseSaveSearchHistory;
 import com.example.whereareyou.vo.response.searchHistory.ResponseSearchHistory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,10 +40,10 @@ public class SearchHistoryController {
      * @return the response entity
      */
     @PostMapping()
-    public ResponseEntity<Boolean> setSearchHistory(@RequestBody RequestSearchHistory requestSearchHistory){
-        searchHistoryService.setSearchHistory(requestSearchHistory);
+    public ResponseEntity<ResponseSaveSearchHistory> setSearchHistory(@RequestBody RequestSearchHistory requestSearchHistory){
+        ResponseSaveSearchHistory responseSaveSearchHistory = searchHistoryService.setSearchHistory(requestSearchHistory);
 
-        return ResponseEntity.status(HttpStatus.OK).body(true);
+        return ResponseEntity.status(HttpStatus.OK).body(responseSaveSearchHistory);
     }
 
     /**
@@ -55,5 +57,18 @@ public class SearchHistoryController {
         ResponseSearchHistory responseSearchHistory = searchHistoryService.getSearchHistory(memberId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseSearchHistory);
+    }
+
+    /**
+     * 사용자 검색 기록 삭제
+     *
+     * @param requestDeleteSearchHistory the request delete search history
+     * @return the response entity
+     */
+    @DeleteMapping()
+    public ResponseEntity<Boolean> deleteSearchHistory(@RequestBody RequestDeleteSearchHistory requestDeleteSearchHistory){
+        searchHistoryService.deleteSearchHistory(requestDeleteSearchHistory);
+
+        return ResponseEntity.status(HttpStatus.OK).body(true);
     }
 }
