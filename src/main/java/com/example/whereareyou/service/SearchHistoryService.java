@@ -2,10 +2,13 @@ package com.example.whereareyou.service;
 
 import com.example.whereareyou.domain.Member;
 import com.example.whereareyou.domain.SearchHistory;
+import com.example.whereareyou.exception.customexception.SearchHistoryNotFoundException;
 import com.example.whereareyou.exception.customexception.UserNotFoundException;
 import com.example.whereareyou.repository.MemberRepository;
 import com.example.whereareyou.repository.SearchHistoryRepository;
+import com.example.whereareyou.vo.request.searchHistory.RequestDeleteSearchHistory;
 import com.example.whereareyou.vo.request.searchHistory.RequestSearchHistory;
+import com.example.whereareyou.vo.response.searchHistory.ResponseSaveSearchHistory;
 import com.example.whereareyou.vo.response.searchHistory.ResponseSearchHistory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,7 +46,7 @@ public class SearchHistoryService {
      *
      * @param requestSearchHistory the request search history
      */
-    public void setSearchHistory(RequestSearchHistory requestSearchHistory){
+    public ResponseSaveSearchHistory setSearchHistory(RequestSearchHistory requestSearchHistory){
         /*
          예외처리
          404 ScheduleNotFoundException: scheduleId Not Found
@@ -58,7 +61,9 @@ public class SearchHistoryService {
                 .member(findMember)
                 .build();
 
-        searchHistoryRepository.save(searchHistory);
+        SearchHistory savedSearchHistory = searchHistoryRepository.save(searchHistory);
+
+        return new ResponseSaveSearchHistory(savedSearchHistory.getId());
     }
 
     /**
@@ -86,5 +91,27 @@ public class SearchHistoryService {
         response.setSearchHistoryList(new ArrayList<>(searchHistoryList));
 
         return response;
+    }
+
+    /**
+     * Delete search history.
+     *
+     * @param requestDeleteSearchHistory the request delete search history
+     */
+    public void deleteSearchHistory(RequestDeleteSearchHistory requestDeleteSearchHistory){
+        /*
+         예외처리
+         404 MemberNotFoundException: memberId Not Found
+         404 SearchHistoryNotFoundException: searchHistoryId Not Found
+         401: Unauthorized (추후에 추가할 예정)
+         500: Server
+        */
+        memberRepository.findById(requestDeleteSearchHistory.getMemberId())
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+
+        SearchHistory searchHistory = searchHistoryRepository.findById(requestDeleteSearchHistory.getSearchHistoryId())
+                .orElseThrow(() -> new SearchHistoryNotFoundException("존재하지 않는 searchHistoryId입니다."));
+
+        searchHistoryRepository.delete(searchHistory);
     }
 }
