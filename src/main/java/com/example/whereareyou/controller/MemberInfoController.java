@@ -4,13 +4,11 @@ import com.amazonaws.Response;
 import com.example.whereareyou.domain.MemberInfo;
 import com.example.whereareyou.service.MemberInfoService;
 import com.example.whereareyou.vo.request.memberInfo.RequestMemberInfo;
+import com.example.whereareyou.vo.response.memberInfo.ResponseMemberInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * packageName    : com.example.whereareyou.controller
@@ -46,5 +44,18 @@ public class MemberInfoController {
         memberInfoService.setMemberInfo(requestMemberInfo);
 
         return ResponseEntity.status(HttpStatus.OK).body(true);
+    }
+
+    /**
+     * 사용자 실시간 위도 경도
+     *
+     * @param memberId the member id
+     * @return the response entity
+     */
+    @GetMapping()
+    public ResponseEntity<ResponseMemberInfo> getMemberInfo(@RequestParam String memberId){
+        ResponseMemberInfo responseMemberInfo = memberInfoService.getMemberInfo(memberId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseMemberInfo);
     }
 }
