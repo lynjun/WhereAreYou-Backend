@@ -33,4 +33,9 @@ public interface ScheduleRepository extends JpaRepository<Schedule, String> {
                        @Param("closed") Boolean closed,
                        @Param("creator") Member creator,
                        @Param("scheduleId") String scheduleId);
+
+    @Modifying
+    @Query("UPDATE Schedule s SET s.closed = true WHERE s.id = :scheduleId")
+    int closeSchedule(@Param("scheduleId") String scheduleId);
+
 }
