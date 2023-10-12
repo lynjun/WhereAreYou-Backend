@@ -10,6 +10,7 @@ public class ResponseLogin {
     private String message;
     private String accessToken;
     private String refreshToken;
+    private String memberId;
 
 
 }
