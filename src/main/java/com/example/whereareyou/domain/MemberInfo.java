@@ -40,4 +40,6 @@ public class MemberInfo {
 
     private Double latitude;
     private Double longitude;
+
+    private String memberId;
 }
