@@ -3,9 +3,7 @@ package com.example.whereareyou.controller;
 import com.example.whereareyou.dto.*;
 import com.example.whereareyou.service.JwtTokenService;
 import com.example.whereareyou.service.MemberService;
-import com.example.whereareyou.vo.response.member.ResponseCheckEmail;
-import com.example.whereareyou.vo.response.member.ResponseCheckId;
-import com.example.whereareyou.vo.response.member.ResponseFindId;
+import com.example.whereareyou.vo.response.member.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,9 +42,9 @@ public class MemberController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenDto> login(@RequestBody MemberLoginRequest dto){
-        TokenDto tokenDto = memberService.login(dto);
-        return ResponseEntity.ok().body(tokenDto);
+    public ResponseEntity<ResponseLogin> login(@RequestBody MemberLoginRequest dto){
+        ResponseLogin responseLogin = memberService.login(dto);
+        return ResponseEntity.ok().body(responseLogin);
     }
 
     @PostMapping("/email")
@@ -55,8 +53,14 @@ public class MemberController {
         return ResponseEntity.ok().body("코드가 전송 되었습니다.");
     }
 
+    @PostMapping("/email/verifyPassword")
+    public ResponseEntity<ResponseResetPassword> verifyEmail(@RequestBody EmailRequest request){
+        ResponseResetPassword resetPassword = memberService.verifyEmailCodeResetPassword(request);
+        return ResponseEntity.ok().body(resetPassword);
+    }
+
     @PostMapping("/email/verify")
-    public ResponseEntity<String> verifyEmail(@RequestBody EmailRequest request){
+    public ResponseEntity<String> verifyEmailResetPassword(@RequestBody EmailRequest request){
         memberService.verifyEmailCode(request.getEmail(), request.getCode());
         return ResponseEntity.ok().body("코드가 일치 합니다");
     }
@@ -76,6 +80,35 @@ public class MemberController {
 
         return ResponseEntity.ok().body(id);
     }
+
+    @PostMapping("/resetPassword")
+    public ResponseEntity<String> resetPassword(@RequestBody CheckPasswordRequest request){
+
+        memberService.passwordReset(request);
+
+        return ResponseEntity.ok().body("재설정 완");
+    }
+
+    @DeleteMapping("/deleteMember")
+    public ResponseEntity<Void> deleteMember(@RequestBody DeleteMemberRequest deleteMemberRequest){
+
+        String memberId= deleteMemberRequest.getMemberId();
+
+        memberService.deleteMember(memberId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/myPage")
+    public ResponseEntity<ResponseMember> myPage(@RequestParam("memberId") String memberId){
+
+        ResponseMember memberPage = memberService.getMemberPage(memberId);
+
+        return ResponseEntity.ok().body(memberPage);
+    }
+
+
+
 
 }
 
