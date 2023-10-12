@@ -1,12 +1,15 @@
 package com.example.whereareyou.service;
 
+import com.example.whereareyou.domain.EmailCode;
 import com.example.whereareyou.domain.Member;
+import com.example.whereareyou.domain.RefreshToken;
 import com.example.whereareyou.dto.*;
 import com.example.whereareyou.exception.customexception.*;
+import com.example.whereareyou.repository.EmailCodeRepository;
 import com.example.whereareyou.repository.MemberRepository;
+import com.example.whereareyou.repository.RefreshTokenRepository;
 import com.example.whereareyou.vo.response.member.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,17 +19,17 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
     public class MemberService {
 
-    private final RedisTemplate<String, String > redisTemplate;
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder encoder;
     private final JavaMailSender javaMailSender;
     private final JwtTokenService jwtTokenService;
+    private final EmailCodeRepository emailCodeRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public Member join(String userName, String userId, String password, String email){
 
@@ -76,12 +79,13 @@ import java.util.concurrent.TimeUnit;
         Optional<Member> memberOptional = memberRepository.findByUserId(memberLoginRequest.getUserId());
 
         Member member = memberOptional.orElseThrow(() -> new UserNotFoundException("아이디 없음"));
+
         if (!encoder.matches(memberLoginRequest.getPassword(), member.getPassword())) {
             throw new PasswordMismatch("비밀번호 틀림");
         }
 
-        String accessToken = jwtTokenService.generateAccessToken(member.getUserId());
-        String refreshToken = jwtTokenService.generateRefreshToken(member.getUserId());
+        String accessToken = jwtTokenService.generateAccessToken(member.getId());
+        String refreshToken = jwtTokenService.generateRefreshToken(member.getId());
 
         ResponseLogin responseLogin = new ResponseLogin();
 
@@ -117,21 +121,23 @@ import java.util.concurrent.TimeUnit;
         }catch (MessagingException e){
             throw new RuntimeException("이메일 형식이 유효 하지 않습니다.");
         }
-        //유효 기간 5분동안 저장
-        redisTemplate.opsForValue().set(email,
-                authKey,
-                300,
-                TimeUnit.SECONDS);
+
+        EmailCode emailCode = EmailCode.builder()
+                .email(email)
+                .code(authKey)
+                .build();
+
+        emailCodeRepository.save(emailCode);
     }
 
     public void verifyEmailCode(String email,String code){
-        String verifyCode = redisTemplate.opsForValue().get(email);
-        if(verifyCode == null){
-            throw new TimeoutCode("시간이 초과되었습니다.");
-        }
+        EmailCode byEmail = emailCodeRepository.findByEmail(email);
+        String verifyCode = byEmail.getCode();
+
         if (!verifyCode.equals(code)){
             throw new InvalidCode("코드가 일치하지 않습니다.");
         }
+        emailCodeRepository.delete(byEmail);
     }
 
     public ResponseResetPassword verifyEmailCodeResetPassword(EmailRequest request){
@@ -140,16 +146,17 @@ import java.util.concurrent.TimeUnit;
 
         Member member = emailOptional.orElseThrow(() -> new EmailNotFoundException("이메일 없음"));
 
-        String verifyCode = redisTemplate.opsForValue().get(request.getEmail());
-        if(verifyCode == null){
-            throw new TimeoutCode("시간이 초과되었습니다.");
-        }
-        if (!verifyCode.equals(request.getCode())){
+        EmailCode byEmail = emailCodeRepository.findByEmail(request.getEmail());
+        String code = byEmail.getCode();
+
+        if (!code.equals(request.getCode())){
             throw new InvalidCode("코드가 일치하지 않습니다.");
         }
         ResponseResetPassword resetPassword = new ResponseResetPassword();
         resetPassword.setMessage("코드가 일치 합니다");
         resetPassword.setUserId(member.getUserId());
+
+        emailCodeRepository.delete(byEmail);
 
         return resetPassword;
 
@@ -186,10 +193,11 @@ import java.util.concurrent.TimeUnit;
     public void deleteMember(String memberId){
 
         Optional<Member> byId = memberRepository.findById(memberId);
-        Member member = byId.orElseThrow(() -> new UserNotFoundException("아이디가 없습니다"));
-        String userId = member.getUserId();
+        byId.orElseThrow(() -> new UserNotFoundException("아이디가 없습니다"));
 
-        redisTemplate.delete(userId);
+        RefreshToken byMemberId = refreshTokenRepository.findByMemberId(memberId);
+
+        refreshTokenRepository.delete(byMemberId);
 
         memberRepository.deleteById(memberId);
 
