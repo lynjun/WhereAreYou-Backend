@@ -5,12 +5,9 @@ import lombok.Data;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ResponseLogin {
+public class ResponseMember {
 
-    private String message;
-    private String accessToken;
-    private String refreshToken;
-    private String memberId;
-
-
+    private String userName;
+    private String userId;
+    private String email;
 }
