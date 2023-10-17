@@ -30,6 +30,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
                 .antMatchers("/member/**").permitAll()
+                .antMatchers("/friend/**").permitAll()
                 .antMatchers("/actuator/health").permitAll()
                 .anyRequest().authenticated();
 
@@ -42,7 +43,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public JwtTokenFilter jwtTokenFilter() {
         List<String> permitAllEndpoints = Arrays.asList(
                 "/member/**",
-                "/actuator/health"
+                "/actuator/health",
+                "/friend/**"
         );
         return new JwtTokenFilter(jwtSecret, permitAllEndpoints);
     }
