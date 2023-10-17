@@ -2,11 +2,12 @@ package com.example.whereareyou.service;
 
 import com.example.whereareyou.domain.FriendRequest;
 import com.example.whereareyou.domain.Member;
-import com.example.whereareyou.dto.FriendInviteRequest;
+import com.example.whereareyou.dto.FriendRequestDto;
 import com.example.whereareyou.exception.customexception.UserNotFoundException;
 import com.example.whereareyou.repository.FriendRepository;
 import com.example.whereareyou.repository.FriendRequestRepository;
 import com.example.whereareyou.repository.MemberRepository;
+import com.example.whereareyou.vo.response.Friend.ResponseFriendRequestList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,7 @@ public class FriendService {
     private final MemberRepository memberRepository;
     private final FriendRequestRepository friendRequestRepository;
 
-    public void friendRequest(FriendInviteRequest request) {
+    public void friendRequest(FriendRequestDto request) {
         Member member = memberRepository.findByUserId(request.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 userId입니다.")); // sender
 
@@ -42,6 +43,30 @@ public class FriendService {
                 .collect(Collectors.toList());
 
         friendRequestRepository.saveAll(friendRequests);
+    }
+
+    public ResponseFriendRequestList friendRequestList(String userId) {
+        Optional<Member> byUserId = memberRepository.findByUserId(userId);
+        Member member = byUserId.orElseThrow(() -> new UserNotFoundException("존재하지 않는 userId입니다."));
+
+
+        List<FriendRequest> id = friendRequestRepository.findByMember(member);
+
+        HashMap<String,String> idMap = new HashMap<>();
+
+        id.stream().map(FriendRequest::getSenderId)
+                .map(memberRepository::findById)
+                .map(byId -> byId.orElseThrow(() -> new UserNotFoundException("존재하지 않는 userId입니다.")))
+                .forEach(member1 -> {
+            String userName = member1.getUserName();
+            String userId2 = member1.getUserId();
+            idMap.put(userId2, userName);
+        });
+
+        ResponseFriendRequestList responseFriendTest = new ResponseFriendRequestList();
+        responseFriendTest.setFriendRequestMap(idMap);
+
+        return responseFriendTest;
     }
 
 }
