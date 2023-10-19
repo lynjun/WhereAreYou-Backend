@@ -5,7 +5,9 @@ import com.example.whereareyou.dto.TokenDto;
 import com.example.whereareyou.exception.customexception.ExpiredJwt;
 import com.example.whereareyou.exception.customexception.JwtTokenMismatchException;
 import com.example.whereareyou.exception.customexception.TokenNotFound;
+import com.example.whereareyou.exception.customexception.UsedTokenException;
 import com.example.whereareyou.repository.RefreshTokenRepository;
+import com.example.whereareyou.vo.response.member.ResponseTokenReissue;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -117,16 +119,24 @@ public class JwtTokenService {
         return claims.getSubject();
     }
 
-    public TokenDto reissueToken(TokenDto tokenDto){
+    public ResponseTokenReissue reissueToken(TokenDto reissue){
 
-        validateToken(tokenDto.getRefreshToken());
+        validateToken(reissue.getRefreshToken());
 
-        String memberId = getMemberId(tokenDto.getRefreshToken());
+        String memberId = getMemberId(reissue.getRefreshToken());
 
-        tokenDto = new TokenDto(
-                generateAccessToken(memberId),
-                generateRefreshToken(memberId)
-        );
-        return tokenDto;
+        RefreshToken byMemberId = refreshTokenRepository.findByMemberId(memberId);
+        String refreshToken = byMemberId.getRefreshToken();
+
+        if(!refreshToken.equals(reissue.getRefreshToken())){
+            throw new UsedTokenException("이미 사용된 토큰 입니다");
+        }
+
+        ResponseTokenReissue responseTokenReissue = new ResponseTokenReissue();
+        responseTokenReissue.setAccessToken(generateAccessToken(memberId));
+        responseTokenReissue.setRefreshToken(generateRefreshToken(memberId));
+        responseTokenReissue.setMemberId(memberId);
+
+        return responseTokenReissue;
     }
 }
