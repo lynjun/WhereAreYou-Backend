@@ -140,11 +140,38 @@ import java.util.Random;
         emailCodeRepository.delete(byEmail);
     }
 
-    public ResponseResetPassword verifyEmailCodeResetPassword(EmailRequest request){
+    public ResponseResetPassword verifyEmailCodeResetPassword(PasswordReset reset){
+
+        Optional<Member> emailOptional = memberRepository.findByEmail(reset.getEmail());
+
+        Member member = emailOptional.orElseThrow(() -> new EmailNotFoundException("이메일 존재하지 않습니다."));
+
+        if(!member.getUserId().equals(reset.getUserId())){
+            throw new RuntimeException("회원 정보가 일치하지 않습니다.");
+        }
+
+        EmailCode byEmail = emailCodeRepository.findByEmail(reset.getEmail());
+        String code = byEmail.getCode();
+
+        if (!code.equals(reset.getCode())){
+            throw new InvalidCode("코드가 일치하지 않습니다.");
+        }
+
+        ResponseResetPassword resetPassword = new ResponseResetPassword();
+        resetPassword.setMessage("코드가 일치 합니다");
+        resetPassword.setUserId(member.getUserId());
+
+        emailCodeRepository.delete(byEmail);
+
+        return resetPassword;
+
+    }
+
+    public ResponseResetPassword verifyEmailCodeFindId(EmailRequest request){
 
         Optional<Member> emailOptional = memberRepository.findByEmail(request.getEmail());
 
-        Member member = emailOptional.orElseThrow(() -> new EmailNotFoundException("이메일 없음"));
+        Member member = emailOptional.orElseThrow(() -> new EmailNotFoundException("이메일 존재하지 않습니다."));
 
         EmailCode byEmail = emailCodeRepository.findByEmail(request.getEmail());
         String code = byEmail.getCode();
@@ -152,6 +179,7 @@ import java.util.Random;
         if (!code.equals(request.getCode())){
             throw new InvalidCode("코드가 일치하지 않습니다.");
         }
+
         ResponseResetPassword resetPassword = new ResponseResetPassword();
         resetPassword.setMessage("코드가 일치 합니다");
         resetPassword.setUserId(member.getUserId());
