@@ -47,30 +47,36 @@ public class MemberController {
         return ResponseEntity.ok().body(responseLogin);
     }
 
-    @PostMapping("/email")
-    public ResponseEntity<String> authEmail(@RequestBody EmailRequest request){
+    @PostMapping("/email/send")
+    public ResponseEntity<String> sendEmail(@RequestBody EmailRequest request){
         memberService.authEmail(request.getEmail());
         return ResponseEntity.ok().body("코드가 전송 되었습니다.");
     }
 
-    @PostMapping("/email/verifyPassword")
-    public ResponseEntity<ResponseResetPassword> verifyEmail(@RequestBody EmailRequest request){
-        ResponseResetPassword resetPassword = memberService.verifyEmailCodeResetPassword(request);
-        return ResponseEntity.ok().body(resetPassword);
-    }
-
     @PostMapping("/email/verify")
-    public ResponseEntity<String> verifyEmailResetPassword(@RequestBody EmailRequest request){
+    public ResponseEntity<String> verifyEmail(@RequestBody EmailRequest request){
         memberService.verifyEmailCode(request.getEmail(), request.getCode());
         return ResponseEntity.ok().body("코드가 일치 합니다");
     }
 
+    @PostMapping("/email/verifyPassword")
+    public ResponseEntity<ResponseResetPassword> verifyEmailResetPassword(@RequestBody PasswordReset reset){
+        ResponseResetPassword resetPassword = memberService.verifyEmailCodeResetPassword(reset);
+        return ResponseEntity.ok().body(resetPassword);
+    }
+
+    @PostMapping("/email/verifyFindId")
+    public ResponseEntity<ResponseResetPassword> verifyEmailFindId(@RequestBody EmailRequest request){
+        ResponseResetPassword resetPassword = memberService.verifyEmailCodeFindId(request);
+        return ResponseEntity.ok().body(resetPassword);
+    }
+
     @PostMapping("/tokenReissue")
-    public ResponseEntity<TokenDto> reissue(@RequestBody TokenDto tokenDto){
+    public ResponseEntity<ResponseTokenReissue> reissue(@RequestBody TokenDto tokenDto){
 
-        tokenDto = jwtTokenService.reissueToken(tokenDto);
+        ResponseTokenReissue responseTokenReissue = jwtTokenService.reissueToken(tokenDto);
 
-        return ResponseEntity.ok().body(tokenDto);
+        return ResponseEntity.ok().body(responseTokenReissue);
     }
 
     @PostMapping("/findId")
@@ -106,9 +112,6 @@ public class MemberController {
 
         return ResponseEntity.ok().body(memberPage);
     }
-
-
-
 
 }
 
