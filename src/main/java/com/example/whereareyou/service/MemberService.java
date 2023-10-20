@@ -14,6 +14,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -30,6 +31,7 @@ import java.util.Random;
     private final JwtTokenService jwtTokenService;
     private final EmailCodeRepository emailCodeRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final AwsS3Service awsS3Service;
 
     public Member join(String userName, String userId, String password, String email){
 
@@ -230,7 +232,7 @@ import java.util.Random;
         memberRepository.deleteById(memberId);
 
     }
-    public ResponseMember getMemberPage(String memberId){
+    public ResponseMember getMyPage(String memberId){
         Optional<Member> byId = memberRepository.findById(memberId);
         Member member = byId.orElseThrow(() -> new UserNotFoundException("아이디가 없습니다"));
 
@@ -246,5 +248,26 @@ import java.util.Random;
         return responseMember;
     }
 
+    public void modifyMyPage(MultipartFile multipartFile,String userId,String newId) throws Exception {
+        //멤버 찾기
+        Optional<Member> byUserId = memberRepository.findByUserId(userId);
+        Member member = byUserId.orElseThrow(() -> new UserNotFoundException("아이디가 없습니다"));
 
+        //아이디 변경
+        if(newId!=null){
+            //아이디 중복 체크
+            Optional<Member> byNewId = memberRepository.findByUserId(newId);
+            byNewId.orElseThrow(() -> new UserIdDuplicatedException("중복된 아이디 입니다."));
+
+            member.setUserId(newId);
+        }
+        //프로필 사진
+        if(multipartFile!=null){
+            String upload = awsS3Service.upload(multipartFile);
+            member.setProfileImage(upload);
+        }
+        //저장
+        memberRepository.save(member);
+
+    }
 }
