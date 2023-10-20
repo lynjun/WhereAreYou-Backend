@@ -1,13 +1,14 @@
 package com.example.whereareyou.controller;
 
 import com.example.whereareyou.dto.*;
+import com.example.whereareyou.service.AwsS3Service;
 import com.example.whereareyou.service.JwtTokenService;
 import com.example.whereareyou.service.MemberService;
 import com.example.whereareyou.vo.response.member.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -106,11 +107,21 @@ public class MemberController {
     }
 
     @GetMapping("/myPage")
-    public ResponseEntity<ResponseMember> myPage(@RequestParam("memberId") String memberId){
+    public ResponseEntity<ResponseMember> getMyPage(@RequestParam("memberId") String memberId){
 
-        ResponseMember memberPage = memberService.getMemberPage(memberId);
+        ResponseMember memberPage = memberService.getMyPage(memberId);
 
         return ResponseEntity.ok().body(memberPage);
+    }
+
+    @PostMapping("/myPage/modify")
+    public ResponseEntity<String> modifyMyPage(@RequestPart(value = "images",required = false) MultipartFile multipartFile,
+                                         @RequestPart(value = "userId") String userId,
+                                         @RequestPart(value = "newId",required = false) String newId) throws Exception {
+
+        memberService.modifyMyPage(multipartFile,userId,newId);
+
+        return ResponseEntity.ok().body("완");
     }
 
 }
