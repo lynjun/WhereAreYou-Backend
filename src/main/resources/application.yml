@@ -51,7 +51,7 @@ spring:
 
 jwt:
   secret: YOUR_SECRET_KEY
-  accessTokenExpiration: 7200000 # 2시간 (밀리초 단위)
+  accessTokenExpiration: 86400000 # 2시간 (밀리초 단위)
   refreshTokenExpiration: 2592000000 # 30일 (밀리초 단위)
 
 # s3
