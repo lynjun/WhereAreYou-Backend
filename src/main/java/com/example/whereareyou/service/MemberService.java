@@ -80,10 +80,10 @@ import java.util.Random;
     public ResponseLogin login(MemberLoginRequest memberLoginRequest) {
         Optional<Member> memberOptional = memberRepository.findByUserId(memberLoginRequest.getUserId());
 
-        Member member = memberOptional.orElseThrow(() -> new UserNotFoundException("아이디 없음"));
+        Member member = memberOptional.orElseThrow(() -> new UserNotFoundException("아이디가 존재하지 않습니다."));
 
         if (!encoder.matches(memberLoginRequest.getPassword(), member.getPassword())) {
-            throw new PasswordMismatch("비밀번호 틀림");
+            throw new PasswordMismatch("비밀번호가 일치하지 않습니다.");
         }
 
         String accessToken = jwtTokenService.generateAccessToken(member.getId());
@@ -142,8 +142,7 @@ import java.util.Random;
         emailCodeRepository.delete(byEmail);
     }
 
-    public ResponseResetPassword verifyEmailCodeResetPassword(PasswordReset reset){
-
+    public ResponseResetPassword verifyResetPasswordEmailCode(PasswordReset reset){
         Optional<Member> emailOptional = memberRepository.findByEmail(reset.getEmail());
 
         Member member = emailOptional.orElseThrow(() -> new EmailNotFoundException("이메일 존재하지 않습니다."));
@@ -152,49 +151,20 @@ import java.util.Random;
             throw new RuntimeException("회원 정보가 일치하지 않습니다.");
         }
 
-        EmailCode byEmail = emailCodeRepository.findByEmail(reset.getEmail());
-        String code = byEmail.getCode();
-
-        if (!code.equals(reset.getCode())){
-            throw new InvalidCode("코드가 일치하지 않습니다.");
-        }
+        verifyEmailCode(reset.getEmail(),reset.getCode());
 
         ResponseResetPassword resetPassword = new ResponseResetPassword();
         resetPassword.setMessage("코드가 일치 합니다");
         resetPassword.setUserId(member.getUserId());
 
-        emailCodeRepository.delete(byEmail);
-
         return resetPassword;
-
-    }
-
-    public ResponseResetPassword verifyEmailCodeFindId(EmailRequest request){
-
-        Optional<Member> emailOptional = memberRepository.findByEmail(request.getEmail());
-
-        Member member = emailOptional.orElseThrow(() -> new EmailNotFoundException("이메일 존재하지 않습니다."));
-
-        EmailCode byEmail = emailCodeRepository.findByEmail(request.getEmail());
-        String code = byEmail.getCode();
-
-        if (!code.equals(request.getCode())){
-            throw new InvalidCode("코드가 일치하지 않습니다.");
-        }
-
-        ResponseResetPassword resetPassword = new ResponseResetPassword();
-        resetPassword.setMessage("코드가 일치 합니다");
-        resetPassword.setUserId(member.getUserId());
-
-        emailCodeRepository.delete(byEmail);
-
-        return resetPassword;
-
     }
 
     public ResponseFindId findId(FindIdRequest request){
-        Optional<Member> emailOptional = memberRepository.findByEmail(request.getEmail());
 
+        verifyEmailCode(request.getEmail(),request.getCode());
+
+        Optional<Member> emailOptional = memberRepository.findByEmail(request.getEmail());
         Member member = emailOptional.orElseThrow(() -> new EmailNotFoundException("이메일 없음"));
 
         ResponseFindId responseFindId = new ResponseFindId();
@@ -211,7 +181,7 @@ import java.util.Random;
         Member member = byUserId.orElseThrow(() -> new EmailNotFoundException("아이디 없음"));
 
         if (!request.getPassword().equals(request.getCheckPassword())){
-            throw new RuntimeException("비밀번호가 일치 하지 않습니다.");
+            throw new ResetPasswordMismatch("비밀번호가 일치 하지 않습니다.");
         }
 
         member.setPassword(encoder.encode(request.getPassword()));
@@ -220,16 +190,16 @@ import java.util.Random;
 
     }
 
-    public void deleteMember(String memberId){
+    public void deleteMember(DeleteMemberRequest deleteMemberRequest){
 
-        Optional<Member> byId = memberRepository.findById(memberId);
+        Optional<Member> byId = memberRepository.findById(deleteMemberRequest.getMemberId());
         byId.orElseThrow(() -> new UserNotFoundException("아이디가 없습니다"));
 
-        RefreshToken byMemberId = refreshTokenRepository.findByMemberId(memberId);
+        RefreshToken byMemberId = refreshTokenRepository.findByMemberId(deleteMemberRequest.getMemberId());
 
         refreshTokenRepository.delete(byMemberId);
 
-        memberRepository.deleteById(memberId);
+        memberRepository.deleteById(deleteMemberRequest.getMemberId());
 
     }
     public ResponseMember getMyPage(String memberId){
