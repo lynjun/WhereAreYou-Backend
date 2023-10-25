@@ -3,6 +3,7 @@ package com.example.whereareyou.service;
 import com.example.whereareyou.domain.FriendRequest;
 import com.example.whereareyou.domain.Member;
 import com.example.whereareyou.dto.FriendRequestDto;
+import com.example.whereareyou.dto.FriendRequestList;
 import com.example.whereareyou.exception.customexception.UserNotFoundException;
 import com.example.whereareyou.repository.FriendRepository;
 import com.example.whereareyou.repository.FriendRequestRepository;
@@ -47,26 +48,29 @@ public class FriendService {
 
     public ResponseFriendRequestList friendRequestList(String userId) {
         Optional<Member> byUserId = memberRepository.findByUserId(userId);
-        Member member = byUserId.orElseThrow(() -> new UserNotFoundException("존재하지 않는 userId입니다."));
-
+        Member member = byUserId.orElseThrow(() -> new UserNotFoundException("존재하지 않는 userId 입니다."));
 
         List<FriendRequest> id = friendRequestRepository.findByMember(member);
 
-        HashMap<String,String> idMap = new HashMap<>();
+        ResponseFriendRequestList responseFriendRequestList = new ResponseFriendRequestList();
+        responseFriendRequestList.setFriendsRequestList(new ArrayList<>());
 
-        id.stream().map(FriendRequest::getSenderId)
-                .map(memberRepository::findById)
-                .map(byId -> byId.orElseThrow(() -> new UserNotFoundException("존재하지 않는 userId입니다.")))
-                .forEach(member1 -> {
-            String userName = member1.getUserName();
-            String userId2 = member1.getUserId();
-            idMap.put(userId2, userName);
-        });
 
-        ResponseFriendRequestList responseFriendTest = new ResponseFriendRequestList();
-        responseFriendTest.setFriendRequestMap(idMap);
+        for (FriendRequest friendRequest : id) {
+            String senderId = friendRequest.getSenderId();
+            Optional<Member> byId = memberRepository.findById(senderId);
+            Member sender = byId.orElseThrow(() -> new UserNotFoundException("존재하지 않는 userId 입니다."));
 
-        return responseFriendTest;
+            String senderUserName = sender.getUserName();
+            String senderUserId = sender.getUserId();
+
+            FriendRequestList friendRequestList = new FriendRequestList();
+            friendRequestList.setFriendRequestId(friendRequest.getId());
+            friendRequestList.setSenderUserName(senderUserName);
+            friendRequestList.setSenderUserId(senderUserId);
+            responseFriendRequestList.getFriendsRequestList().add(friendRequestList);
+        }
+
+        return responseFriendRequestList;
     }
-
 }
