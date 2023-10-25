@@ -1,5 +1,6 @@
 package com.example.whereareyou.controller;
 
+import com.example.whereareyou.dto.AcceptFriend;
 import com.example.whereareyou.dto.FriendRequestDto;
 import com.example.whereareyou.service.FriendService;
 import com.example.whereareyou.vo.response.Friend.ResponseFriendRequestList;
@@ -26,6 +27,13 @@ public class FriendController {
         ResponseFriendRequestList responseFriendRequestList = friendService.friendRequestList(userId);
 
         return ResponseEntity.ok().body(responseFriendRequestList);
+    }
+
+    @PostMapping("/accept")
+    public ResponseEntity<String> accept(@RequestBody AcceptFriend acceptFriend){
+        friendService.acceptFriend(acceptFriend);
+
+        return ResponseEntity.ok().body("친구 수락 완료");
     }
 
 }
