@@ -1,5 +1,6 @@
 package com.example.whereareyou.vo.response.Friend;
 
+import com.example.whereareyou.dto.FriendRequestList;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
@@ -10,6 +11,5 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseFriendRequestList {
 
-    private List<String> friendsRequestList;
-    private HashMap<String,String> friendRequestMap;
+    private List<FriendRequestList> friendsRequestList;
 }
