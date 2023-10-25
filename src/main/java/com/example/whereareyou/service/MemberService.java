@@ -148,7 +148,7 @@ import java.util.Random;
         Member member = emailOptional.orElseThrow(() -> new EmailNotFoundException("이메일 존재하지 않습니다."));
 
         if(!member.getUserId().equals(reset.getUserId())){
-            throw new RuntimeException("회원 정보가 일치하지 않습니다.");
+            throw new MemberMismatchException("회원 정보가 일치하지 않습니다.");
         }
 
         verifyEmailCode(reset.getEmail(),reset.getCode());
