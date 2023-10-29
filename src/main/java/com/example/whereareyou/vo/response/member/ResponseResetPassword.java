@@ -8,6 +8,5 @@ import lombok.Data;
 public class ResponseResetPassword {
 
     private String userId;
-    private String message;
 
 }
