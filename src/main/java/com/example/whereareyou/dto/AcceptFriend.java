@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class AcceptFriend {
 
     private String friendRequestId;
-    private String userId;
-    private String friendId;
+    private String memberId;
+    private String senderId;
 
 }
