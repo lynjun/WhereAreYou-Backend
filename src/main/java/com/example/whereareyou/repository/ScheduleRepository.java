@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * packageName    : project.whereareyou.repository
@@ -37,5 +38,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, String> {
     @Modifying
     @Query("UPDATE Schedule s SET s.closed = true WHERE s.id = :scheduleId")
     int closeSchedule(@Param("scheduleId") String scheduleId);
+
+    List<Schedule> findByCreatorId(String MemberId);
 
 }
