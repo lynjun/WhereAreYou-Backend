@@ -33,9 +33,11 @@ public class FriendRequest {
     @Column(name = "friendRequest_id", updatable = false, nullable = false)
     private String id;
 
-    private String senderId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_id")
+    private Member senderId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "receiver_id")
+    private Member receiverId;
 }
