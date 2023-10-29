@@ -34,9 +34,11 @@ public class Friend {
     @Column(name = "friend_id", updatable = false, nullable = false)
     private String id;
 
-    private String friend;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "friends_id")
+    private Member friends;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "owner_id")
+    private Member owner;
 }
