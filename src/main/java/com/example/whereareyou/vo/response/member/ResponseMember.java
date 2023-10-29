@@ -10,4 +10,5 @@ public class ResponseMember {
     private String userName;
     private String userId;
     private String email;
+    private String profileImage;
 }
