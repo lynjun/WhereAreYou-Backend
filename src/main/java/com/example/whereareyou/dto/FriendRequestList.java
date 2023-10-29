@@ -12,8 +12,7 @@ import lombok.Setter;
 public class FriendRequestList {
 
     String friendRequestId;
-    String senderUserName;
-    String senderUserId;
+    String senderId;
 
 }
 
