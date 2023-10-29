@@ -8,6 +8,5 @@ import lombok.Data;
 public class ResponseCheckEmail {
 
     private String email;
-    private String message;
 
 }
