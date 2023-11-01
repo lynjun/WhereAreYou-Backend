@@ -216,4 +216,12 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
 
         return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(AlreadyFriendsException.class)
+    public final ResponseEntity<Object> alreadyFriendsException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
+    }
 }
