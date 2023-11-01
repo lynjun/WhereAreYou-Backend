@@ -19,10 +19,10 @@ public class MemberController {
 
 
     @PostMapping("/join")
-    public ResponseEntity<String> join(@RequestBody MemberJoinRequest dto){
+    public ResponseEntity<Void> join(@RequestBody MemberJoinRequest dto){
         memberService.join(dto.getUserName(), dto.getUserId(), dto.getPassword(), dto.getEmail());
 
-        return ResponseEntity.ok().body("회원가입 성공");
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/checkId")
@@ -47,17 +47,17 @@ public class MemberController {
     }
 
     @PostMapping("/email/send")
-    public ResponseEntity<String> sendEmail(@RequestBody EmailRequest request){
-        memberService.authEmail(request.getEmail());
+    public ResponseEntity<Void> sendEmail(@RequestBody EmailRequest email){
+        memberService.authEmail(email.getEmail());
 
-        return ResponseEntity.ok().body("코드가 전송 되었습니다.");
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/email/verify")
-    public ResponseEntity<String> verifyEmail(@RequestBody EmailRequest request){
+    public ResponseEntity<Void> verifyEmail(@RequestBody EmailRequest request){
         memberService.verifyEmailCode(request.getEmail(), request.getCode());
 
-        return ResponseEntity.ok().body("코드가 일치 합니다");
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/email/verifyPassword")
@@ -82,10 +82,10 @@ public class MemberController {
     }
 
     @PostMapping("/resetPassword")
-    public ResponseEntity<String> resetPassword(@RequestBody CheckPasswordRequest request){
+    public ResponseEntity<Void> resetPassword(@RequestBody CheckPasswordRequest request){
         memberService.passwordReset(request);
 
-        return ResponseEntity.ok().body("비밀번호 재설정이 완료되었습니다.");
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/deleteMember")
@@ -95,20 +95,20 @@ public class MemberController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/myPage")
-    public ResponseEntity<ResponseMember> getMyPage(@RequestParam("memberId") String memberId){
-        ResponseMember memberPage = memberService.getMyPage(memberId);
+    @GetMapping("/details")
+    public ResponseEntity<ResponseMember> getDetailMember(@RequestParam("memberId") String memberId){
+        ResponseMember memberPage = memberService.getDetailMember(memberId);
 
         return ResponseEntity.ok().body(memberPage);
     }
 
     @PostMapping("/myPage/modify")
-    public ResponseEntity<String> modifyMyPage(@RequestPart(value = "images",required = false) MultipartFile multipartFile,
-                                         @RequestPart(value = "userId") String userId,
+    public ResponseEntity<Void> modifyMyPage(@RequestPart(value = "memberId") String memberId,
+                                         @RequestPart(value = "images",required = false) MultipartFile multipartFile,
                                          @RequestPart(value = "newId",required = false) String newId) throws Exception {
-        memberService.modifyMyPage(multipartFile,userId,newId);
+        memberService.modifyMyPage(multipartFile,memberId,newId);
 
-        return ResponseEntity.ok().body("수정이 완료되었습니다.");
+        return ResponseEntity.noContent().build();
     }
 
 }
