@@ -3,21 +3,23 @@ package com.example.whereareyou.service;
 import com.example.whereareyou.domain.Friend;
 import com.example.whereareyou.domain.FriendRequest;
 import com.example.whereareyou.domain.Member;
+import com.example.whereareyou.domain.Schedule;
 import com.example.whereareyou.dto.AcceptFriend;
 import com.example.whereareyou.dto.FriendRequestDto;
 import com.example.whereareyou.dto.FriendRequestList;
-import com.example.whereareyou.exception.customexception.FriendRequestNotFoundException;
-import com.example.whereareyou.exception.customexception.MemberMismatchException;
-import com.example.whereareyou.exception.customexception.UserNotFoundException;
+import com.example.whereareyou.dto.ScheduleList;
+import com.example.whereareyou.exception.customexception.*;
 import com.example.whereareyou.repository.FriendRepository;
 import com.example.whereareyou.repository.FriendRequestRepository;
 import com.example.whereareyou.repository.MemberRepository;
+import com.example.whereareyou.repository.ScheduleRepository;
 import com.example.whereareyou.vo.response.Friend.ResponseFriendRequestList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,85 +28,107 @@ public class FriendService {
     private final FriendRepository friendRepository;
     private final MemberRepository memberRepository;
     private final FriendRequestRepository friendRequestRepository;
+    private final ScheduleRepository scheduleRepository;
 
     public void friendRequest(FriendRequestDto request) {
-        Member member = memberRepository.findByUserId(request.getUserId())
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 userId입니다.")); // sender
+        Optional<Member> byId = memberRepository.findById(request.getMemberId());
+        Member memberId = byId.orElseThrow(() ->
+                new UserNotFoundException("아이디가 없습니다"));
 
-        List<String> requestList = request.getMemberIdList(); // 친구 요청 리스트 receiver
+        Optional<Member> byFriendId = memberRepository.findById(request.getFriendId());
+        Member friendId = byFriendId.orElseThrow(() ->
+                new UserNotFoundException("아이디가 없습니다."));
 
         // 본인 ID를 확인하고 예외 처리
-        if (requestList.contains(member.getUserId())) {
-            throw new RuntimeException("본인 ID는 친구 요청을 보낼 수 없습니다.");
+        if (memberId == friendId) {
+            throw new MemberIdCannotBeInFriendListException("본인 ID는 친구 요청을 보낼 수 없습니다.");
         }
 
-        List<Member> allById = memberRepository.findByUserIdIn(requestList); // 친구 요청 리스트 멤버 조회
+        List<FriendRequest> byReceiverId = friendRequestRepository.findBySenderId(memberId);
+        byReceiverId
+                .stream()
+                .filter(friendRequest -> Objects.equals(friendRequest.getSenderId().getId(), memberId.getId()) && friendRequest.getReceiverId().getId().equals(friendId.getId()))
+                .forEach(friendRequest -> {
+            throw new AlreadySent("이미 요청이 전송 되었습니다.");
+        });
 
-        List<FriendRequest> friendRequests = allById.stream()
-                .map(receiver -> FriendRequest.builder()
-                        .senderId(member.getId())
-                        .member(receiver)
-                        .build())
-                .collect(Collectors.toList());
+        List<Friend> byOwner = friendRepository.findByOwner(memberId);
+        byOwner.stream().filter(friend ->
+                friend.getOwner().getId().equals(memberId.getId()) && friend.getFriends().getId().equals(friendId.getId()))
+                .forEach(friend -> {
+            throw new AlreadyFriendsException("이미 친구 관계 입니다.");
+        });
 
-        friendRequestRepository.saveAll(friendRequests);
+        FriendRequest friendRequest = FriendRequest.builder()
+                .senderId(memberId)
+                .receiverId(friendId)
+                .build();
+
+        friendRequestRepository.save(friendRequest);
+
     }
 
-    public ResponseFriendRequestList friendRequestList(String userId) {
-        Optional<Member> byUserId = memberRepository.findByUserId(userId);
-        Member member = byUserId.orElseThrow(() -> new UserNotFoundException("존재하지 않는 userId 입니다."));
+    public ResponseFriendRequestList friendRequestList(String memberId) {
+        Optional<Member> byId = memberRepository.findById(memberId);
+        Member member = byId.orElseThrow(() -> new UserNotFoundException("존재하지 않는 아이디 입니다."));
 
-        List<FriendRequest> id = friendRequestRepository.findByMember(member);
+        List<FriendRequest> id = friendRequestRepository.findByReceiverId(member);
 
         ResponseFriendRequestList responseFriendRequestList = new ResponseFriendRequestList();
         responseFriendRequestList.setFriendsRequestList(new ArrayList<>());
+        responseFriendRequestList.setScheduleList(new ArrayList<>());
 
-
-        for (FriendRequest friendRequest : id) {
-            String senderId = friendRequest.getSenderId();
-            Optional<Member> byId = memberRepository.findById(senderId);
-            Member sender = byId.orElseThrow(() -> new UserNotFoundException("존재하지 않는 userId 입니다."));
-
-            String senderUserName = sender.getUserName();
-            String senderUserId = sender.getUserId();
-
+        id.forEach(friendRequest -> {
+            Member senderId = friendRequest.getSenderId();
             FriendRequestList friendRequestList = new FriendRequestList();
             friendRequestList.setFriendRequestId(friendRequest.getId());
-            friendRequestList.setSenderUserName(senderUserName);
-            friendRequestList.setSenderUserId(senderUserId);
+            friendRequestList.setSenderId(senderId.getId());
             responseFriendRequestList.getFriendsRequestList().add(friendRequestList);
-        }
+        });
+
+        List<Schedule> byCreatorId = scheduleRepository.findByCreatorId(memberId);
+
+        byCreatorId.forEach(schedule -> {
+            LocalDateTime start = schedule.getStart();
+            LocalDateTime now = LocalDateTime.now();
+
+            String startTime = start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            String nowTime = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+            if (startTime.equals(nowTime)) {
+                ScheduleList scheduleList = new ScheduleList();
+                scheduleList.setScheduleId(schedule.getId());
+                responseFriendRequestList.getScheduleList().add(scheduleList);
+            }
+        });
 
         return responseFriendRequestList;
     }
 
     public void acceptFriend(AcceptFriend acceptFriend){
-        Optional<Member> byUserId = memberRepository.findByUserId(acceptFriend.getUserId());
-        Member userId = byUserId.orElseThrow(() -> new UserNotFoundException("존재하지 않은 userId 입니다."));
+        Optional<Member> byMemberId = memberRepository.findById(acceptFriend.getMemberId());
+        Member memberId = byMemberId.orElseThrow(() -> new UserNotFoundException("존재하지 않은 userId 입니다."));
 
-        Optional<Member> byFriendId = memberRepository.findByUserId(acceptFriend.getFriendId());
+        Optional<Member> byFriendId = memberRepository.findById(acceptFriend.getSenderId());
         Member friendId = byFriendId.orElseThrow(() -> new UserNotFoundException("존재하지 않은 FriendId 입니다."));
 
         Optional<FriendRequest> byId = friendRequestRepository.findById(acceptFriend.getFriendRequestId());
         FriendRequest friendRequest = byId.orElseThrow(() -> new FriendRequestNotFoundException("존재하지 않은 요청 입니다."));
 
-        if(friendRequest.getMember()!=userId){
-            throw new MemberMismatchException("회원 정보가 일치하지 않습니다");
-        }
-
-        friendRequestRepository.delete(friendRequest);
-
-        Friend user = Friend.builder()
-                .member(userId)
-                .friend(acceptFriend.getUserId())
+        Friend owner = Friend.builder()
+                .owner(memberId)
+                .friends(friendId)
                 .build();
-        friendRepository.save(user);
 
         Friend friend = Friend.builder()
-                .member(friendId)
-                .friend(acceptFriend.getFriendId())
+                .owner(friendId)
+                .friends(memberId)
                 .build();
+
+        friendRepository.save(owner);
         friendRepository.save(friend);
+
+        friendRequestRepository.delete(friendRequest);
 
     }
 
