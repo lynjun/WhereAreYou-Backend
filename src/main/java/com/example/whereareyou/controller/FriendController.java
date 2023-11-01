@@ -19,12 +19,12 @@ public class FriendController {
     public ResponseEntity<String> friendRequest(@RequestBody FriendRequestDto request){
         friendService.friendRequest(request);
 
-        return ResponseEntity.ok().body("친구 신청 완료");
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/requestList")
-    public ResponseEntity<ResponseFriendRequestList> friendRequestList(@RequestParam("userId") String userId){
-        ResponseFriendRequestList responseFriendRequestList = friendService.friendRequestList(userId);
+    public ResponseEntity<ResponseFriendRequestList> friendRequestList(@RequestParam("memberId") String memberId){
+        ResponseFriendRequestList responseFriendRequestList = friendService.friendRequestList(memberId);
 
         return ResponseEntity.ok().body(responseFriendRequestList);
     }
@@ -33,7 +33,7 @@ public class FriendController {
     public ResponseEntity<String> accept(@RequestBody AcceptFriend acceptFriend){
         friendService.acceptFriend(acceptFriend);
 
-        return ResponseEntity.ok().body("친구 수락 완료");
+        return ResponseEntity.noContent().build();
     }
 
 }
