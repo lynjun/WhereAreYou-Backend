@@ -4,15 +4,13 @@ import com.example.whereareyou.domain.Friend;
 import com.example.whereareyou.domain.FriendRequest;
 import com.example.whereareyou.domain.Member;
 import com.example.whereareyou.domain.Schedule;
-import com.example.whereareyou.dto.AcceptFriend;
-import com.example.whereareyou.dto.FriendRequestDto;
-import com.example.whereareyou.dto.FriendRequestList;
-import com.example.whereareyou.dto.ScheduleList;
+import com.example.whereareyou.dto.*;
 import com.example.whereareyou.exception.customexception.*;
 import com.example.whereareyou.repository.FriendRepository;
 import com.example.whereareyou.repository.FriendRequestRepository;
 import com.example.whereareyou.repository.MemberRepository;
 import com.example.whereareyou.repository.ScheduleRepository;
+import com.example.whereareyou.vo.response.Friend.ResponseFriendList;
 import com.example.whereareyou.vo.response.Friend.ResponseFriendRequestList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -129,6 +127,24 @@ public class FriendService {
         friendRepository.save(friend);
 
         friendRequestRepository.delete(friendRequest);
+
+    }
+
+    public ResponseFriendList friendList(List<String> friendIds){
+
+        List<Member> byUserIdIn = memberRepository.findById(friendIds);
+        ResponseFriendList responseFriendList = new ResponseFriendList();
+        responseFriendList.setFriendsRequestList(new ArrayList<>());
+
+        byUserIdIn.forEach(member -> {
+            FriendList friendList = new FriendList();
+            friendList.setMemberId(member.getId());
+            friendList.setUserName(member.getUserName());
+            friendList.setProfileImage(member.getProfileImage());
+            responseFriendList.getFriendsRequestList().add(friendList);
+        });
+
+        return responseFriendList;
 
     }
 
