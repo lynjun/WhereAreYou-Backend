@@ -67,14 +67,17 @@ public class FriendService {
     }
 
     public ResponseFriendRequestList friendRequestList(String memberId) {
+        ResponseFriendRequestList responseFriendRequestList = new ResponseFriendRequestList();
+        responseFriendRequestList.setFriendsRequestList(new ArrayList<>());
+
+        TodaySchedule todaySchedule = new TodaySchedule();
+        todaySchedule.setScheduleList(new ArrayList<>());
+
+
         Optional<Member> byId = memberRepository.findById(memberId);
         Member member = byId.orElseThrow(() -> new UserNotFoundException("존재하지 않는 아이디 입니다."));
 
         List<FriendRequest> id = friendRequestRepository.findByReceiverId(member);
-
-        ResponseFriendRequestList responseFriendRequestList = new ResponseFriendRequestList();
-        responseFriendRequestList.setFriendsRequestList(new ArrayList<>());
-        responseFriendRequestList.setScheduleList(new ArrayList<>());
 
         id.forEach(friendRequest -> {
             Member senderId = friendRequest.getSenderId();
@@ -96,9 +99,11 @@ public class FriendService {
             if (startTime.equals(nowTime)) {
                 ScheduleList scheduleList = new ScheduleList();
                 scheduleList.setScheduleId(schedule.getId());
-                responseFriendRequestList.getScheduleList().add(scheduleList);
+                todaySchedule.getScheduleList().add(scheduleList);
             }
         });
+        int todayScheduleCount = todaySchedule.getScheduleList().size();
+        responseFriendRequestList.setTodaySchedule(todayScheduleCount);
 
         return responseFriendRequestList;
     }
