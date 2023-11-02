@@ -1,6 +1,6 @@
 package com.example.whereareyou.vo.response.member;
 
-import com.example.whereareyou.dto.FriendList;
+import com.example.whereareyou.dto.FriendLoginList;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
@@ -13,6 +13,6 @@ public class ResponseLogin {
     private String accessToken;
     private String refreshToken;
     private String memberId;
-    private List<FriendList> friendList;
+    private List<FriendLoginList> friendList;
 
 }
