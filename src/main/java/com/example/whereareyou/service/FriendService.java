@@ -148,4 +148,14 @@ public class FriendService {
 
     }
 
+    public void refuseFriend(RefuseFriend refuseFriend){
+        Optional<FriendRequest> byId = friendRequestRepository.findById(refuseFriend.getFriendRequestId());
+
+        FriendRequest friendRequest = byId.orElseThrow(() ->
+                new FriendRequestNotFoundException("존재하지 않은 요청 입니다."));
+
+        friendRequestRepository.delete(friendRequest);
+
+    }
+
 }

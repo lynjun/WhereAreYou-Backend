@@ -2,6 +2,7 @@ package com.example.whereareyou.controller;
 
 import com.example.whereareyou.dto.AcceptFriend;
 import com.example.whereareyou.dto.FriendRequestDto;
+import com.example.whereareyou.dto.RefuseFriend;
 import com.example.whereareyou.service.FriendService;
 import com.example.whereareyou.vo.response.Friend.ResponseFriendList;
 import com.example.whereareyou.vo.response.Friend.ResponseFriendRequestList;
@@ -45,6 +46,14 @@ public class FriendController {
 
 
         return ResponseEntity.ok().body(responseFriendList);
+    }
+
+    @PostMapping("/refuse")
+    public ResponseEntity<Void> refuseFriend(@RequestBody RefuseFriend refuseFriend){
+
+        friendService.refuseFriend(refuseFriend);
+
+        return ResponseEntity.noContent().build();
     }
 
 }
