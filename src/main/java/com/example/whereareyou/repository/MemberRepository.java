@@ -2,6 +2,7 @@ package com.example.whereareyou.repository;
 
 import com.example.whereareyou.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public interface MemberRepository extends JpaRepository<Member, String> {
 
     Optional<Member> findByEmail(String email);
 
-    List<Member> findByUserIdIn(List<String> userIds);
+    @Query("SELECT m FROM Member m WHERE m.id IN :friendIds")
+    List<Member> findById(List<String> friendIds);
 
 }
