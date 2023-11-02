@@ -9,7 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class FriendList {
+public class FriendLoginList {
 
     private String friendId;
 
