@@ -96,7 +96,7 @@ import java.util.Random;
 
         if(byOwner != null) {
             byOwner.stream().map(Friend::getFriends).map(Member::getId).forEach(id -> {
-                FriendList friendList = new FriendList();
+                FriendLoginList friendList = new FriendLoginList();
                 friendList.setFriendId(id);
                 responseLogin.getFriendList().add(friendList);
             });
