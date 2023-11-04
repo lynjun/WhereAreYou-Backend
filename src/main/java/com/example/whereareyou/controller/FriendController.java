@@ -1,10 +1,8 @@
 package com.example.whereareyou.controller;
 
-import com.example.whereareyou.dto.AcceptFriend;
-import com.example.whereareyou.dto.FriendDto;
-import com.example.whereareyou.dto.FriendRequestDto;
-import com.example.whereareyou.dto.RefuseFriend;
+import com.example.whereareyou.dto.*;
 import com.example.whereareyou.service.FriendService;
+import com.example.whereareyou.vo.response.Friend.ResponseFriendIdList;
 import com.example.whereareyou.vo.response.Friend.ResponseFriendList;
 import com.example.whereareyou.vo.response.Friend.ResponseFriendRequestList;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +51,14 @@ public class FriendController {
         friendService.refuseFriend(refuseFriend);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/friendIds")
+    private ResponseEntity<ResponseFriendIdList> getFriendIds(@RequestBody GetFriendId getFriendId){
+
+        ResponseFriendIdList friendId = friendService.getFriendId(getFriendId);
+
+        return ResponseEntity.ok().body(friendId);
     }
 
 }
