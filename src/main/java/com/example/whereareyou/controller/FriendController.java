@@ -1,6 +1,7 @@
 package com.example.whereareyou.controller;
 
 import com.example.whereareyou.dto.AcceptFriend;
+import com.example.whereareyou.dto.FriendDto;
 import com.example.whereareyou.dto.FriendRequestDto;
 import com.example.whereareyou.dto.RefuseFriend;
 import com.example.whereareyou.service.FriendService;
@@ -9,8 +10,6 @@ import com.example.whereareyou.vo.response.Friend.ResponseFriendRequestList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,9 +39,9 @@ public class FriendController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/friendList")
-    public ResponseEntity<ResponseFriendList> friendList(@RequestParam List<String> friendIds){
-        ResponseFriendList responseFriendList = friendService.friendList(friendIds);
+    @PostMapping("/friendList")
+    public ResponseEntity<ResponseFriendList> getFriendList(@RequestBody FriendDto friend){
+        ResponseFriendList responseFriendList = friendService.getFriendList(friend);
 
 
         return ResponseEntity.ok().body(responseFriendList);
