@@ -10,5 +10,5 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseFriendList {
 
-    private List<FriendList> friendsRequestList;
+    private List<FriendList> friendsList;
 }
