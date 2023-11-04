@@ -135,18 +135,18 @@ public class FriendService {
 
     }
 
-    public ResponseFriendList friendList(List<String> friendIds){
+    public ResponseFriendList getFriendList(FriendDto friend){
 
-        List<Member> byUserIdIn = memberRepository.findById(friendIds);
+        List<Member> byUserIdIn = memberRepository.findById(friend.getFriendId());
         ResponseFriendList responseFriendList = new ResponseFriendList();
-        responseFriendList.setFriendsRequestList(new ArrayList<>());
+        responseFriendList.setFriendsList(new ArrayList<>());
 
         byUserIdIn.forEach(member -> {
             FriendList friendList = new FriendList();
             friendList.setMemberId(member.getId());
             friendList.setUserName(member.getUserName());
             friendList.setProfileImage(member.getProfileImage());
-            responseFriendList.getFriendsRequestList().add(friendList);
+            responseFriendList.getFriendsList().add(friendList);
         });
 
         return responseFriendList;
