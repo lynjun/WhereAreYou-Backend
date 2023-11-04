@@ -10,6 +10,7 @@ import com.example.whereareyou.repository.FriendRepository;
 import com.example.whereareyou.repository.FriendRequestRepository;
 import com.example.whereareyou.repository.MemberRepository;
 import com.example.whereareyou.repository.ScheduleRepository;
+import com.example.whereareyou.vo.response.Friend.ResponseFriendIdList;
 import com.example.whereareyou.vo.response.Friend.ResponseFriendList;
 import com.example.whereareyou.vo.response.Friend.ResponseFriendRequestList;
 import lombok.RequiredArgsConstructor;
@@ -150,7 +151,6 @@ public class FriendService {
         });
 
         return responseFriendList;
-
     }
 
     public void refuseFriend(RefuseFriend refuseFriend){
@@ -163,4 +163,27 @@ public class FriendService {
 
     }
 
+    public ResponseFriendIdList getFriendId(GetFriendId getFriendId){
+
+        Optional<Member> byId = memberRepository.findById(getFriendId.getMemberId());
+
+        Member member = byId.orElseThrow(() ->
+                new UserNotFoundException("아이디가 존재하지 않습니다."));
+
+        List<Friend> byOwner = friendRepository.findByOwner(member);
+
+        ResponseFriendIdList responseFriendIdList = new ResponseFriendIdList();
+        responseFriendIdList.setFriendsIdList(new ArrayList<>());
+
+        if(byOwner != null) {
+            byOwner.stream().map(Friend::getFriends).map(Member::getId).forEach(id -> {
+                FriendIdList friendIdList = new FriendIdList();
+                friendIdList.setFriendId(id);
+                responseFriendIdList.getFriendsIdList().add(friendIdList);
+            });
+        }
+
+        return responseFriendIdList;
+
+    }
 }
