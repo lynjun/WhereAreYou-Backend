@@ -248,35 +248,34 @@ public class ScheduleService {
      * @param date     the date
      * @return the response brief date schedule
      */
-    public ResponseBriefDateSchedule getBriefDateSchedule(String memberId, Integer year, Integer month, Integer date){
-        /*
-         예외처리
-         404: MemberId Not Found
-         400: Invalid Year or Month or Date
-         401: Unauthorized (추후에 추가할 예정)
-         500: Server
-        */
-        Member findMember = memberRepository.findById(memberId)
+    public ResponseBriefDateSchedule getBriefDateSchedule(String memberId, Integer year, Integer month, Integer date) {
+        // 사용자 확인
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
 
-        // Response할 객체 생성
+        // 해당 Member가 수락한 MemberSchedule 가져오기
+        List<MemberSchedule> acceptedMemberSchedules = memberScheduleRepository.findByMemberAndAcceptIsTrue(member);
+
+        // Response 객체 생성
         ResponseBriefDateSchedule responseBriefDateSchedule = new ResponseBriefDateSchedule();
         responseBriefDateSchedule.setBriefDateScheduleDTOList(new ArrayList<>());
 
-        // Member를 통해 ScheduleList 반환
-        List<Schedule> scheduleList = findMember.getScheduleList();
-        for(Schedule schedule : scheduleList){
-            // 스케줄의 시작날짜가 입력한 연, 월, 일과 일치하는지 확인
-            if(schedule.getStart().getYear() == year
-                    && schedule.getStart().getMonthValue() == month
-                    && schedule.getStart().getDayOfMonth() == date){
+        // 주어진 날짜 객체 생성
+        LocalDate givenDate = LocalDate.of(year, month, date);
 
-                // ModelMapper를 사용하여 BriefDateScheduleDTO로 변환
-                ModelMapper mapper = new ModelMapper();
-                mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        // 수락된 스케줄 중 입력된 날짜가 스케줄 기간 안에 있는지 확인
+        for (MemberSchedule memberSchedule : acceptedMemberSchedules) {
+            Schedule schedule = memberSchedule.getSchedule();
+            LocalDate startDate = schedule.getStart().toLocalDate();
+            LocalDate endDate = schedule.getEnd().toLocalDate();
 
-                BriefDateScheduleDTO briefDateScheduleDTO = mapper.map(schedule, BriefDateScheduleDTO.class);
+            // 입력된 날짜가 스케줄 기간 안에 있는 경우
+            if (!givenDate.isBefore(startDate) && !givenDate.isAfter(endDate)) {
+                BriefDateScheduleDTO briefDateScheduleDTO = new BriefDateScheduleDTO();
                 briefDateScheduleDTO.setScheduleId(schedule.getId());
+                briefDateScheduleDTO.setTitle(schedule.getTitle());
+                briefDateScheduleDTO.setStart(schedule.getStart());
+                briefDateScheduleDTO.setEnd(schedule.getEnd());
                 responseBriefDateSchedule.getBriefDateScheduleDTOList().add(briefDateScheduleDTO);
             }
         }
