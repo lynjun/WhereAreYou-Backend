@@ -1,5 +1,6 @@
 package com.example.whereareyou.memberSchedule.repository;
 
+import com.example.whereareyou.member.domain.Member;
 import com.example.whereareyou.memberSchedule.domain.MemberSchedule;
 import com.example.whereareyou.schedule.domain.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,4 +36,6 @@ public interface MemberScheduleRepository extends JpaRepository<MemberSchedule, 
 
     @Query("SELECT ms FROM MemberSchedule ms WHERE ms.schedule = :schedule")
     List<MemberSchedule> findMemberSchedulesBySchedule(@Param("schedule") Schedule schedule);
+
+    List<MemberSchedule> findByMemberAndAcceptIsTrue(Member member);
 }
