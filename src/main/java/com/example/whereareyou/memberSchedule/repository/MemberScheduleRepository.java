@@ -42,4 +42,6 @@ public interface MemberScheduleRepository extends JpaRepository<MemberSchedule, 
 
     @Query("SELECT ms FROM MemberSchedule ms WHERE ms.member = :member AND ms.schedule.id = :scheduleId AND ms.accept = true")
     Optional<MemberSchedule> findByMemberAndScheduleIdAndAcceptIsTrue(@Param("member") Member member, @Param("scheduleId") String scheduleId);
+
+    Optional<MemberSchedule> findByMemberAndSchedule(Member member, Schedule schedule);
 }
