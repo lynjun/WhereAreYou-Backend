@@ -226,14 +226,14 @@ public class ScheduleService {
      * @param requestDeleteSchedule the request delete schedule
      */
     public void deleteSchedule(RequestDeleteSchedule requestDeleteSchedule){
-        /*
-         예외처리
-         404: ScheduleId Not Found
-         401: Unauthorized (추후에 추가할 예정)
-         500: Server
-        */
+        Member creator = memberRepository.findById(requestDeleteSchedule.getCreatorId())
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+
         Schedule schedule = scheduleRepository.findById(requestDeleteSchedule.getScheduleId())
                 .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
+
+        if(!schedule.getCreator().getId().equals(creator.getId()))
+            throw new ScheduleNotFoundException("회원이 생성한 일정이 아닙니다.");
 
         memberScheduleRepository.deleteAllBySchedule(schedule);
         scheduleRepository.deleteById(requestDeleteSchedule.getScheduleId());
