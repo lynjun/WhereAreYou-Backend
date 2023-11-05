@@ -127,19 +127,6 @@ public class ScheduleController {
     }
 
     /**
-     * 일정 수락
-     *
-     * @param requestScheduleAccept the request schedule accept
-     * @return the response entity
-     */
-    @PutMapping("/accept")
-    public ResponseEntity<Boolean> scheduleAccept(@RequestBody RequestScheduleAccept requestScheduleAccept){
-        scheduleService.scheduleAccept(requestScheduleAccept);
-
-        return ResponseEntity.status(HttpStatus.OK).body(true);
-    }
-
-    /**
      * 일정 종료
      *
      * @param requestScheduleClosed the request schedule closed

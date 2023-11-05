@@ -2,6 +2,8 @@ package com.example.whereareyou.memberSchedule.controller;
 
 import com.example.whereareyou.memberSchedule.request.RequestModifyMemberSchedule;
 import com.example.whereareyou.memberSchedule.service.MemberScheduleService;
+import com.example.whereareyou.schedule.request.RequestScheduleAccept;
+import com.example.whereareyou.schedule.service.ScheduleService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,5 +39,12 @@ public class MemberScheduleController {
         memberScheduleService.modifyMemberSchedule(requestModifyMemberSchedule);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/accept")
+    public ResponseEntity<Boolean> scheduleAccept(@RequestBody RequestScheduleAccept requestScheduleAccept){
+        memberScheduleService.scheduleAccept(requestScheduleAccept);
+
+        return ResponseEntity.status(HttpStatus.OK).body(true);
     }
 }
