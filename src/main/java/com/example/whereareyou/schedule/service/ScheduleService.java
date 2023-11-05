@@ -141,21 +141,13 @@ public class ScheduleService {
          500 updateQueryException: update Fail
          500: Server
         */
-        Member modifier = memberRepository.findById(requestModifySchedule.getMemberId())
+        Member creator = memberRepository.findById(requestModifySchedule.getCreatorId())
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
         Schedule savedSchedule = scheduleRepository.findById(requestModifySchedule.getScheduleId())
                 .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
 
-        List<String> friendList = requestModifySchedule.getMemberIdList();
-        if (friendList == null || friendList.isEmpty())
-            throw new FriendListNotFoundException("일정 추가 시 친구 설정은 필수 입니다.");
-
-        if (friendList.contains(modifier.getId()))
-            throw new MemberIdCannotBeInFriendListException("일정 친구 추가 시 본인의 ID는 들어갈 수 없습니다.");
-
-        List<Member> friends = memberRepository.findAllById(friendList);
-        if (friends.size() != friendList.size())
-            throw new UserNotFoundException("존재하지 않는 memberId입니다.");
+        if(!savedSchedule.getCreator().getId().equals(creator.getId()))
+            throw new ScheduleNotFoundException("해당 schedule의 creator가 아닙니다.");
 
         // Schedule 변경
         int updatedCount = scheduleRepository.updateSchedule(
@@ -165,28 +157,12 @@ public class ScheduleService {
                 requestModifySchedule.getPlace(),
                 requestModifySchedule.getMemo(),
                 savedSchedule.getClosed(),
-                modifier,
+                creator,
                 savedSchedule.getId()
         );
 
         if (updatedCount == 0)
             throw new UpdateQueryException("업데이트 실패");
-
-        // 기존의 MemberSchedule을 모두 삭제
-        memberScheduleRepository.deleteAllBySchedule(savedSchedule);
-
-        // friendList에 대한 MemberSchedule 생성 및 저장
-        for (String memberId : friendList) {
-            Member scheduleMember = memberRepository.findById(memberId).orElseThrow(
-                    () -> new UserNotFoundException("존재하지 않는 memberId입니다."));
-            MemberSchedule newMemberSchedule = MemberSchedule.builder()
-                    .schedule(savedSchedule)
-                    .member(scheduleMember)
-                    .accept(false)
-                    .arrived(false)
-                    .build();
-            memberScheduleRepository.save(newMemberSchedule);
-        }
     }
 
     /**
