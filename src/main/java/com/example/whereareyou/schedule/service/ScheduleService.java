@@ -326,14 +326,7 @@ public class ScheduleService {
      * @param requestScheduleClosed the request schedule closed
      */
     public void scheduleClosed(RequestScheduleClosed requestScheduleClosed){
-        /*
-         예외처리
-         404 ScheduleNotFoundException: scheduleId Not Found
-         400 NotCreatedScheduleByMemberException: This is not a user-created schedule
-         401: Unauthorized (추후에 추가할 예정)
-         500 updateQueryException: update Fail
-         500: Server
-        */
+
         Schedule findSchedule = scheduleRepository.findById(requestScheduleClosed.getScheduleId())
                 .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
         Member creator = memberRepository.findById(requestScheduleClosed.getCreatorId())
