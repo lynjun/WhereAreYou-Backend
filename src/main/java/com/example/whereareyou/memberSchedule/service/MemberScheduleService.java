@@ -8,7 +8,9 @@ import com.example.whereareyou.memberSchedule.repository.MemberScheduleRepositor
 import com.example.whereareyou.memberSchedule.request.RequestModifyMemberSchedule;
 import com.example.whereareyou.schedule.domain.Schedule;
 import com.example.whereareyou.schedule.exception.ScheduleNotFoundException;
+import com.example.whereareyou.schedule.exception.UpdateQueryException;
 import com.example.whereareyou.schedule.repository.ScheduleRepository;
+import com.example.whereareyou.schedule.request.RequestScheduleAccept;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -102,5 +104,23 @@ public class MemberScheduleService {
                 .filter(memberSchedule -> !requestedFriendIds.contains(memberSchedule.getMember().getId())
                         && !memberSchedule.getMember().equals(creator))
                 .forEach(memberScheduleRepository::delete);
+    }
+
+    /**
+     * Schedule accept.
+     *
+     * @param requestScheduleAccept the request schedule accept
+     */
+    public void scheduleAccept(RequestScheduleAccept requestScheduleAccept){
+
+        Member acceptMember = memberRepository.findById(requestScheduleAccept.getAcceptMemberId())
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        Schedule findSchedule = scheduleRepository.findById(requestScheduleAccept.getScheduleId())
+                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
+
+        int updateCnt
+                = memberScheduleRepository.setAcceptTrueForMemberAndSchedule(acceptMember.getId(), findSchedule.getId());
+        if(updateCnt == 0)
+            throw new UpdateQueryException("업데이트 실패");
     }
 }
