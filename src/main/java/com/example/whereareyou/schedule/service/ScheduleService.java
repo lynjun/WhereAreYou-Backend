@@ -309,6 +309,7 @@ public class ScheduleService {
 
         // ResponseDetailSchedule 객체 반환
         return ResponseDetailSchedule.builder()
+                .creatorId(findSchedule.getCreator().getId())
                 .start(findSchedule.getStart())
                 .end(findSchedule.getEnd())
                 .title(findSchedule.getTitle())
