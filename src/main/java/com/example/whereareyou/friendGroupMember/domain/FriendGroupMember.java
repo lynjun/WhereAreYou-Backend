@@ -1,6 +1,6 @@
-package com.example.whereareyou.friendGroup.domain;
+package com.example.whereareyou.friendGroupMember.domain;
 
-import com.example.whereareyou.friendGroupMember.domain.FriendGroupMember;
+import com.example.whereareyou.friendGroup.domain.FriendGroup;
 import com.example.whereareyou.member.domain.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,40 +9,38 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * packageName    : way.whereareyou.domain
- * fileName       : FriendGroup
+ * packageName    : com.example.whereareyou.domain
+ * fileName       : FriendGroupMember
  * author         : pjh57
- * date           : 2023-09-14
- * description    : 친구 그룹 Entity
+ * date           : 2023-10-20
+ * description    : 친구 그룹에 들어 있는 친구 목록
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 2023-09-14        pjh57       최초 생성
+ * 2023-10-20        pjh57       최초 생성
  */
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class FriendGroup {
+public class FriendGroupMember {
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(
             name = "uuid2",
             strategy = "org.hibernate.id.UUIDGenerator"
     )
-    @Column(name = "group_id", updatable = false, nullable = false)
+    @Column(name = "frined_group_member_id", updatable = false, nullable = false)
     private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id")
-    private Member owner;
+    @JoinColumn(name = "friend_group_id")
+    private FriendGroup friendGroup;
 
-    @OneToMany(mappedBy = "friendGroup", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FriendGroupMember> friendGroupMembers = new ArrayList<>();
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "friend_id")
+    private Member member;
 }
