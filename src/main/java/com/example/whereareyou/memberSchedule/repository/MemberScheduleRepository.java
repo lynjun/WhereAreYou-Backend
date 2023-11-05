@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * packageName    : project.whereareyou.repository
@@ -38,4 +39,7 @@ public interface MemberScheduleRepository extends JpaRepository<MemberSchedule, 
     List<MemberSchedule> findMemberSchedulesBySchedule(@Param("schedule") Schedule schedule);
 
     List<MemberSchedule> findByMemberAndAcceptIsTrue(Member member);
+
+    @Query("SELECT ms FROM MemberSchedule ms WHERE ms.member = :member AND ms.schedule.id = :scheduleId AND ms.accept = true")
+    Optional<MemberSchedule> findByMemberAndScheduleIdAndAcceptIsTrue(@Param("member") Member member, @Param("scheduleId") String scheduleId);
 }
