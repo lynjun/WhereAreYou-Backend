@@ -346,14 +346,7 @@ public class ScheduleService {
      * @param requestScheduleArrived the request schedule arrived
      */
     public void scheduleArrived(RequestScheduleArrived requestScheduleArrived){
-        /*
-         예외처리
-         404 ScheduleNotFoundException: scheduleId Not Found
-         400 NotCreatedScheduleByMemberException: This is not a user-created schedule
-         401: Unauthorized (추후에 추가할 예정)
-         500 updateQueryException: update Fail
-         500: Server
-        */
+
         Member arrivedMember = memberRepository.findById(requestScheduleArrived.getArrivedMemberId())
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
         Schedule findSchedule = scheduleRepository.findById(requestScheduleArrived.getScheduleId())
