@@ -22,6 +22,7 @@ import java.util.List;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseDetailSchedule {
+    private String creatorId;
     private LocalDateTime start;
     private LocalDateTime end;
     private String title;
