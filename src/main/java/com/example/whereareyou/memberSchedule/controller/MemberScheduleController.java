@@ -1,6 +1,7 @@
 package com.example.whereareyou.memberSchedule.controller;
 
 import com.example.whereareyou.memberSchedule.request.RequestModifyMemberSchedule;
+import com.example.whereareyou.memberSchedule.request.RequestRefuseSchedule;
 import com.example.whereareyou.memberSchedule.service.MemberScheduleService;
 import com.example.whereareyou.schedule.request.RequestScheduleAccept;
 import com.example.whereareyou.schedule.service.ScheduleService;
@@ -8,10 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * packageName    : com.example.whereareyou.memberSchedule.controller
@@ -46,5 +44,12 @@ public class MemberScheduleController {
         memberScheduleService.scheduleAccept(requestScheduleAccept);
 
         return ResponseEntity.status(HttpStatus.OK).body(true);
+    }
+
+    @DeleteMapping("/refuse")
+    public ResponseEntity<Void> refuseSchedule(@RequestBody RequestRefuseSchedule refuseSchedule){
+        memberScheduleService.refuseSchedule(refuseSchedule);
+
+        return ResponseEntity.noContent().build();
     }
 }
