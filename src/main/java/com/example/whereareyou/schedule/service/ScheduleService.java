@@ -290,26 +290,20 @@ public class ScheduleService {
      * @param scheduleId the schedule id
      * @return the response detail schedule
      */
-    public ResponseDetailSchedule getDetailSchedule(String memberId, String scheduleId){
-        /*
-         예외처리
-         404 UserNotFoundException: MemberId Not Found
-         404 ScheduleNotFoundException: scheduleId Not Found
-         400 NotCreatedScheduleByMemberException: This is not a user-created schedule
-         401: Unauthorized (추후에 추가할 예정)
-         500: Server
-        */
+    public ResponseDetailSchedule getDetailSchedule(String memberId, String scheduleId) {
+        // 사용자 확인
         Member findMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
-        Schedule findSchedule = scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
 
-        List<Schedule> scheduleList = findMember.getScheduleList();
-        if(!scheduleList.contains(findSchedule))
-            throw new NotCreatedScheduleByMemberException("회원이 만든 일정이 아닙니다.");
+        // 해당 Member가 수락한 MemberSchedule 중 특정 Schedule 찾기
+        MemberSchedule acceptedMemberSchedule = memberScheduleRepository.findByMemberAndScheduleIdAndAcceptIsTrue(findMember, scheduleId)
+                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId이거나 회원이 수락하지 않은 일정입니다."));
 
-        // 친구의 ID 목록 추출
+        Schedule findSchedule = acceptedMemberSchedule.getSchedule();
+
+        // 친구의 ID 목록 추출 (수락한 친구들만 포함)
         List<String> friendsIdList = findSchedule.getMemberScheduleList().stream()
+                .filter(MemberSchedule::getAccept)
                 .map(memberSchedule -> memberSchedule.getMember().getId())
                 .collect(Collectors.toList());
 
