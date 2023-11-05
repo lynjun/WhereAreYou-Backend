@@ -1,6 +1,5 @@
 package com.example.whereareyou.global.exception;
 
-import com.example.whereareyou.exception.customexception.*;
 import com.example.whereareyou.friend.exception.AlreadyFriendsException;
 import com.example.whereareyou.friend.exception.AlreadySent;
 import com.example.whereareyou.friend.exception.FriendRequestNotFoundException;
@@ -131,14 +130,6 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
         return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(TimeoutCode.class)
-    public final ResponseEntity<Object> timeoutCode(Exception ex, WebRequest request){
-        ExceptionResponse exceptionResponse =
-                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
-
-        return new ResponseEntity(exceptionResponse,HttpStatus.NOT_FOUND);
-    }
-
     @ExceptionHandler(TokenNotFound.class)
     public final ResponseEntity<Object> TokenNotFound(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse =
@@ -185,14 +176,6 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
                 new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
 
         return new ResponseEntity(exceptionResponse,HttpStatus.GONE);
-    }
-
-    @ExceptionHandler(ResetPasswordMismatch.class)
-    public final ResponseEntity<Object> resetPasswordMismatch(Exception ex, WebRequest request){
-        ExceptionResponse exceptionResponse =
-                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
-
-        return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(FriendRequestNotFoundException.class)
