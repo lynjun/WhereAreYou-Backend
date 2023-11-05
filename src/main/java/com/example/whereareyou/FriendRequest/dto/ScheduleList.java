@@ -1,14 +1,16 @@
-package com.example.whereareyou.dto;
+package com.example.whereareyou.FriendRequest.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class CheckUserIdDuplicateRequest {
+@Setter
+public class ScheduleList {
 
-    private String userId;
+    String scheduleId;
 
 }

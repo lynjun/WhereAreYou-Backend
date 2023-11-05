@@ -1,7 +1,7 @@
 package com.example.whereareyou.global.service;
 
 import com.example.whereareyou.refreshToken.domain.RefreshToken;
-import com.example.whereareyou.dto.TokenDto;
+import com.example.whereareyou.member.dto.TokenDto;
 import com.example.whereareyou.refreshToken.exception.ExpiredJwt;
 import com.example.whereareyou.refreshToken.exception.JwtTokenMismatchException;
 import com.example.whereareyou.refreshToken.exception.TokenNotFound;

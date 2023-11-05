@@ -1,11 +1,11 @@
 package com.example.whereareyou.member.service;
 
-import com.example.whereareyou.dto.*;
 import com.example.whereareyou.emailCode.domain.EmailCode;
 import com.example.whereareyou.emailCode.repository.EmailCodeRepository;
 import com.example.whereareyou.friend.repository.FriendRepository;
 import com.example.whereareyou.friend.domain.Friend;
 import com.example.whereareyou.member.domain.Member;
+import com.example.whereareyou.member.dto.*;
 import com.example.whereareyou.member.exception.*;
 import com.example.whereareyou.memberInfo.repository.MemberInfoRepository;
 import com.example.whereareyou.member.repository.MemberRepository;

@@ -1,16 +1,16 @@
-package com.example.whereareyou.dto;
+package com.example.whereareyou.friend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
+import lombok.Setter;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class FriendDto {
+@Setter
+public class GetFriendId {
 
-    List<String> friendId;
+    private String memberId;
 
 }

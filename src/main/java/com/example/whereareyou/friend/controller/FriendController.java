@@ -1,6 +1,10 @@
 package com.example.whereareyou.friend.controller;
 
-import com.example.whereareyou.dto.*;
+import com.example.whereareyou.FriendRequest.dto.FriendRequestDto;
+import com.example.whereareyou.FriendRequest.dto.RefuseFriend;
+import com.example.whereareyou.FriendRequest.dto.AcceptFriend;
+import com.example.whereareyou.friend.dto.FriendDto;
+import com.example.whereareyou.friend.dto.GetFriendId;
 import com.example.whereareyou.friend.service.FriendService;
 import com.example.whereareyou.friend.response.ResponseFriendIdList;
 import com.example.whereareyou.friend.response.ResponseFriendList;

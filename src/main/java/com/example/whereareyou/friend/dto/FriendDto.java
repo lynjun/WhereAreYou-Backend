@@ -1,16 +1,16 @@
-package com.example.whereareyou.dto;
+package com.example.whereareyou.friend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @AllArgsConstructor
-@Getter
 @NoArgsConstructor
-public class FindIdRequest {
+@Getter
+public class FriendDto {
 
-    private String email;
+    List<String> friendId;
 
-    private String code;
 }
-
