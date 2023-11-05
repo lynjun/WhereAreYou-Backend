@@ -111,7 +111,7 @@ public class ScheduleService {
                 .map(friend -> MemberSchedule.builder()
                         .schedule(schedule)
                         .member(friend)
-                        .accept(false)
+                        .accept(friend.equals(creator)) // creator에 대해서만 accept를 true로 설정
                         .arrived(false)
                         .build())
                 .collect(Collectors.toList());
