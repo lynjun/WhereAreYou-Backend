@@ -1,6 +1,6 @@
 package com.example.whereareyou.friend.response;
 
-import com.example.whereareyou.dto.FriendList;
+import com.example.whereareyou.friend.dto.FriendList;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 

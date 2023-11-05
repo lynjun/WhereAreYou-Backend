@@ -1,7 +1,7 @@
 package com.example.whereareyou.member.controller;
 
-import com.example.whereareyou.dto.*;
-import com.example.whereareyou.dto.CheckEmailRequest;
+import com.example.whereareyou.member.dto.CheckEmailRequest;
+import com.example.whereareyou.member.dto.*;
 import com.example.whereareyou.member.response.*;
 import com.example.whereareyou.global.service.JwtTokenService;
 import com.example.whereareyou.member.service.MemberService;

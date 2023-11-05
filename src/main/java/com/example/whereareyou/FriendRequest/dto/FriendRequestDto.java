@@ -1,4 +1,4 @@
-package com.example.whereareyou.dto;
+package com.example.whereareyou.FriendRequest.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.example.whereareyou.dto;
+package com.example.whereareyou.friend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,10 +9,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class FriendRequestList {
+public class FriendList {
 
-    String friendRequestId;
-    String senderId;
+    private String memberId;
+    private String userName;
+    private String profileImage;
 
 }
-

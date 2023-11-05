@@ -1,15 +1,17 @@
-package com.example.whereareyou.dto;
+package com.example.whereareyou.member.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class MemberLoginRequest {
+@NoArgsConstructor
+public class CheckPasswordRequest {
 
     private String userId;
+
     private String password;
 
+    private String checkPassword;
 }

@@ -1,7 +1,9 @@
 package com.example.whereareyou.friend.service;
 
+import com.example.whereareyou.FriendRequest.dto.*;
 import com.example.whereareyou.friend.domain.Friend;
 import com.example.whereareyou.FriendRequest.domain.FriendRequest;
+import com.example.whereareyou.friend.dto.*;
 import com.example.whereareyou.friend.exception.AlreadyFriendsException;
 import com.example.whereareyou.friend.exception.AlreadySent;
 import com.example.whereareyou.friend.exception.FriendRequestNotFoundException;
@@ -9,7 +11,6 @@ import com.example.whereareyou.member.domain.Member;
 import com.example.whereareyou.member.exception.MemberIdCannotBeInFriendListException;
 import com.example.whereareyou.member.exception.UserNotFoundException;
 import com.example.whereareyou.schedule.domain.Schedule;
-import com.example.whereareyou.dto.*;
 import com.example.whereareyou.friend.repository.FriendRepository;
 import com.example.whereareyou.FriendRequest.repository.FriendRequestRepository;
 import com.example.whereareyou.member.repository.MemberRepository;

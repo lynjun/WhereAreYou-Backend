@@ -1,4 +1,4 @@
-package com.example.whereareyou.dto;
+package com.example.whereareyou.member.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class ModifyMyPageDto {
+public class MemberLoginRequest {
 
-    private String oldId;
-    private String newId;
+    private String userId;
+    private String password;
 
 }
