@@ -5,8 +5,9 @@ import lombok.Data;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ResponseResetPassword {
+public class ResponseTokenReissue {
 
-    private String userId;
-
+    private String accessToken;
+    private String refreshToken;
+    private String memberId;
 }

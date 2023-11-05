@@ -1,9 +1,6 @@
 package com.example.whereareyou.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -43,11 +40,17 @@ public class Member {
     private String email;
     private String profileImage;
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FriendRequest> friendRequestList = new ArrayList<>();
+    @OneToMany(mappedBy = "receiverId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FriendRequest> receiverRequestList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "senderId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FriendRequest> senderRequestList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "friends", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Friend> friendList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Friend> ownerList = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FriendGroup> groupList = new ArrayList<>();
@@ -63,4 +66,13 @@ public class Member {
 
     @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Schedule> scheduleList = new ArrayList<>();
+
+    public Member(String id, String userName, String userId, String password, String email, String profileImage) {
+        this.id = id;
+        this.userName = userName;
+        this.userId = userId;
+        this.password = password;
+        this.email = email;
+        this.profileImage = profileImage;
+    }
 }

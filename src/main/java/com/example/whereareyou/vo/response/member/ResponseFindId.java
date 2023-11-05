@@ -1,5 +1,6 @@
 package com.example.whereareyou.vo.response.member;
 
+import com.example.whereareyou.domain.Member;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 

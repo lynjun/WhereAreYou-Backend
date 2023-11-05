@@ -1,22 +1,21 @@
 package com.example.whereareyou.service;
 
-import com.example.whereareyou.domain.EmailCode;
-import com.example.whereareyou.domain.Member;
-import com.example.whereareyou.domain.RefreshToken;
+import com.example.whereareyou.domain.*;
 import com.example.whereareyou.dto.*;
 import com.example.whereareyou.exception.customexception.*;
-import com.example.whereareyou.repository.EmailCodeRepository;
-import com.example.whereareyou.repository.MemberRepository;
-import com.example.whereareyou.repository.RefreshTokenRepository;
+import com.example.whereareyou.repository.*;
 import com.example.whereareyou.vo.response.member.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -30,6 +29,9 @@ import java.util.Random;
     private final JwtTokenService jwtTokenService;
     private final EmailCodeRepository emailCodeRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final AwsS3Service awsS3Service;
+    private final MemberInfoRepository memberInfoRepository;
+    private final FriendRepository friendRepository;
 
     public Member join(String userName, String userId, String password, String email){
 
@@ -47,14 +49,13 @@ import java.util.Random;
     public ResponseCheckId checkUserIdDuplicate(String userId){
 
         //userId 중복 체크
-        memberRepository.findByUserId(userId).ifPresent(user -> {
+        memberRepository.findByUserId(userId)
+                .ifPresent(user -> {
             throw new UserIdDuplicatedException("이미 존재 하는 아이디");
         });
 
         ResponseCheckId responseCheckId = new ResponseCheckId();
         responseCheckId.setUserId(userId);
-        responseCheckId.setMessage("사용 가능");
-
         return responseCheckId;
 
     }
@@ -69,8 +70,6 @@ import java.util.Random;
 
         ResponseCheckEmail responseCheckEmail = new ResponseCheckEmail();
         responseCheckEmail.setEmail(email);
-        responseCheckEmail.setMessage("사용 가능한 이메일 입니다.");
-
         return responseCheckEmail;
 
     }
@@ -78,20 +77,30 @@ import java.util.Random;
     public ResponseLogin login(MemberLoginRequest memberLoginRequest) {
         Optional<Member> memberOptional = memberRepository.findByUserId(memberLoginRequest.getUserId());
 
-        Member member = memberOptional.orElseThrow(() -> new UserNotFoundException("아이디 없음"));
+        Member member = memberOptional.orElseThrow(() ->
+                new UserNotFoundException("아이디가 존재하지 않습니다."));
 
         if (!encoder.matches(memberLoginRequest.getPassword(), member.getPassword())) {
-            throw new PasswordMismatch("비밀번호 틀림");
+            throw new PasswordMismatch("비밀번호가 일치하지 않습니다.");
         }
+        List<Friend> byOwner = friendRepository.findByOwner(member);
 
         String accessToken = jwtTokenService.generateAccessToken(member.getId());
         String refreshToken = jwtTokenService.generateRefreshToken(member.getId());
 
         ResponseLogin responseLogin = new ResponseLogin();
-
+        responseLogin.setFriendList(new ArrayList<>());
         responseLogin.setAccessToken(accessToken);
         responseLogin.setRefreshToken(refreshToken);
         responseLogin.setMemberId(member.getId());
+
+        if(byOwner != null) {
+            byOwner.stream().map(Friend::getFriends).map(Member::getId).forEach(id -> {
+                FriendLoginList friendList = new FriendLoginList();
+                friendList.setFriendId(id);
+                responseLogin.getFriendList().add(friendList);
+            });
+        }
 
         return responseLogin;
     }
@@ -106,8 +115,7 @@ import java.util.Random;
         sendAuthEmail(email,authKey);
     }
 
-    private void sendAuthEmail(String email,String authKey){
-
+    private void sendAuthEmail(String email, String authKey){
         String subject = "제목";
         String text = "인증번호는 " + authKey + "입니다. <br/>";
 
@@ -119,7 +127,7 @@ import java.util.Random;
             helper.setText(text,true);
             javaMailSender.send(mimeMessage);
         }catch (MessagingException e){
-            throw new RuntimeException("이메일 형식이 유효 하지 않습니다.");
+            throw new InvalidEmailException("이메일 형식이 유효 하지 않습니다.");
         }
 
         EmailCode emailCode = EmailCode.builder()
@@ -140,31 +148,29 @@ import java.util.Random;
         emailCodeRepository.delete(byEmail);
     }
 
-    public ResponseResetPassword verifyEmailCodeResetPassword(EmailRequest request){
+    public ResponseResetPassword verifyResetPasswordEmailCode(PasswordReset reset){
+        Optional<Member> emailOptional = memberRepository.findByEmail(reset.getEmail());
 
-        Optional<Member> emailOptional = memberRepository.findByEmail(request.getEmail());
+        Member member = emailOptional.orElseThrow(() ->
+                new EmailNotFoundException("이메일 존재하지 않습니다."));
 
-        Member member = emailOptional.orElseThrow(() -> new EmailNotFoundException("이메일 없음"));
-
-        EmailCode byEmail = emailCodeRepository.findByEmail(request.getEmail());
-        String code = byEmail.getCode();
-
-        if (!code.equals(request.getCode())){
-            throw new InvalidCode("코드가 일치하지 않습니다.");
+        if(!member.getUserId().equals(reset.getUserId())){
+            throw new MemberMismatchException("회원 정보가 일치하지 않습니다.");
         }
+
+        verifyEmailCode(reset.getEmail(),reset.getCode());
+
         ResponseResetPassword resetPassword = new ResponseResetPassword();
-        resetPassword.setMessage("코드가 일치 합니다");
         resetPassword.setUserId(member.getUserId());
 
-        emailCodeRepository.delete(byEmail);
-
         return resetPassword;
-
     }
 
     public ResponseFindId findId(FindIdRequest request){
-        Optional<Member> emailOptional = memberRepository.findByEmail(request.getEmail());
 
+        verifyEmailCode(request.getEmail(),request.getCode());
+
+        Optional<Member> emailOptional = memberRepository.findByEmail(request.getEmail());
         Member member = emailOptional.orElseThrow(() -> new EmailNotFoundException("이메일 없음"));
 
         ResponseFindId responseFindId = new ResponseFindId();
@@ -178,11 +184,8 @@ import java.util.Random;
 
         Optional<Member> byUserId = memberRepository.findByUserId(request.getUserId());
 
-        Member member = byUserId.orElseThrow(() -> new EmailNotFoundException("아이디 없음"));
-
-        if (!request.getPassword().equals(request.getCheckPassword())){
-            throw new RuntimeException("비밀번호가 일치 하지 않습니다.");
-        }
+        Member member = byUserId.orElseThrow(() ->
+                new UserNotFoundException("아이디가 존재하지 않습니다."));
 
         member.setPassword(encoder.encode(request.getPassword()));
 
@@ -190,33 +193,54 @@ import java.util.Random;
 
     }
 
-    public void deleteMember(String memberId){
+    public void deleteMember(DeleteMemberRequest deleteMemberRequest){
 
-        Optional<Member> byId = memberRepository.findById(memberId);
-        byId.orElseThrow(() -> new UserNotFoundException("아이디가 없습니다"));
+        Optional<Member> byId = memberRepository.findById(deleteMemberRequest.getMemberId());
+        Member member = byId.orElseThrow(() ->
+                new UserNotFoundException("존재하지 않는 memberId입니다."));
 
-        RefreshToken byMemberId = refreshTokenRepository.findByMemberId(memberId);
+        refreshTokenRepository.deleteByMemberId(member.getId());
+        memberInfoRepository.deleteByMemberId(member.getId());
 
-        refreshTokenRepository.delete(byMemberId);
-
-        memberRepository.deleteById(memberId);
+        memberRepository.deleteById(member.getId());
 
     }
-    public ResponseMember getMemberPage(String memberId){
+    public ResponseMember getDetailMember(String memberId){
         Optional<Member> byId = memberRepository.findById(memberId);
-        Member member = byId.orElseThrow(() -> new UserNotFoundException("아이디가 없습니다"));
-
-        String userName = member.getUserName();
-        String userId = member.getUserId();
-        String email = member.getEmail();
+        Member member = byId.orElseThrow(() ->
+                new UserNotFoundException("존재하지 않는 memberId입니다."));
 
         ResponseMember responseMember = new ResponseMember();
-        responseMember.setUserName(userName);
-        responseMember.setUserId(userId);
-        responseMember.setEmail(email);
+        responseMember.setUserName(member.getUserName());
+        responseMember.setUserId(member.getUserId());
+        responseMember.setEmail(member.getEmail());
+        responseMember.setProfileImage(member.getProfileImage());
 
         return responseMember;
     }
 
+    public void modifyMyPage(MultipartFile multipartFile,String memberId,String newId) throws Exception {
+        //멤버 찾기
+        Optional<Member> byUserId = memberRepository.findById(memberId);
+        Member member = byUserId.orElseThrow(() -> new UserNotFoundException("아이디가 없습니다"));
 
+        //아이디 변경
+        if(newId!=null){
+            //아이디 중복 체크
+            memberRepository.findByUserId(newId)
+                    .ifPresent(user -> {
+                        throw new UserIdDuplicatedException("이미 존재 하는 아이디 입니다.");
+                    });
+
+            member.setUserId(newId);
+        }
+        //프로필 사진
+        if(multipartFile!=null){
+            String upload = awsS3Service.upload(multipartFile);
+            member.setProfileImage(upload);
+        }
+        //저장
+        memberRepository.save(member);
+
+    }
 }

@@ -8,6 +8,4 @@ import lombok.Data;
 public class ResponseCheckId {
 
     private String userId;
-    private String message;
-
 }

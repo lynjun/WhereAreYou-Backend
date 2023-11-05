@@ -168,4 +168,60 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
 
         return new ResponseEntity(exceptionResponse,HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(UsedTokenException.class)
+    public final ResponseEntity<Object> usedTokenException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.GONE);
+    }
+
+    @ExceptionHandler(ResetPasswordMismatch.class)
+    public final ResponseEntity<Object> resetPasswordMismatch(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(FriendRequestNotFoundException.class)
+    public final ResponseEntity<Object> friendRequestNotFoundException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MemberMismatchException.class)
+    public final ResponseEntity<Object> memberMismatchException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidEmailException.class)
+    public final ResponseEntity<Object> invalidEmailException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AlreadySent.class)
+    public final ResponseEntity<Object> alreadySentException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AlreadyFriendsException.class)
+    public final ResponseEntity<Object> alreadyFriendsException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
+    }
 }

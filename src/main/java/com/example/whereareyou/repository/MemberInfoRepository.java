@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -27,4 +28,7 @@ public interface MemberInfoRepository extends JpaRepository<MemberInfo, String> 
     @Modifying
     @Query("update MemberInfo m set m.latitude = :latitude, m.longitude = :longitude where m.memberId = :memberId")
     int updateMemberInfoByMemberId(@Param("latitude") Double latitude, @Param("longitude") Double longitude, @Param("memberId") String memberId);
+
+    @Transactional
+    void deleteByMemberId(String memberId);
 }
