@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * packageName    : project.whereareyou.repository
  * fileName       : MemberSchedule
@@ -30,4 +32,7 @@ public interface MemberScheduleRepository extends JpaRepository<MemberSchedule, 
     @Modifying
     @Query("UPDATE MemberSchedule ms SET ms.arrived = true WHERE ms.member.id = :memberId AND ms.schedule.id = :scheduleId")
     int setArrivedTrue(@Param("memberId") String memberId, @Param("scheduleId") String scheduleId);
+
+    @Query("SELECT ms FROM MemberSchedule ms WHERE ms.schedule = :schedule")
+    List<MemberSchedule> findMemberSchedulesBySchedule(@Param("schedule") Schedule schedule);
 }
