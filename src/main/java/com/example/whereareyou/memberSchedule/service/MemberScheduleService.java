@@ -4,8 +4,10 @@ import com.example.whereareyou.member.domain.Member;
 import com.example.whereareyou.member.exception.UserNotFoundException;
 import com.example.whereareyou.member.repository.MemberRepository;
 import com.example.whereareyou.memberSchedule.domain.MemberSchedule;
+import com.example.whereareyou.memberSchedule.exception.CreatorCannotRefuseSchedule;
 import com.example.whereareyou.memberSchedule.repository.MemberScheduleRepository;
 import com.example.whereareyou.memberSchedule.request.RequestModifyMemberSchedule;
+import com.example.whereareyou.memberSchedule.request.RequestRefuseSchedule;
 import com.example.whereareyou.schedule.domain.Schedule;
 import com.example.whereareyou.schedule.exception.ScheduleNotFoundException;
 import com.example.whereareyou.schedule.exception.UpdateQueryException;
@@ -123,4 +125,29 @@ public class MemberScheduleService {
         if(updateCnt == 0)
             throw new UpdateQueryException("업데이트 실패");
     }
+
+    /**
+     * Refuse schedule.
+     *
+     * @param requestRefuseSchedule the request refuse schedule
+     */
+    public void refuseSchedule(RequestRefuseSchedule requestRefuseSchedule){
+        // 거부하는 멤버 찾기
+        Member refuseMember = memberRepository.findById(requestRefuseSchedule.getRefuseMemberId())
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+
+        // 거부 대상 스케줄 찾기
+        Schedule findSchedule = scheduleRepository.findById(requestRefuseSchedule.getScheduleId())
+                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
+
+        // 스케줄의 생성자인 경우 거부 불가
+        if(findSchedule.getCreator().equals(refuseMember)) {
+            throw new CreatorCannotRefuseSchedule("스케줄의 생성자는 스케줄을 거부할 수 없습니다.");
+        }
+
+        // 해당 MemberSchedule 찾기 및 삭제
+        memberScheduleRepository.findByMemberAndSchedule(refuseMember, findSchedule)
+                .ifPresent(memberScheduleRepository::delete);
+    }
+
 }
