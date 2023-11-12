@@ -111,7 +111,7 @@ public class ScheduleService {
                 .map(friend -> MemberSchedule.builder()
                         .schedule(schedule)
                         .member(friend)
-                        .accept(false)
+                        .accept(friend.equals(creator)) // creator에 대해서만 accept를 true로 설정
                         .arrived(false)
                         .build())
                 .collect(Collectors.toList());
@@ -141,21 +141,13 @@ public class ScheduleService {
          500 updateQueryException: update Fail
          500: Server
         */
-        Member modifier = memberRepository.findById(requestModifySchedule.getMemberId())
+        Member creator = memberRepository.findById(requestModifySchedule.getCreatorId())
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
         Schedule savedSchedule = scheduleRepository.findById(requestModifySchedule.getScheduleId())
                 .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
 
-        List<String> friendList = requestModifySchedule.getMemberIdList();
-        if (friendList == null || friendList.isEmpty())
-            throw new FriendListNotFoundException("일정 추가 시 친구 설정은 필수 입니다.");
-
-        if (friendList.contains(modifier.getId()))
-            throw new MemberIdCannotBeInFriendListException("일정 친구 추가 시 본인의 ID는 들어갈 수 없습니다.");
-
-        List<Member> friends = memberRepository.findAllById(friendList);
-        if (friends.size() != friendList.size())
-            throw new UserNotFoundException("존재하지 않는 memberId입니다.");
+        if(!savedSchedule.getCreator().getId().equals(creator.getId()))
+            throw new ScheduleNotFoundException("해당 schedule의 creator가 아닙니다.");
 
         // Schedule 변경
         int updatedCount = scheduleRepository.updateSchedule(
@@ -165,28 +157,12 @@ public class ScheduleService {
                 requestModifySchedule.getPlace(),
                 requestModifySchedule.getMemo(),
                 savedSchedule.getClosed(),
-                modifier,
+                creator,
                 savedSchedule.getId()
         );
 
         if (updatedCount == 0)
             throw new UpdateQueryException("업데이트 실패");
-
-        // 기존의 MemberSchedule을 모두 삭제
-        memberScheduleRepository.deleteAllBySchedule(savedSchedule);
-
-        // friendList에 대한 MemberSchedule 생성 및 저장
-        for (String memberId : friendList) {
-            Member scheduleMember = memberRepository.findById(memberId).orElseThrow(
-                    () -> new UserNotFoundException("존재하지 않는 memberId입니다."));
-            MemberSchedule newMemberSchedule = MemberSchedule.builder()
-                    .schedule(savedSchedule)
-                    .member(scheduleMember)
-                    .accept(false)
-                    .arrived(false)
-                    .build();
-            memberScheduleRepository.save(newMemberSchedule);
-        }
     }
 
     /**
@@ -198,21 +174,16 @@ public class ScheduleService {
      * @return the response monthly schedule
      */
     public ResponseMonthlySchedule getMonthSchedule(String memberId, Integer year, Integer month){
-        /*
-         예외처리
-         404 UserNotFoundException: MemberId Not Found
-         400 InvalidYearOrMonthOrDateException: Invalid Year or Month or Date
-         401: Unauthorized (추후에 추가할 예정)
-         500: Server
-        */
+        // 사용자 확인
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
 
+        // 유효한 월 확인
         if(month < 1 || month > 12)
             throw new InvalidYearOrMonthOrDateException("월이 올바르지 않습니다.");
 
-        // 해당 Member가 생성한 Schedule 반환
-        List<Schedule> scheduleList = member.getScheduleList();
+        // 해당 Member가 수락한 MemberSchedule 가져오기
+        List<MemberSchedule> acceptedMemberSchedules = memberScheduleRepository.findByMemberAndAcceptIsTrue(member);
 
         // Response 객체 생성
         ResponseMonthlySchedule responseMonthlySchedule = new ResponseMonthlySchedule();
@@ -220,23 +191,26 @@ public class ScheduleService {
         responseMonthlySchedule.setMonth(month);
         responseMonthlySchedule.setSchedules(new ArrayList<>());
 
-        // Month의 최대 일수 구하기
+        // 월별 최대 일수 계산
         YearMonth yearMonthObject = YearMonth.of(year, month);
         int daysInMonth = yearMonthObject.lengthOfMonth();
 
-        // 일별로 스케줄이 있는지 확인
+        // 일별로 수락된 스케줄 확인
         for (int day = 1; day <= daysInMonth; day++) {
             MonthlyScheduleResponseDTO monthlyScheduleResponseDTO = new MonthlyScheduleResponseDTO();
             monthlyScheduleResponseDTO.setDate(day);
 
             int finalDay = day;
-            List<Schedule> schedulesForTheDay = scheduleList.stream().filter(schedule -> {
-                LocalDate currentDate = LocalDate.of(year, month, finalDay);
-                LocalDate scheduleStartDate = schedule.getStart().toLocalDate();
-                LocalDate scheduleEndDate = schedule.getEnd().toLocalDate();
-                return (currentDate.isEqual(scheduleStartDate) || currentDate.isAfter(scheduleStartDate)) &&
-                        (currentDate.isEqual(scheduleEndDate) || currentDate.isBefore(scheduleEndDate));
-            }).collect(Collectors.toList());
+            List<Schedule> schedulesForTheDay = acceptedMemberSchedules.stream()
+                    .map(MemberSchedule::getSchedule)
+                    .filter(schedule -> {
+                        LocalDate currentDate = LocalDate.of(year, month, finalDay);
+                        LocalDate scheduleStartDate = schedule.getStart().toLocalDate();
+                        LocalDate scheduleEndDate = schedule.getEnd().toLocalDate();
+                        return (currentDate.isEqual(scheduleStartDate) || currentDate.isAfter(scheduleStartDate)) &&
+                                (currentDate.isEqual(scheduleEndDate) || currentDate.isBefore(scheduleEndDate));
+                    })
+                    .collect(Collectors.toList());
 
             monthlyScheduleResponseDTO.setHasSchedule(!schedulesForTheDay.isEmpty());
             monthlyScheduleResponseDTO.setAmountSchedule(schedulesForTheDay.size());
@@ -252,14 +226,14 @@ public class ScheduleService {
      * @param requestDeleteSchedule the request delete schedule
      */
     public void deleteSchedule(RequestDeleteSchedule requestDeleteSchedule){
-        /*
-         예외처리
-         404: ScheduleId Not Found
-         401: Unauthorized (추후에 추가할 예정)
-         500: Server
-        */
+        Member creator = memberRepository.findById(requestDeleteSchedule.getCreatorId())
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+
         Schedule schedule = scheduleRepository.findById(requestDeleteSchedule.getScheduleId())
                 .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
+
+        if(!schedule.getCreator().getId().equals(creator.getId()))
+            throw new ScheduleNotFoundException("회원이 생성한 일정이 아닙니다.");
 
         memberScheduleRepository.deleteAllBySchedule(schedule);
         scheduleRepository.deleteById(requestDeleteSchedule.getScheduleId());
@@ -274,35 +248,34 @@ public class ScheduleService {
      * @param date     the date
      * @return the response brief date schedule
      */
-    public ResponseBriefDateSchedule getBriefDateSchedule(String memberId, Integer year, Integer month, Integer date){
-        /*
-         예외처리
-         404: MemberId Not Found
-         400: Invalid Year or Month or Date
-         401: Unauthorized (추후에 추가할 예정)
-         500: Server
-        */
-        Member findMember = memberRepository.findById(memberId)
+    public ResponseBriefDateSchedule getBriefDateSchedule(String memberId, Integer year, Integer month, Integer date) {
+        // 사용자 확인
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
 
-        // Response할 객체 생성
+        // 해당 Member가 수락한 MemberSchedule 가져오기
+        List<MemberSchedule> acceptedMemberSchedules = memberScheduleRepository.findByMemberAndAcceptIsTrue(member);
+
+        // Response 객체 생성
         ResponseBriefDateSchedule responseBriefDateSchedule = new ResponseBriefDateSchedule();
         responseBriefDateSchedule.setBriefDateScheduleDTOList(new ArrayList<>());
 
-        // Member를 통해 ScheduleList 반환
-        List<Schedule> scheduleList = findMember.getScheduleList();
-        for(Schedule schedule : scheduleList){
-            // 스케줄의 시작날짜가 입력한 연, 월, 일과 일치하는지 확인
-            if(schedule.getStart().getYear() == year
-                    && schedule.getStart().getMonthValue() == month
-                    && schedule.getStart().getDayOfMonth() == date){
+        // 주어진 날짜 객체 생성
+        LocalDate givenDate = LocalDate.of(year, month, date);
 
-                // ModelMapper를 사용하여 BriefDateScheduleDTO로 변환
-                ModelMapper mapper = new ModelMapper();
-                mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        // 수락된 스케줄 중 입력된 날짜가 스케줄 기간 안에 있는지 확인
+        for (MemberSchedule memberSchedule : acceptedMemberSchedules) {
+            Schedule schedule = memberSchedule.getSchedule();
+            LocalDate startDate = schedule.getStart().toLocalDate();
+            LocalDate endDate = schedule.getEnd().toLocalDate();
 
-                BriefDateScheduleDTO briefDateScheduleDTO = mapper.map(schedule, BriefDateScheduleDTO.class);
+            // 입력된 날짜가 스케줄 기간 안에 있는 경우
+            if (!givenDate.isBefore(startDate) && !givenDate.isAfter(endDate)) {
+                BriefDateScheduleDTO briefDateScheduleDTO = new BriefDateScheduleDTO();
                 briefDateScheduleDTO.setScheduleId(schedule.getId());
+                briefDateScheduleDTO.setTitle(schedule.getTitle());
+                briefDateScheduleDTO.setStart(schedule.getStart());
+                briefDateScheduleDTO.setEnd(schedule.getEnd());
                 responseBriefDateSchedule.getBriefDateScheduleDTOList().add(briefDateScheduleDTO);
             }
         }
@@ -317,31 +290,26 @@ public class ScheduleService {
      * @param scheduleId the schedule id
      * @return the response detail schedule
      */
-    public ResponseDetailSchedule getDetailSchedule(String memberId, String scheduleId){
-        /*
-         예외처리
-         404 UserNotFoundException: MemberId Not Found
-         404 ScheduleNotFoundException: scheduleId Not Found
-         400 NotCreatedScheduleByMemberException: This is not a user-created schedule
-         401: Unauthorized (추후에 추가할 예정)
-         500: Server
-        */
+    public ResponseDetailSchedule getDetailSchedule(String memberId, String scheduleId) {
+        // 사용자 확인
         Member findMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
-        Schedule findSchedule = scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
 
-        List<Schedule> scheduleList = findMember.getScheduleList();
-        if(!scheduleList.contains(findSchedule))
-            throw new NotCreatedScheduleByMemberException("회원이 만든 일정이 아닙니다.");
+        // 해당 Member가 수락한 MemberSchedule 중 특정 Schedule 찾기
+        MemberSchedule acceptedMemberSchedule = memberScheduleRepository.findByMemberAndScheduleIdAndAcceptIsTrue(findMember, scheduleId)
+                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId이거나 회원이 수락하지 않은 일정입니다."));
 
-        // 친구의 ID 목록 추출
+        Schedule findSchedule = acceptedMemberSchedule.getSchedule();
+
+        // 친구의 ID 목록 추출 (수락한 친구들만 포함)
         List<String> friendsIdList = findSchedule.getMemberScheduleList().stream()
+                .filter(MemberSchedule::getAccept)
                 .map(memberSchedule -> memberSchedule.getMember().getId())
                 .collect(Collectors.toList());
 
         // ResponseDetailSchedule 객체 반환
         return ResponseDetailSchedule.builder()
+                .creatorId(findSchedule.getCreator().getId())
                 .start(findSchedule.getStart())
                 .end(findSchedule.getEnd())
                 .title(findSchedule.getTitle())
@@ -351,31 +319,6 @@ public class ScheduleService {
                 .build();
     }
 
-    /**
-     * Schedule accept.
-     *
-     * @param requestScheduleAccept the request schedule accept
-     */
-    public void scheduleAccept(RequestScheduleAccept requestScheduleAccept){
-        /*
-         예외처리
-         404 UserNotFoundException: MemberId Not Found
-         404 ScheduleNotFoundException: scheduleId Not Found
-         401: Unauthorized (추후에 추가할 예정)
-         500 updateQueryException: update Fail
-         500: Server
-        */
-        Member acceptMember = memberRepository.findById(requestScheduleAccept.getAcceptMemberId())
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
-        Schedule findSchedule = scheduleRepository.findById(requestScheduleAccept.getScheduleId())
-                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
-
-        int updateCnt
-                = memberScheduleRepository.setAcceptTrueForMemberAndSchedule(acceptMember.getId(), findSchedule.getId());
-        if(updateCnt == 0)
-            throw new UpdateQueryException("업데이트 실패");
-    }
-
 
     /**
      * Schedule closed.
@@ -383,14 +326,7 @@ public class ScheduleService {
      * @param requestScheduleClosed the request schedule closed
      */
     public void scheduleClosed(RequestScheduleClosed requestScheduleClosed){
-        /*
-         예외처리
-         404 ScheduleNotFoundException: scheduleId Not Found
-         400 NotCreatedScheduleByMemberException: This is not a user-created schedule
-         401: Unauthorized (추후에 추가할 예정)
-         500 updateQueryException: update Fail
-         500: Server
-        */
+
         Schedule findSchedule = scheduleRepository.findById(requestScheduleClosed.getScheduleId())
                 .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
         Member creator = memberRepository.findById(requestScheduleClosed.getCreatorId())
@@ -410,14 +346,7 @@ public class ScheduleService {
      * @param requestScheduleArrived the request schedule arrived
      */
     public void scheduleArrived(RequestScheduleArrived requestScheduleArrived){
-        /*
-         예외처리
-         404 ScheduleNotFoundException: scheduleId Not Found
-         400 NotCreatedScheduleByMemberException: This is not a user-created schedule
-         401: Unauthorized (추후에 추가할 예정)
-         500 updateQueryException: update Fail
-         500: Server
-        */
+
         Member arrivedMember = memberRepository.findById(requestScheduleArrived.getArrivedMemberId())
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
         Schedule findSchedule = scheduleRepository.findById(requestScheduleArrived.getScheduleId())

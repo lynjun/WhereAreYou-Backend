@@ -18,12 +18,11 @@ import java.util.List;
  */
 @Data
 public class RequestModifySchedule {
-    private String memberId;
+    private String creatorId;
     private String scheduleId;
     private LocalDateTime start;
     private LocalDateTime end;
     private String title;
     private String place;
     private String memo;
-    private List<String> memberIdList;
 }
