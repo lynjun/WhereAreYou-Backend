@@ -99,7 +99,8 @@ public class ScheduleService {
                 .title(requestSaveSchedule.getTitle())
                 .place(requestSaveSchedule.getPlace())
                 .memo(requestSaveSchedule.getMemo())
-                .closed(false)
+                .destinationLatitude(requestSaveSchedule.getDestinationLatitude())
+                .destinationLongitude(requestSaveSchedule.getDestinationLongitude())
                 .creator(creator)
                 .build();
         // Schedule 저장
@@ -156,7 +157,6 @@ public class ScheduleService {
                 requestModifySchedule.getTitle(),
                 requestModifySchedule.getPlace(),
                 requestModifySchedule.getMemo(),
-                savedSchedule.getClosed(),
                 creator,
                 savedSchedule.getId()
         );
@@ -315,30 +315,12 @@ public class ScheduleService {
                 .title(findSchedule.getTitle())
                 .place(findSchedule.getPlace())
                 .memo(findSchedule.getMemo())
+                .destinationLatitude(findSchedule.getDestinationLatitude())
+                .destinationLongitude(findSchedule.getDestinationLongitude())
                 .friendsIdListDTO(friendsIdList)
                 .build();
     }
 
-
-    /**
-     * Schedule closed.
-     *
-     * @param requestScheduleClosed the request schedule closed
-     */
-    public void scheduleClosed(RequestScheduleClosed requestScheduleClosed){
-
-        Schedule findSchedule = scheduleRepository.findById(requestScheduleClosed.getScheduleId())
-                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
-        Member creator = memberRepository.findById(requestScheduleClosed.getCreatorId())
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
-
-        if(!findSchedule.getCreator().getId().equals(creator.getId()))
-            throw new NotCreatedScheduleByMemberException("회원이 만든 일정이 아닙니다.");
-
-        int updateCnt = scheduleRepository.closeSchedule(findSchedule.getId());
-        if(updateCnt == 0)
-            throw new UpdateQueryException("업데이트 실패");
-    }
 
     /**
      * Schedule arrived.

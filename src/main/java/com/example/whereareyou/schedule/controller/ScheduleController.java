@@ -127,19 +127,6 @@ public class ScheduleController {
     }
 
     /**
-     * 일정 종료
-     *
-     * @param requestScheduleClosed the request schedule closed
-     * @return the response entity
-     */
-    @PutMapping("/closed")
-    public ResponseEntity<Boolean> scheduleClosed(@RequestBody RequestScheduleClosed requestScheduleClosed){
-        scheduleService.scheduleClosed(requestScheduleClosed);
-
-        return ResponseEntity.status(HttpStatus.OK).body(true);
-    }
-
-    /**
      * 도착 여부
      *
      * @param requestScheduleArrived the request schedule arrived

@@ -33,6 +33,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/member/**").permitAll()
                 .antMatchers("/friend/**").permitAll()
                 .antMatchers("/actuator/health").permitAll()
+                .antMatchers("/schedule/**").permitAll()
+                .antMatchers("/memberschedule/**").permitAll()
                 .anyRequest().authenticated();
 
         http.csrf().disable();
@@ -45,7 +47,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         List<String> permitAllEndpoints = Arrays.asList(
                 "/member/**",
                 "/actuator/health",
-                "/friend/**"
+                "/friend/**",
+                "/schedule/**",
+                "/memberschedule/**"
         );
         return new JwtTokenFilter(jwtSecret, permitAllEndpoints);
     }

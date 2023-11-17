@@ -47,7 +47,8 @@ public class Schedule {
     private String place;
     private String memo;
 
-    private Boolean closed;
+    private Double destinationLatitude;
+    private Double destinationLongitude;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
