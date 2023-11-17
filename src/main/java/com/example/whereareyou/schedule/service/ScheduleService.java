@@ -99,6 +99,8 @@ public class ScheduleService {
                 .title(requestSaveSchedule.getTitle())
                 .place(requestSaveSchedule.getPlace())
                 .memo(requestSaveSchedule.getMemo())
+                .destinationLatitude(requestSaveSchedule.getDestinationLatitude())
+                .destinationLongitude(requestSaveSchedule.getDestinationLongitude())
                 .creator(creator)
                 .build();
         // Schedule 저장
