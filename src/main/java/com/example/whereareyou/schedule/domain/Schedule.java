@@ -47,8 +47,6 @@ public class Schedule {
     private String place;
     private String memo;
 
-    private Boolean closed;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member creator;
