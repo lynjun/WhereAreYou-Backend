@@ -315,6 +315,8 @@ public class ScheduleService {
                 .title(findSchedule.getTitle())
                 .place(findSchedule.getPlace())
                 .memo(findSchedule.getMemo())
+                .destinationLatitude(findSchedule.getDestinationLatitude())
+                .destinationLongitude(findSchedule.getDestinationLongitude())
                 .friendsIdListDTO(friendsIdList)
                 .build();
     }
