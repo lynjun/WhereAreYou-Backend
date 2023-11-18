@@ -3,6 +3,7 @@ package com.example.whereareyou.friend.controller;
 import com.example.whereareyou.FriendRequest.dto.FriendRequestDto;
 import com.example.whereareyou.FriendRequest.dto.RefuseFriend;
 import com.example.whereareyou.FriendRequest.dto.AcceptFriend;
+import com.example.whereareyou.friend.dto.FriendDeleteDto;
 import com.example.whereareyou.friend.dto.FriendDto;
 import com.example.whereareyou.friend.dto.GetFriendId;
 import com.example.whereareyou.friend.service.FriendService;
@@ -63,6 +64,14 @@ public class FriendController {
         ResponseFriendIdList friendId = friendService.getFriendId(getFriendId);
 
         return ResponseEntity.ok().body(friendId);
+    }
+
+    @DeleteMapping("/delete")
+    private ResponseEntity<Void> deleteFriend(@RequestBody FriendDeleteDto friendDeleteDto){
+
+        friendService.deleteFriend(friendDeleteDto);
+
+        return ResponseEntity.noContent().build();
     }
 
 }
