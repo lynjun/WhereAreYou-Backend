@@ -1,8 +1,11 @@
 package com.example.whereareyou.friendGroupMember.repository;
 
+import com.example.whereareyou.friendGroup.domain.FriendGroup;
 import com.example.whereareyou.friendGroupMember.domain.FriendGroupMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * packageName    : com.example.whereareyou.friendGroupMember.repository
@@ -17,5 +20,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface FriendGroupMemberRepository extends JpaRepository<FriendGroupMember, String> {
-
+    List<FriendGroupMember> findByFriendGroup(FriendGroup friendGroup);
 }
