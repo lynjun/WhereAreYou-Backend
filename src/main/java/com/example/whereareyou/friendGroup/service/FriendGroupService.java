@@ -4,7 +4,9 @@ import com.example.whereareyou.friendGroup.domain.FriendGroup;
 import com.example.whereareyou.friendGroup.repository.FriendGroupRepository;
 import com.example.whereareyou.friendGroup.request.RequestCreateGroup;
 import com.example.whereareyou.friendGroup.response.ResponseCreateGroup;
+import com.example.whereareyou.friendGroup.response.ResponseGetGroup;
 import com.example.whereareyou.friendGroupMember.domain.FriendGroupMember;
+import com.example.whereareyou.friendGroupMember.dto.GroupMemberDto;
 import com.example.whereareyou.friendGroupMember.repository.FriendGroupMemberRepository;
 import com.example.whereareyou.member.domain.Member;
 import com.example.whereareyou.member.exception.UserNotFoundException;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -81,5 +84,33 @@ public class FriendGroupService {
         ResponseCreateGroup responseCreateGroup = new ResponseCreateGroup();
         responseCreateGroup.setGroupId(friendGroup.getId());
         return responseCreateGroup;
+    }
+
+    /**
+     * Gets group.
+     *
+     * @param ownerId the owner id
+     * @return the group
+     */
+    public List<ResponseGetGroup> getGroup(String ownerId) {
+        Member owner = memberRepository.findById(ownerId)
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+
+        List<FriendGroup> friendGroups = friendGroupRepository.findByOwner(owner);
+        List<ResponseGetGroup> responseGetGroups = new ArrayList<>();
+
+        for (FriendGroup friendGroup : friendGroups) {
+            List<FriendGroupMember> groupMembers = friendGroupMemberRepository.findByFriendGroup(friendGroup);
+
+            List<GroupMemberDto> groupMemberDtos = groupMembers.stream()
+                    .map(friendGroupMember -> new GroupMemberDto(
+                            friendGroupMember.getMember().getId(),
+                            friendGroupMember.getMember().getUserName()))
+                    .collect(Collectors.toList());
+
+            responseGetGroups.add(new ResponseGetGroup(friendGroup.getName(), groupMemberDtos));
+        }
+
+        return responseGetGroups;
     }
 }
