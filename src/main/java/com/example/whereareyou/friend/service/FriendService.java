@@ -21,8 +21,6 @@ import com.example.whereareyou.friend.response.ResponseFriendRequestList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -92,24 +90,6 @@ public class FriendService {
             friendRequestList.setSenderId(senderId.getId());
             responseFriendRequestList.getFriendsRequestList().add(friendRequestList);
         });
-
-        List<Schedule> byCreatorId = scheduleRepository.findByCreatorId(memberId);
-
-        byCreatorId.forEach(schedule -> {
-            LocalDateTime start = schedule.getStart();
-            LocalDateTime now = LocalDateTime.now();
-
-            String startTime = start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            String nowTime = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
-            if (startTime.equals(nowTime)) {
-                ScheduleList scheduleList = new ScheduleList();
-                scheduleList.setScheduleId(schedule.getId());
-                todaySchedule.getScheduleList().add(scheduleList);
-            }
-        });
-        int todayScheduleCount = todaySchedule.getScheduleList().size();
-        responseFriendRequestList.setTodaySchedule(todayScheduleCount);
 
         return responseFriendRequestList;
     }
@@ -191,4 +171,26 @@ public class FriendService {
         return responseFriendIdList;
 
     }
+    public void deleteFriend(FriendDeleteDto friendDeleteDto){
+        Optional<Member> byMemberId = memberRepository.findById(friendDeleteDto.getMemberId());
+        Member member = byMemberId.orElseThrow(() ->
+                new UserNotFoundException("아이디가 존재하지 않습니다."));
+
+        Optional<Member> byFriendId = memberRepository.findById(friendDeleteDto.getFriendId());
+        Member friend = byFriendId.orElseThrow(() ->
+                new UserNotFoundException("아이디가 존재하지 않습니다."));
+
+        Optional<Friend> byOwnerAndFriends = friendRepository.findByOwnerAndFriends(member, friend);
+        Friend nofriend = byOwnerAndFriends.orElseThrow(() ->
+                new RuntimeException("친구 아님"));
+        Optional<Friend> byOwnerAndFriends1 = friendRepository.findByOwnerAndFriends(friend, member);
+        Friend nono = byOwnerAndFriends1.orElseThrow(() ->
+                new RuntimeException("친구 아님 ㅇㅇ"));
+
+
+        friendRepository.delete(nofriend);
+        friendRepository.delete(nono);
+
+    }
+
 }
