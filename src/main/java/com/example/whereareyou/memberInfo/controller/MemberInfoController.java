@@ -51,8 +51,8 @@ public class MemberInfoController {
      * @return the response entity
      */
     @GetMapping()
-    public ResponseEntity<ResponseMemberInfo> getMemberInfo(@RequestParam String memberId){
-        ResponseMemberInfo responseMemberInfo = memberInfoService.getMemberInfo(memberId);
+    public ResponseEntity<ResponseMemberInfo> getMemberInfo(@RequestParam String memberId, String scheduleId){
+        ResponseMemberInfo responseMemberInfo = memberInfoService.getMemberInfo(memberId, scheduleId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseMemberInfo);
     }
