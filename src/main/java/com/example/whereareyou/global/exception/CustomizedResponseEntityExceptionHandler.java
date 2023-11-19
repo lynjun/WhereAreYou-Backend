@@ -4,6 +4,7 @@ import com.example.whereareyou.friend.exception.AlreadyFriendsException;
 import com.example.whereareyou.friend.exception.AlreadySent;
 import com.example.whereareyou.friend.exception.FriendRequestNotFoundException;
 import com.example.whereareyou.member.exception.*;
+import com.example.whereareyou.memberInfo.exception.InvalidRequestTimeException;
 import com.example.whereareyou.memberSchedule.exception.CreatorCannotRefuseSchedule;
 import com.example.whereareyou.refreshToken.exception.ExpiredJwt;
 import com.example.whereareyou.refreshToken.exception.JwtTokenMismatchException;
@@ -221,6 +222,14 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
 
     @ExceptionHandler(CreatorCannotRefuseSchedule.class)
     public final ResponseEntity<Object> creatorCannotRefuseSchedule(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidRequestTimeException.class)
+    public final ResponseEntity<Object> invalidRequestTimeException(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse =
                 new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
 
