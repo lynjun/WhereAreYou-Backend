@@ -1,6 +1,7 @@
 package com.example.whereareyou.friendGroup.controller;
 
 import com.example.whereareyou.friendGroup.request.RequestCreateGroup;
+import com.example.whereareyou.friendGroup.request.RequestDeleteGroup;
 import com.example.whereareyou.friendGroup.response.ResponseCreateGroup;
 import com.example.whereareyou.friendGroup.response.ResponseGetGroup;
 import com.example.whereareyou.friendGroup.service.FriendGroupService;
@@ -56,5 +57,18 @@ public class FriendGroupController {
         List<ResponseGetGroup> responseGetGroups = friendGroupService.getGroup(ownerId);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseGetGroups);
+    }
+
+    /**
+     * 그룹 삭제
+     *
+     * @param requestDeleteGroup the request delete group
+     * @return the response entity
+     */
+    @DeleteMapping()
+    public ResponseEntity<Boolean> deleteGroup(@RequestBody RequestDeleteGroup requestDeleteGroup){
+        friendGroupService.deleteGroup(requestDeleteGroup);
+
+        return ResponseEntity.status(HttpStatus.OK).body(true);
     }
 }
