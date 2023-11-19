@@ -17,6 +17,7 @@ import java.util.List;
  */
 @Data
 public class RequestCreateGroup {
+    private String name;
     private String ownerId;
     private List<String> groupMemberId;
 }

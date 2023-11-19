@@ -32,6 +32,12 @@ public class FriendGroupController {
         this.friendGroupService = friendGroupService;
     }
 
+    /**
+     * 그룹 생성
+     *
+     * @param requestCreateGroup the request create group
+     * @return the response entity
+     */
     @PostMapping
     public ResponseEntity<ResponseCreateGroup> createGroup(@RequestBody RequestCreateGroup requestCreateGroup){
         ResponseCreateGroup responseCreateGroup = friendGroupService.createGroup(requestCreateGroup);

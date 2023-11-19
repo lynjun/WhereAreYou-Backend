@@ -44,6 +44,12 @@ public class FriendGroupService {
         this.friendGroupMemberRepository = friendGroupMemberRepository;
     }
 
+    /**
+     * Create group response create group.
+     *
+     * @param requestCreateGroup the request create group
+     * @return the response create group
+     */
     public ResponseCreateGroup createGroup(RequestCreateGroup requestCreateGroup){
         Member owner = memberRepository.findById(requestCreateGroup.getOwnerId())
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
@@ -56,6 +62,7 @@ public class FriendGroupService {
         // FriendGroup 생성 및 저장
         FriendGroup friendGroup = FriendGroup.builder()
                 .owner(owner)
+                .name(requestCreateGroup.getName())
                 .build();
         friendGroup = friendGroupRepository.save(friendGroup);
 
