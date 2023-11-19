@@ -1,8 +1,11 @@
 package com.example.whereareyou.friendGroup.service;
 
 import com.example.whereareyou.friendGroup.domain.FriendGroup;
+import com.example.whereareyou.friendGroup.exception.FriendGroupNotFoundException;
+import com.example.whereareyou.friendGroup.exception.GroupOwnerMismatchException;
 import com.example.whereareyou.friendGroup.repository.FriendGroupRepository;
 import com.example.whereareyou.friendGroup.request.RequestCreateGroup;
+import com.example.whereareyou.friendGroup.request.RequestDeleteGroup;
 import com.example.whereareyou.friendGroup.response.ResponseCreateGroup;
 import com.example.whereareyou.friendGroup.response.ResponseGetGroup;
 import com.example.whereareyou.friendGroupMember.domain.FriendGroupMember;
@@ -112,5 +115,23 @@ public class FriendGroupService {
         }
 
         return responseGetGroups;
+    }
+
+    /**
+     * Delete group.
+     *
+     * @param requestDeleteGroup the request delete group
+     */
+    public void deleteGroup(RequestDeleteGroup requestDeleteGroup){
+        Member owner = memberRepository.findById(requestDeleteGroup.getOwnerId())
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        FriendGroup friendGroup = friendGroupRepository.findById(requestDeleteGroup.getGroupId())
+                .orElseThrow(() -> new FriendGroupNotFoundException("존재하지 않는 groupId입니다."));
+
+        if(!friendGroup.getOwner().getId().equals(owner.getId())){
+            throw new GroupOwnerMismatchException("해당 member가 생성한 그룹이 아닙니다.");
+        }
+
+        friendGroupRepository.delete(friendGroup);
     }
 }
