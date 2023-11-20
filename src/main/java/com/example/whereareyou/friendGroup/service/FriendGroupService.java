@@ -6,6 +6,7 @@ import com.example.whereareyou.friendGroup.exception.GroupOwnerMismatchException
 import com.example.whereareyou.friendGroup.repository.FriendGroupRepository;
 import com.example.whereareyou.friendGroup.request.RequestCreateGroup;
 import com.example.whereareyou.friendGroup.request.RequestDeleteGroup;
+import com.example.whereareyou.friendGroup.request.RequestModifyGroupName;
 import com.example.whereareyou.friendGroup.response.ResponseCreateGroup;
 import com.example.whereareyou.friendGroup.response.ResponseGetGroup;
 import com.example.whereareyou.friendGroupMember.domain.FriendGroupMember;
@@ -15,6 +16,7 @@ import com.example.whereareyou.member.domain.Member;
 import com.example.whereareyou.member.exception.UserNotFoundException;
 import com.example.whereareyou.member.repository.MemberRepository;
 import com.example.whereareyou.memberSchedule.domain.MemberSchedule;
+import com.example.whereareyou.schedule.exception.UpdateQueryException;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,5 +135,22 @@ public class FriendGroupService {
         }
 
         friendGroupRepository.delete(friendGroup);
+    }
+
+    public void modifyGroupName(RequestModifyGroupName requestModifyGroupName){
+        Member owner = memberRepository.findById(requestModifyGroupName.getOwnerId())
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        FriendGroup friendGroup = friendGroupRepository.findById(requestModifyGroupName.getGroupId())
+                .orElseThrow(() -> new FriendGroupNotFoundException("존재하지 않는 groupId입니다."));
+
+        if(!friendGroup.getOwner().getId().equals(owner.getId())){
+            throw new GroupOwnerMismatchException("해당 member가 생성한 그룹이 아닙니다.");
+        }
+
+        int update = friendGroupRepository.updateGroupName(requestModifyGroupName.getGroupId(), requestModifyGroupName.getName());
+
+        if(update == 0){
+            throw new UpdateQueryException("없데이트 실패");
+        }
     }
 }
