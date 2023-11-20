@@ -2,6 +2,7 @@ package com.example.whereareyou.friendGroup.controller;
 
 import com.example.whereareyou.friendGroup.request.RequestCreateGroup;
 import com.example.whereareyou.friendGroup.request.RequestDeleteGroup;
+import com.example.whereareyou.friendGroup.request.RequestModifyGroupName;
 import com.example.whereareyou.friendGroup.response.ResponseCreateGroup;
 import com.example.whereareyou.friendGroup.response.ResponseGetGroup;
 import com.example.whereareyou.friendGroup.service.FriendGroupService;
@@ -70,5 +71,18 @@ public class FriendGroupController {
         friendGroupService.deleteGroup(requestDeleteGroup);
 
         return ResponseEntity.status(HttpStatus.OK).body(true);
+    }
+
+    /**
+     * 그룹 이름 수정
+     *
+     * @param requestModifyGroupName the request modify group name
+     * @return the response entity
+     */
+    @PutMapping("/name")
+    public ResponseEntity<Void> modifyGroupName(@RequestBody RequestModifyGroupName requestModifyGroupName){
+        friendGroupService.modifyGroupName(requestModifyGroupName);
+
+        return ResponseEntity.noContent().build();
     }
 }
