@@ -4,6 +4,7 @@ import com.example.whereareyou.friend.exception.AlreadyFriendsException;
 import com.example.whereareyou.friend.exception.AlreadySent;
 import com.example.whereareyou.friend.exception.FriendRequestNotFoundException;
 import com.example.whereareyou.friendGroup.exception.FriendGroupNotFoundException;
+import com.example.whereareyou.friendGroup.exception.GroupMemberEmptyException;
 import com.example.whereareyou.friendGroup.exception.GroupOwnerMismatchException;
 import com.example.whereareyou.member.exception.*;
 import com.example.whereareyou.memberInfo.exception.InvalidRequestTimeException;
@@ -248,6 +249,14 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
 
     @ExceptionHandler(GroupOwnerMismatchException.class)
     public final ResponseEntity<Object> groupOwnerMismatchException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(GroupMemberEmptyException.class)
+    public final ResponseEntity<Object> groupMemberEmptyException(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse =
                 new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
 
