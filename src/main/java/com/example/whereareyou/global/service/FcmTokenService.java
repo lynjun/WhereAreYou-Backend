@@ -53,4 +53,14 @@ public class FcmTokenService {
             fcmTokenRepository.save(newToken);
         }
     }
+
+    /**
+     * Get token by member id optional.
+     *
+     * @param id the id
+     * @return the optional
+     */
+    public Optional<FcmToken> getTokenByMemberId(String id){
+        return fcmTokenRepository.findByMemberId(id);
+    }
 }
