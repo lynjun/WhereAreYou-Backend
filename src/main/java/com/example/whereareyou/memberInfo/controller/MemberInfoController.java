@@ -1,5 +1,6 @@
 package com.example.whereareyou.memberInfo.controller;
 
+import com.example.whereareyou.memberInfo.request.RequestGetMemberInfo;
 import com.example.whereareyou.memberInfo.service.MemberInfoService;
 import com.example.whereareyou.memberInfo.request.RequestMemberInfo;
 import com.example.whereareyou.memberInfo.response.ResponseMemberInfo;
@@ -7,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * packageName    : com.example.whereareyou.controller
@@ -47,12 +50,12 @@ public class MemberInfoController {
     /**
      * 사용자 실시간 위도 경도
      *
-     * @param memberId the member id
+     * @param requestGetMemberInfo the request get member info
      * @return the response entity
      */
-    @GetMapping()
-    public ResponseEntity<ResponseMemberInfo> getMemberInfo(@RequestParam String memberId, String scheduleId){
-        ResponseMemberInfo responseMemberInfo = memberInfoService.getMemberInfo(memberId, scheduleId);
+    @PostMapping()
+    public ResponseEntity<List<ResponseMemberInfo>> getMemberInfo(@RequestBody RequestGetMemberInfo requestGetMemberInfo){
+        List<ResponseMemberInfo> responseMemberInfo = memberInfoService.getMemberInfos(requestGetMemberInfo);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseMemberInfo);
     }

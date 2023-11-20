@@ -2,6 +2,7 @@ package com.example.whereareyou.memberInfo.service;
 
 import com.example.whereareyou.memberInfo.domain.MemberInfo;
 import com.example.whereareyou.memberInfo.exception.InvalidRequestTimeException;
+import com.example.whereareyou.memberInfo.request.RequestGetMemberInfo;
 import com.example.whereareyou.schedule.domain.Schedule;
 import com.example.whereareyou.schedule.exception.ScheduleNotFoundException;
 import com.example.whereareyou.schedule.exception.UpdateQueryException;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * packageName    : com.example.whereareyou.service
@@ -80,32 +83,19 @@ public class MemberInfoService {
         }
     }
 
+
     /**
-     * Get member info response member info.
+     * Gets member infos.
      *
-     * @param memberId the member id
-     * @return the response member info
+     * @param requestGetMemberInfo the request get member info
+     * @return the member infos
      */
-    public ResponseMemberInfo getMemberInfo(String memberId, String scheduleId){
-        /*
-         예외처리
-         404 UserNotFoundException: memberId Not Found
-         404 UserNotFoundException: scheduleId Not Found
-         400 InvalidRequestTimeException: 요청 시간이 유효한 범위에 있지 않습니다.
-         401: Unauthorized (추후에 추가할 예정)
-         500: Server
-        */
-        memberRepository.findById(memberId)
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
-
-        MemberInfo memberInfo = memberInfoRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
-
-        Schedule schedule = scheduleRepository.findById(scheduleId)
+    public List<ResponseMemberInfo> getMemberInfos(RequestGetMemberInfo requestGetMemberInfo) {
+        // 스케줄 유효성 검사
+        Schedule schedule = scheduleRepository.findById(requestGetMemberInfo.getScheduleId())
                 .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
 
         LocalDateTime now = LocalDateTime.now();
-
         LocalDateTime twoHoursBeforeStart = schedule.getStart().minusHours(2);
         LocalDateTime scheduleEnd = schedule.getEnd();
 
@@ -113,9 +103,17 @@ public class MemberInfoService {
             throw new InvalidRequestTimeException("요청 시간이 유효한 범위에 있지 않습니다.");
         }
 
+        // 멤버 정보 조회 및 변환
+        List<MemberInfo> membersInfo = memberInfoRepository.findAllById(requestGetMemberInfo.getMemberId());
+        if (membersInfo.size() != requestGetMemberInfo.getMemberId().size()) {
+            throw new UserNotFoundException("하나 이상의 memberId가 존재하지 않습니다.");
+        }
+
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
-        return mapper.map(memberInfo, ResponseMemberInfo.class);
+        return membersInfo.stream()
+                .map(memberInfo -> mapper.map(memberInfo, ResponseMemberInfo.class))
+                .collect(Collectors.toList());
     }
 }
