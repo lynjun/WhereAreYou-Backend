@@ -12,7 +12,9 @@ import com.example.whereareyou.friendGroup.response.ResponseCreateGroup;
 import com.example.whereareyou.friendGroup.response.ResponseGetGroup;
 import com.example.whereareyou.friendGroupMember.domain.FriendGroupMember;
 import com.example.whereareyou.friendGroupMember.dto.GroupMemberDto;
+import com.example.whereareyou.friendGroupMember.exception.MemberNotInGroupException;
 import com.example.whereareyou.friendGroupMember.repository.FriendGroupMemberRepository;
+import com.example.whereareyou.friendGroupMember.request.RequestDeleteGroupMember;
 import com.example.whereareyou.member.domain.Member;
 import com.example.whereareyou.member.exception.UserNotFoundException;
 import com.example.whereareyou.member.repository.MemberRepository;
@@ -161,6 +163,40 @@ public class FriendGroupService {
 
         if(update == 0){
             throw new UpdateQueryException("없데이트 실패");
+        }
+    }
+
+    /**
+     * Delete group member.
+     *
+     * @param requestDeleteGroupMember the request delete group member
+     */
+    public void deleteGroupMember(RequestDeleteGroupMember requestDeleteGroupMember){
+        Member owner = memberRepository.findById(requestDeleteGroupMember.getOwnerId())
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        Member deleteMember = memberRepository.findById(requestDeleteGroupMember.getDeleteMemberId())
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        FriendGroup friendGroup = friendGroupRepository.findById(requestDeleteGroupMember.getGroupId())
+                .orElseThrow(() -> new FriendGroupNotFoundException("존재하지 않는 groupId입니다."));
+
+        if(!friendGroup.getOwner().getId().equals(owner.getId())){
+            throw new GroupOwnerMismatchException("해당 member가 생성한 그룹이 아닙니다.");
+        }
+
+        // 삭제할 FriendGroupMember 찾기
+        FriendGroupMember groupMember = friendGroupMemberRepository
+                .findByFriendGroupAndMember(friendGroup, deleteMember)
+                .orElseThrow(() -> new MemberNotInGroupException("그룹에 해당 멤버가 존재하지 않습니다."));
+
+        // FriendGroupMember 삭제
+        friendGroupMemberRepository.delete(groupMember);
+
+        // FriendGroup의 멤버 수 확인
+        long remainingMembers = friendGroupMemberRepository.countByFriendGroup(friendGroup);
+
+        // 멤버가 없으면 FriendGroup 삭제
+        if(remainingMembers == 0) {
+            friendGroupRepository.delete(friendGroup);
         }
     }
 }

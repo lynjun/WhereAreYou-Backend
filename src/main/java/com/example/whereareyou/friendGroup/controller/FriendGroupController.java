@@ -6,6 +6,7 @@ import com.example.whereareyou.friendGroup.request.RequestModifyGroupName;
 import com.example.whereareyou.friendGroup.response.ResponseCreateGroup;
 import com.example.whereareyou.friendGroup.response.ResponseGetGroup;
 import com.example.whereareyou.friendGroup.service.FriendGroupService;
+import com.example.whereareyou.friendGroupMember.request.RequestDeleteGroupMember;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -82,6 +83,13 @@ public class FriendGroupController {
     @PutMapping("/name")
     public ResponseEntity<Void> modifyGroupName(@RequestBody RequestModifyGroupName requestModifyGroupName){
         friendGroupService.modifyGroupName(requestModifyGroupName);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/member")
+    public ResponseEntity<Void> deleteGroupMember(@RequestBody RequestDeleteGroupMember requestDeleteGroupMember){
+        friendGroupService.deleteGroupMember(requestDeleteGroupMember);
 
         return ResponseEntity.noContent().build();
     }
