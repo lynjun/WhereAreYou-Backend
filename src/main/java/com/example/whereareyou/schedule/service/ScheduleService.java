@@ -12,20 +12,18 @@ import com.example.whereareyou.memberSchedule.repository.MemberScheduleRepositor
 import com.example.whereareyou.schedule.exception.*;
 import com.example.whereareyou.schedule.repository.ScheduleRepository;
 import com.example.whereareyou.schedule.request.*;
-import com.example.whereareyou.schedule.response.ResponseBriefDateSchedule;
-import com.example.whereareyou.schedule.response.ResponseDetailSchedule;
-import com.example.whereareyou.schedule.response.ResponseMonthlySchedule;
-import com.example.whereareyou.schedule.response.ResponseSaveSchedule;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
+import com.example.whereareyou.schedule.response.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -343,5 +341,29 @@ public class ScheduleService {
         int update = memberScheduleRepository.setArrivedTrue(arrivedMember.getId(), findSchedule.getId());
         if(update == 0)
             throw new UpdateQueryException("업데이트 실패");
+    }
+
+    public ResponseTodaySchedule getTodaySchedule(String memberId) {
+        Optional<Member> optionalMember = memberRepository.findById(memberId);
+        Member member = optionalMember.orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+
+        List<MemberSchedule> memberSchedules = memberScheduleRepository.findByMemberAndAcceptIsTrue(member);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        int todayScheduleCount = 0;
+
+        for (MemberSchedule memberSchedule : memberSchedules) {
+            Schedule schedule = memberSchedule.getSchedule();
+            String start = schedule.getStart().format(formatter);
+            String today = LocalDateTime.now().format(formatter);
+
+            if (start.equals(today)) {
+                todayScheduleCount++;
+            }
+        }
+
+        ResponseTodaySchedule responseTodaySchedule = new ResponseTodaySchedule();
+        responseTodaySchedule.setTodaySchedule(todayScheduleCount);
+
+        return responseTodaySchedule;
     }
 }
