@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseTodaySchedule {
-    private long todaySchedule;
+    private int todaySchedule;
 }
