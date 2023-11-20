@@ -53,7 +53,7 @@ public class MemberInfoController {
      * @param requestGetMemberInfo the request get member info
      * @return the response entity
      */
-    @PostMapping()
+    @PostMapping("/realTime")
     public ResponseEntity<List<ResponseMemberInfo>> getMemberInfo(@RequestBody RequestGetMemberInfo requestGetMemberInfo){
         List<ResponseMemberInfo> responseMemberInfo = memberInfoService.getMemberInfos(requestGetMemberInfo);
 
