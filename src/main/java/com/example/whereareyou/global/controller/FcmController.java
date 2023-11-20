@@ -37,6 +37,12 @@ public class FcmController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * FCM 토큰 저장 및 갱신
+     *
+     * @param requestFcmToken the request fcm token
+     * @return the response entity
+     */
     @PostMapping()
     public ResponseEntity<Void> saveFcmToken(@RequestBody RequestFcmToken requestFcmToken){
         fcmTokenService.saveOrUpdateToken(requestFcmToken);

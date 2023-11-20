@@ -30,6 +30,11 @@ public class FcmTokenService {
         this.fcmTokenRepository = fcmTokenRepository;
     }
 
+    /**
+     * Save or update token.
+     *
+     * @param requestFcmToken the request fcm token
+     */
     public void saveOrUpdateToken(RequestFcmToken requestFcmToken) {
         Optional<FcmToken> existingToken = fcmTokenRepository.findByMemberId(requestFcmToken.getMemberId());
 
