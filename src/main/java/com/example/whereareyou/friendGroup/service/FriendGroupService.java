@@ -142,6 +142,11 @@ public class FriendGroupService {
         friendGroupRepository.delete(friendGroup);
     }
 
+    /**
+     * Modify group name.
+     *
+     * @param requestModifyGroupName the request modify group name
+     */
     public void modifyGroupName(RequestModifyGroupName requestModifyGroupName){
         Member owner = memberRepository.findById(requestModifyGroupName.getOwnerId())
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
