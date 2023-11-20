@@ -87,6 +87,12 @@ public class FriendGroupController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * 그룹 멤버 삭제
+     *
+     * @param requestDeleteGroupMember the request delete group member
+     * @return the response entity
+     */
     @DeleteMapping("/member")
     public ResponseEntity<Void> deleteGroupMember(@RequestBody RequestDeleteGroupMember requestDeleteGroupMember){
         friendGroupService.deleteGroupMember(requestDeleteGroupMember);
