@@ -2,6 +2,7 @@ package com.example.whereareyou.friendGroup.service;
 
 import com.example.whereareyou.friendGroup.domain.FriendGroup;
 import com.example.whereareyou.friendGroup.exception.FriendGroupNotFoundException;
+import com.example.whereareyou.friendGroup.exception.GroupMemberEmptyException;
 import com.example.whereareyou.friendGroup.exception.GroupOwnerMismatchException;
 import com.example.whereareyou.friendGroup.repository.FriendGroupRepository;
 import com.example.whereareyou.friendGroup.request.RequestCreateGroup;
@@ -61,6 +62,10 @@ public class FriendGroupService {
     public ResponseCreateGroup createGroup(RequestCreateGroup requestCreateGroup){
         Member owner = memberRepository.findById(requestCreateGroup.getOwnerId())
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+
+        if(requestCreateGroup.getGroupMemberId().size() == 0){
+            throw new GroupMemberEmptyException("그룹 멤버에 들어 있는 사람이 없습니다.");
+        }
 
         for(String id : requestCreateGroup.getGroupMemberId()) {
             memberRepository.findById(id)
