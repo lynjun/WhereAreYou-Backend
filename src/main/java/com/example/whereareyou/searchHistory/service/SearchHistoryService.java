@@ -18,17 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * packageName    : com.example.whereareyou.service
- * fileName       : SearchHistoryService
- * author         : pjh57
- * date           : 2023-10-11
- * description    : 검색 Service
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2023-10-11        pjh57       최초 생성
- */
+import static com.example.whereareyou.global.constant.ExceptionConstant.USER_NOT_FOUND_EXCEPTION_MESSAGE;
+
 @Service
 @Transactional
 public class SearchHistoryService {
@@ -46,24 +37,26 @@ public class SearchHistoryService {
      *
      * @param requestSearchHistory the request search history
      */
-    public ResponseSaveSearchHistory setSearchHistory(RequestSearchHistory requestSearchHistory){
-        /*
-         예외처리
-         404 ScheduleNotFoundException: scheduleId Not Found
-         401: Unauthorized (추후에 추가할 예정)
-         500: Server
-        */
-        Member findMember = memberRepository.findById(requestSearchHistory.getMemberId())
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+    public ResponseSaveSearchHistory setSearchHistory(RequestSearchHistory requestSearchHistory) {
+        Member findMember = returnMember(requestSearchHistory.getMemberId());
 
+        SearchHistory savedSearchHistory = saveSearchHistory(requestSearchHistory, findMember);
+
+        return new ResponseSaveSearchHistory(savedSearchHistory.getId());
+    }
+
+    private Member returnMember(String memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_EXCEPTION_MESSAGE));
+    }
+
+    private SearchHistory saveSearchHistory(RequestSearchHistory requestSearchHistory, Member findMember) {
         SearchHistory searchHistory = SearchHistory.builder()
                 .searchHistory(requestSearchHistory.getSearchHistory())
                 .member(findMember)
                 .build();
 
-        SearchHistory savedSearchHistory = searchHistoryRepository.save(searchHistory);
-
-        return new ResponseSaveSearchHistory(savedSearchHistory.getId());
+        return searchHistoryRepository.save(searchHistory);
     }
 
     /**
