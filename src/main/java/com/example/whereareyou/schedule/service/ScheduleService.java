@@ -275,7 +275,7 @@ public class ScheduleService {
     }
 
     /**
-     * Get brief date schedule response brief date schedule.
+     * Get brief date schedule
      *
      * @param memberId the member id
      * @param year     the year
@@ -284,27 +284,31 @@ public class ScheduleService {
      * @return the response brief date schedule
      */
     public ResponseBriefDateSchedule getBriefDateSchedule(String memberId, Integer year, Integer month, Integer date) {
-        // 사용자 확인
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
-
-        // 해당 Member가 수락한 MemberSchedule 가져오기
+        Member member = returnMember(memberId);
         List<MemberSchedule> acceptedMemberSchedules = memberScheduleRepository.findByMemberAndAcceptIsTrue(member);
 
-        // Response 객체 생성
+        ResponseBriefDateSchedule responseBriefDateSchedule = setResponseBriefDateSchedule();
+
+        LocalDate givenDate = LocalDate.of(year, month, date);
+
+        checkScheduleInGivenDate(givenDate, acceptedMemberSchedules, responseBriefDateSchedule);
+
+        return responseBriefDateSchedule;
+    }
+
+    private ResponseBriefDateSchedule setResponseBriefDateSchedule() {
         ResponseBriefDateSchedule responseBriefDateSchedule = new ResponseBriefDateSchedule();
         responseBriefDateSchedule.setBriefDateScheduleDTOList(new ArrayList<>());
 
-        // 주어진 날짜 객체 생성
-        LocalDate givenDate = LocalDate.of(year, month, date);
+        return responseBriefDateSchedule;
+    }
 
-        // 수락된 스케줄 중 입력된 날짜가 스케줄 기간 안에 있는지 확인
+    private void checkScheduleInGivenDate(LocalDate givenDate, List<MemberSchedule> acceptedMemberSchedules, ResponseBriefDateSchedule responseBriefDateSchedule) {
         for (MemberSchedule memberSchedule : acceptedMemberSchedules) {
             Schedule schedule = memberSchedule.getSchedule();
             LocalDate startDate = schedule.getStart().toLocalDate();
             LocalDate endDate = schedule.getEnd().toLocalDate();
 
-            // 입력된 날짜가 스케줄 기간 안에 있는 경우
             if (!givenDate.isBefore(startDate) && !givenDate.isAfter(endDate)) {
                 BriefDateScheduleDTO briefDateScheduleDTO = new BriefDateScheduleDTO();
                 briefDateScheduleDTO.setScheduleId(schedule.getId());
@@ -314,8 +318,6 @@ public class ScheduleService {
                 responseBriefDateSchedule.getBriefDateScheduleDTOList().add(briefDateScheduleDTO);
             }
         }
-
-        return responseBriefDateSchedule;
     }
 
     /**
