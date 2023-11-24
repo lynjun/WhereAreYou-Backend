@@ -38,6 +38,8 @@ public class FriendGroup {
     @Column(name = "group_id", updatable = false, nullable = false)
     private String id;
 
+    private String name;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private Member owner;

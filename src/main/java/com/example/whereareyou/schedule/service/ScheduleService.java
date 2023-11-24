@@ -1,5 +1,9 @@
 package com.example.whereareyou.schedule.service;
 
+import com.example.whereareyou.global.domain.FcmToken;
+import com.example.whereareyou.global.dto.FirebaseCloudMessageDTO;
+import com.example.whereareyou.global.service.FcmTokenService;
+import com.example.whereareyou.global.service.FirebaseCloudMessageService;
 import com.example.whereareyou.member.domain.Member;
 import com.example.whereareyou.member.exception.MemberIdCannotBeInFriendListException;
 import com.example.whereareyou.member.exception.UserNotFoundException;
@@ -22,10 +26,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -45,6 +51,9 @@ public class ScheduleService {
     private final MemberScheduleRepository memberScheduleRepository;
     private final ScheduleRepository scheduleRepository;
     private final MemberRepository memberRepository;
+    private final FirebaseCloudMessageService firebaseCloudMessageService;
+
+    private final FcmTokenService fcmTokenService;
 
     /**
      * Instantiates a new Schedule service.
@@ -54,10 +63,12 @@ public class ScheduleService {
      * @param memberRepository         the member repository
      */
     @Autowired
-    public ScheduleService(MemberScheduleRepository memberScheduleRepository, ScheduleRepository scheduleRepository, MemberRepository memberRepository) {
+    public ScheduleService(MemberScheduleRepository memberScheduleRepository, ScheduleRepository scheduleRepository, MemberRepository memberRepository, FirebaseCloudMessageService firebaseCloudMessageService, FcmTokenService fcmTokenService) {
         this.memberScheduleRepository = memberScheduleRepository;
         this.scheduleRepository = scheduleRepository;
         this.memberRepository = memberRepository;
+        this.firebaseCloudMessageService = firebaseCloudMessageService;
+        this.fcmTokenService = fcmTokenService;
     }
 
     /**
@@ -79,8 +90,6 @@ public class ScheduleService {
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
 
         List<String> friendList = requestSaveSchedule.getMemberIdList();
-        if (friendList == null || friendList.isEmpty())
-            throw new FriendListNotFoundException("일정 추가 시 친구 설정은 필수 입니다.");
 
         if (friendList.contains(creator.getId()))
             throw new MemberIdCannotBeInFriendListException("일정 친구 추가 시 본인의 ID는 들어갈 수 없습니다.");
@@ -122,6 +131,21 @@ public class ScheduleService {
         // ResponseSaveSchedule 생성
         ResponseSaveSchedule responseSaveSchedule = new ResponseSaveSchedule();
         responseSaveSchedule.setScheduleId(schedule.getId());
+
+        String title = "일정 요청이 들어왔습니다.";
+        friends.stream()
+                .filter(friend -> !friend.equals(creator)) // 생성자를 제외한 친구들에게만 보냄
+                .forEach(friend -> {
+                    Optional<FcmToken> fcmTokenOpt = fcmTokenService.getTokenByMemberId(friend.getId());
+                    fcmTokenOpt.ifPresent(token -> {
+                        String body = creator.getUserName() + "이(가) " + friend.getUserName() + "에게 일정 요청을 보냈습니다.";
+                        try {
+                            firebaseCloudMessageService.sendMessageTo(token.getTargetToken(), title, body);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                });
 
         return responseSaveSchedule;
     }
