@@ -23,20 +23,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * packageName    : com.example.whereareyou.service
- * fileName       : MemberInfoService
- * author         : pjh57
- * date           : 2023-10-11
- * description    : 위도 경도
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2023-10-11        pjh57       최초 생성
- */
 @Transactional
 @Service
-@Slf4j
 public class MemberInfoService {
     private final MemberRepository memberRepository;
     private final MemberInfoRepository memberInfoRepository;
