@@ -159,25 +159,25 @@ public class ScheduleService {
      * @param requestModifySchedule the request modify schedule
      */
     public void modifySchedule(RequestModifySchedule requestModifySchedule) {
-        /*
-         예외처리
-         404 ScheduleNotFoundException: ScheduleId Not Found
-         404 UserNotFoundException: MemberId Not Found
-         400 FriendListNotFoundException: FriendListNot Found
-         400 MemberIdCannotBeInFriendListException: FriendList have creatorId
-         401: Unauthorized (추후에 추가할 예정)
-         500 updateQueryException: update Fail
-         500: Server
-        */
-        Member creator = memberRepository.findById(requestModifySchedule.getCreatorId())
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
-        Schedule savedSchedule = scheduleRepository.findById(requestModifySchedule.getScheduleId())
-                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
+        Member creator = returnMember(requestModifySchedule.getCreatorId());
+        Schedule savedSchedule = returnSchedule(requestModifySchedule.getScheduleId());
 
-        if(!savedSchedule.getCreator().getId().equals(creator.getId()))
-            throw new ScheduleNotFoundException("해당 schedule의 creator가 아닙니다.");
+        checkScheduleCreatedByCreator(savedSchedule, creator);
 
-        // Schedule 변경
+        updateSchedule(requestModifySchedule, creator, savedSchedule);
+    }
+
+    private Schedule returnSchedule(String scheduleId) {
+        return scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new ScheduleNotFoundException(SCHEDULE_NOT_FOUND_EXCEPTION_MESSAGE));
+    }
+
+    private void checkScheduleCreatedByCreator(Schedule schedule, Member creator) {
+        if (!schedule.getCreator().getId().equals(creator.getId()))
+            throw new ScheduleNotFoundException(SCHEDULE_CREATOR_MISMATCH_EXCEPTION_MESSAGE);
+    }
+
+    private void updateSchedule(RequestModifySchedule requestModifySchedule, Member creator, Schedule schedule) {
         int updatedCount = scheduleRepository.updateSchedule(
                 requestModifySchedule.getStart(),
                 requestModifySchedule.getEnd(),
@@ -185,11 +185,11 @@ public class ScheduleService {
                 requestModifySchedule.getPlace(),
                 requestModifySchedule.getMemo(),
                 creator,
-                savedSchedule.getId()
+                schedule.getId()
         );
 
-        if (updatedCount == 0)
-            throw new UpdateQueryException("업데이트 실패");
+        if (updatedCount == UPDATE_QUERY_EXCEPTION_SIZE)
+            throw new UpdateQueryException(UPDATE_QUERY_EXCEPTION_MESSAGE);
     }
 
     /**
