@@ -338,7 +338,7 @@ public class ScheduleService {
 
     private Schedule returnMemberScheduleIfMemberAccept(Member findMember, String scheduleId) {
         MemberSchedule acceptedMemberSchedule = memberScheduleRepository.findByMemberAndScheduleIdAndAcceptIsTrue(findMember, scheduleId)
-                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId이거나 회원이 수락하지 않은 일정입니다."));
+                .orElseThrow(() -> new ScheduleNotFoundException(SCHEDULE_NOT_FOUND_OR_MEMBER_DIDNT_ACCEPT_EXCEPTION_MESSAGE));
 
         return acceptedMemberSchedule.getSchedule();
     }
