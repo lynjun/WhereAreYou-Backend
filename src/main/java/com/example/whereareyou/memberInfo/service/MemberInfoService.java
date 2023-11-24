@@ -1,5 +1,6 @@
 package com.example.whereareyou.memberInfo.service;
 
+import com.example.whereareyou.member.domain.Member;
 import com.example.whereareyou.memberInfo.domain.MemberInfo;
 import com.example.whereareyou.memberInfo.exception.InvalidRequestTimeException;
 import com.example.whereareyou.memberInfo.request.RequestGetMemberInfo;
@@ -23,6 +24,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.example.whereareyou.global.constant.ExceptionConstant.USER_NOT_FOUND_EXCEPTION_MESSAGE;
+import static com.example.whereareyou.schedule.constant.ScheduleConstant.ZERO;
+
 @Transactional
 @Service
 public class MemberInfoService {
@@ -37,42 +41,53 @@ public class MemberInfoService {
         this.scheduleRepository = scheduleRepository;
     }
 
-    public void setMemberInfo(RequestMemberInfo requestMemberInfo){
-        /*
-         예외처리
-         404 UserNotFoundException: memberId Not Found
-         401: Unauthorized (추후에 추가할 예정)
-         500 updateQueryException: update Fail
-         500: Server
-        */
+    /**
+     * Set member info.
+     *
+     * @param requestMemberInfo the request member info
+     */
+    public void setMemberInfo(RequestMemberInfo requestMemberInfo) {
+        checkMember(requestMemberInfo.getMemberId());
 
-        memberRepository.findById(requestMemberInfo.getMemberId())
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        MemberInfo existingMemberInfo = returnMemberInfoByMemberId(requestMemberInfo.getMemberId());
 
-        MemberInfo existingMemberInfo
-                = memberInfoRepository.findByMemberId(requestMemberInfo.getMemberId()).orElse(null);
-
-        if(existingMemberInfo != null) {
-            int update = memberInfoRepository.updateMemberInfoByMemberId(
-                    requestMemberInfo.getLatitude(),
-                    requestMemberInfo.getLongitude(),
-                    requestMemberInfo.getMemberId()
-            );
-
-            if(update == 0)
-                throw new UpdateQueryException("업데이트 실패");
-
-        } else{
-            MemberInfo memberInfo = MemberInfo.builder()
-                    .memberId(requestMemberInfo.getMemberId())
-                    .latitude(requestMemberInfo.getLatitude())
-                    .longitude(requestMemberInfo.getLongitude())
-                    .build();
-
-            memberInfoRepository.save(memberInfo);
+        if (existingMemberInfo != null) {
+            updateMemberInfo(requestMemberInfo);
+        } else {
+            saveMemberInfo(requestMemberInfo);
         }
     }
 
+    private void checkMember(String memberId) {
+        memberRepository.findById(memberId)
+                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_EXCEPTION_MESSAGE));
+    }
+
+    private MemberInfo returnMemberInfoByMemberId(String memberId) {
+        return memberInfoRepository.findByMemberId(memberId).orElse(null);
+    }
+
+    private void updateMemberInfo(RequestMemberInfo requestMemberInfo) {
+        int update = memberInfoRepository.updateMemberInfoByMemberId(
+                requestMemberInfo.getLatitude(),
+                requestMemberInfo.getLongitude(),
+                requestMemberInfo.getMemberId()
+        );
+
+        if (update == ZERO) {
+            throw new UpdateQueryException("업데이트 실패");
+        }
+    }
+
+    private void saveMemberInfo(RequestMemberInfo requestMemberInfo) {
+        MemberInfo memberInfo = MemberInfo.builder()
+                .memberId(requestMemberInfo.getMemberId())
+                .latitude(requestMemberInfo.getLatitude())
+                .longitude(requestMemberInfo.getLongitude())
+                .build();
+
+        memberInfoRepository.save(memberInfo);
+    }
 
     /**
      * Gets member infos.
