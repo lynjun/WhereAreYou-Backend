@@ -9,19 +9,18 @@ import com.example.whereareyou.memberSchedule.repository.MemberScheduleRepositor
 import com.example.whereareyou.memberSchedule.request.RequestModifyMemberSchedule;
 import com.example.whereareyou.memberSchedule.request.RequestRefuseSchedule;
 import com.example.whereareyou.schedule.domain.Schedule;
+import com.example.whereareyou.schedule.dto.ScheduleInviteDto;
 import com.example.whereareyou.schedule.exception.ScheduleNotFoundException;
 import com.example.whereareyou.schedule.exception.UpdateQueryException;
 import com.example.whereareyou.schedule.repository.ScheduleRepository;
 import com.example.whereareyou.schedule.request.RequestScheduleAccept;
+import com.example.whereareyou.schedule.response.ResponseGroupInvite;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -150,4 +149,31 @@ public class MemberScheduleService {
                 .ifPresent(memberScheduleRepository::delete);
     }
 
+    public ResponseGroupInvite getScheduleInvite(String memberId){
+        Optional<Member> byId = memberRepository.findById(memberId);
+        Member member = byId.orElseThrow(() -> new UserNotFoundException("존재하지 않는 userId 입니다."));
+
+        List<String> scheduleId = memberScheduleRepository.findByMemberAndAcceptIsFalse(member);
+
+        return getScheduleInvite(scheduleId);
+    }
+
+    private ResponseGroupInvite getScheduleInvite(List<String> scheduleId){
+
+        List<Schedule> byId = scheduleRepository.findAllById(scheduleId);
+
+        ResponseGroupInvite responseGroupInvite = new ResponseGroupInvite();
+        responseGroupInvite.setTestList(new ArrayList<>());
+
+        byId.forEach(schedule -> {
+            ScheduleInviteDto scheduleInviteDto = new ScheduleInviteDto();
+            scheduleInviteDto.setScheduleId(schedule.getId());
+            scheduleInviteDto.setTitle(schedule.getTitle());
+            scheduleInviteDto.setUserName(schedule.getCreator().getUserName());
+            scheduleInviteDto.setStart(schedule.getStart());
+            responseGroupInvite.getTestList().add(scheduleInviteDto);
+        });
+
+        return responseGroupInvite;
+    }
 }
