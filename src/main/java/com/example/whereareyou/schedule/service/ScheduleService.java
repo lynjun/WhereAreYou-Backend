@@ -369,22 +369,29 @@ public class ScheduleService {
      *
      * @param requestScheduleArrived the request schedule arrived
      */
-    public void scheduleArrived(RequestScheduleArrived requestScheduleArrived){
+    public void scheduleArrived(RequestScheduleArrived requestScheduleArrived) {
 
-        Member arrivedMember = memberRepository.findById(requestScheduleArrived.getArrivedMemberId())
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
-        Schedule findSchedule = scheduleRepository.findById(requestScheduleArrived.getScheduleId())
-                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
+        Member arrivedMember = returnMember(requestScheduleArrived.getArrivedMemberId());
+        Schedule findSchedule = returnSchedule(requestScheduleArrived.getScheduleId());
+
+        checkIfMemberIsPartOfSchedule(findSchedule, arrivedMember);
+
+        changeArrivedFalseToTrue(arrivedMember, findSchedule);
+    }
+
+    private void checkIfMemberIsPartOfSchedule(Schedule findSchedule, Member arrivedMember) {
         boolean isMemberPartOfSchedule = findSchedule.getMemberScheduleList()
                 .stream()
                 .anyMatch(ms -> ms.getMember().getId().equals(arrivedMember.getId()));
         if (!isMemberPartOfSchedule) {
-            throw new UserNotFoundException("해당 Member는 Schedule에 존재하지 않습니다.");
+            throw new UserNotFoundException(MEMBER_NOT_IN_SCHEDULE_EXCEPTION_MESSAGE);
         }
+    }
 
+    private void changeArrivedFalseToTrue(Member arrivedMember, Schedule findSchedule) {
         int update = memberScheduleRepository.setArrivedTrue(arrivedMember.getId(), findSchedule.getId());
-        if(update == 0)
-            throw new UpdateQueryException("업데이트 실패");
+        if (update == ZERO)
+            throw new UpdateQueryException(UPDATE_QUERY_EXCEPTION_MESSAGE);
     }
 
     public ResponseTodaySchedule getTodaySchedule(String memberId) {
