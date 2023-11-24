@@ -13,4 +13,5 @@ public class ExceptionConstant {
     public static final String CREATOR_CANNOT_REFUSE_SCHEDULE = "스케줄의 생성자는 스케줄을 거부할 수 없습니다.";
     public static final String INVALID_REQUEST_TIME_EXCEPTION_MESSAGE = "요청 시간이 유효한 범위에 있지 않습니다.";
     public static final String EMPTY_LATITUDE_LONGITUDE_EXCEPTION_MESSAGE = "위도/경도 정보가 저장되어 있지 않는 Member가 존재합니다.";
+    public static final String SEARCH_HISTORY_NOT_FOUND_EXCEPTION_MESSAGE = "존재하지 않는 searchHistoryId입니다.";
 }
