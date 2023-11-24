@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.example.whereareyou.global.constant.ExceptionConstant.SCHEDULE_CREATOR_MISMATCH_EXCEPTION_MESSAGE;
+import static com.example.whereareyou.global.constant.ExceptionConstant.*;
 import static com.example.whereareyou.schedule.constant.ScheduleConstant.*;
 
 /**
@@ -97,12 +97,12 @@ public class MemberScheduleService {
 
     private Member returnMember(String memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_EXCEPTION_MESSAGE));
     }
 
     private Schedule returnSchedule(String scheduleId) {
         return scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
+                .orElseThrow(() -> new ScheduleNotFoundException(SCHEDULE_NOT_FOUND_EXCEPTION_MESSAGE));
     }
 
     private void checkScheduleCreatedByCreator(Schedule schedule, Member creator) {
