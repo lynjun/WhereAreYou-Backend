@@ -161,17 +161,20 @@ public class MemberScheduleService {
      *
      * @param requestScheduleAccept the request schedule accept
      */
-    public void scheduleAccept(RequestScheduleAccept requestScheduleAccept){
+    public void scheduleAccept(RequestScheduleAccept requestScheduleAccept) {
 
-        Member acceptMember = memberRepository.findById(requestScheduleAccept.getAcceptMemberId())
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
-        Schedule findSchedule = scheduleRepository.findById(requestScheduleAccept.getScheduleId())
-                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
+        Member acceptMember = returnMember(requestScheduleAccept.getAcceptMemberId());
+        Schedule findSchedule = returnSchedule(requestScheduleAccept.getScheduleId());
 
+        changeAcceptFalseToTrue(acceptMember, findSchedule);
+    }
+
+    private void changeAcceptFalseToTrue(Member acceptMember, Schedule findSchedule) {
         int updateCnt
                 = memberScheduleRepository.setAcceptTrueForMemberAndSchedule(acceptMember.getId(), findSchedule.getId());
-        if(updateCnt == 0)
-            throw new UpdateQueryException("업데이트 실패");
+        if (updateCnt == ZERO) {
+            throw new UpdateQueryException(UPDATE_QUERY_EXCEPTION_MESSAGE);
+        }
     }
 
     /**
