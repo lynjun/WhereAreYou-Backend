@@ -26,17 +26,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.util.Date;
 
-/**
- * packageName    : project.whereareyou.exception.customexception
- * fileName       : ScheduleController
- * author         : pjh57
- * date           : 2023-09-16
- * description    : CustomizedResponseEntityExceptionHandler
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2023-09-16        pjh57       최초 생성
- */
 @RestControllerAdvice
 public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 
