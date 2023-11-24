@@ -3,7 +3,6 @@ package com.example.whereareyou.member.service;
 import com.example.whereareyou.emailCode.domain.EmailCode;
 import com.example.whereareyou.emailCode.repository.EmailCodeRepository;
 import com.example.whereareyou.friend.repository.FriendRepository;
-import com.example.whereareyou.friend.domain.Friend;
 import com.example.whereareyou.member.domain.Member;
 import com.example.whereareyou.member.dto.*;
 import com.example.whereareyou.member.exception.*;
@@ -91,24 +90,14 @@ import java.util.Random;
         if (!encoder.matches(memberLoginRequest.getPassword(), member.getPassword())) {
             throw new PasswordMismatch("비밀번호가 일치하지 않습니다.");
         }
-        List<Friend> byOwner = friendRepository.findByOwner(member);
 
         String accessToken = jwtTokenService.generateAccessToken(member.getId());
         String refreshToken = jwtTokenService.generateRefreshToken(member.getId());
 
         ResponseLogin responseLogin = new ResponseLogin();
-        responseLogin.setFriendList(new ArrayList<>());
         responseLogin.setAccessToken(accessToken);
         responseLogin.setRefreshToken(refreshToken);
         responseLogin.setMemberId(member.getId());
-
-        if(byOwner != null) {
-            byOwner.stream().map(Friend::getFriends).map(Member::getId).forEach(id -> {
-                FriendLoginList friendList = new FriendLoginList();
-                friendList.setFriendId(id);
-                responseLogin.getFriendList().add(friendList);
-            });
-        }
 
         return responseLogin;
     }

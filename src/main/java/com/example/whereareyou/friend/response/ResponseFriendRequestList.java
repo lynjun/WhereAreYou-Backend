@@ -11,5 +11,4 @@ import java.util.List;
 public class ResponseFriendRequestList {
 
     private List<FriendRequestList> friendsRequestList;
-    private int todaySchedule;
 }

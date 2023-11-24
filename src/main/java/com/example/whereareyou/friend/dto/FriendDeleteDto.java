@@ -1,4 +1,4 @@
-package com.example.whereareyou.member.dto;
+package com.example.whereareyou.friend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class FriendLoginList {
+public class FriendDeleteDto {
 
+    private String memberId;
     private String friendId;
 
 }

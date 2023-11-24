@@ -1,11 +1,8 @@
 package com.example.whereareyou.schedule.controller;
 
 import com.example.whereareyou.schedule.request.*;
+import com.example.whereareyou.schedule.response.*;
 import com.example.whereareyou.schedule.service.ScheduleService;
-import com.example.whereareyou.schedule.response.ResponseBriefDateSchedule;
-import com.example.whereareyou.schedule.response.ResponseDetailSchedule;
-import com.example.whereareyou.schedule.response.ResponseMonthlySchedule;
-import com.example.whereareyou.schedule.response.ResponseSaveSchedule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -137,5 +134,12 @@ public class ScheduleController {
         scheduleService.scheduleArrived(requestScheduleArrived);
 
         return ResponseEntity.status(HttpStatus.OK).body(true);
+    }
+
+    @GetMapping("/today")
+    public ResponseEntity<ResponseTodaySchedule> todaySchedule(@RequestParam String memberId) {
+        ResponseTodaySchedule todaySchedule = scheduleService.getTodaySchedule(memberId);
+
+        return ResponseEntity.ok().body(todaySchedule);
     }
 }
