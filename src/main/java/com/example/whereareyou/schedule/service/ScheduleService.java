@@ -193,7 +193,7 @@ public class ScheduleService {
     }
 
     /**
-     * Get month schedule response monthly schedule.
+     * Get monthly schedule
      *
      * @param memberId the member id
      * @param year     the year
@@ -201,29 +201,43 @@ public class ScheduleService {
      * @return the response monthly schedule
      */
     public ResponseMonthlySchedule getMonthSchedule(String memberId, Integer year, Integer month){
-        // 사용자 확인
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        Member member = returnMember(memberId);
+        checkDate(month);
 
-        // 유효한 월 확인
-        if(month < 1 || month > 12)
-            throw new InvalidYearOrMonthOrDateException("월이 올바르지 않습니다.");
-
-        // 해당 Member가 수락한 MemberSchedule 가져오기
         List<MemberSchedule> acceptedMemberSchedules = memberScheduleRepository.findByMemberAndAcceptIsTrue(member);
 
-        // Response 객체 생성
+        ResponseMonthlySchedule responseMonthlySchedule = setResponseMonthlySchedule(year, month);
+
+        int daysInMonth = returnDaysInMonth(year, month);
+
+        checkMonthlySchedule(daysInMonth, acceptedMemberSchedules, year, month, responseMonthlySchedule);
+
+        return responseMonthlySchedule;
+    }
+
+    private void checkDate(Integer month){
+        if(month < START_OF_MONTH || month > END_OF_MONTH) {
+            throw new InvalidYearOrMonthOrDateException(INVALID_MONTH_EXCEPTION);
+        }
+    }
+
+    private ResponseMonthlySchedule setResponseMonthlySchedule(Integer year, Integer month){
         ResponseMonthlySchedule responseMonthlySchedule = new ResponseMonthlySchedule();
         responseMonthlySchedule.setYear(year);
         responseMonthlySchedule.setMonth(month);
         responseMonthlySchedule.setSchedules(new ArrayList<>());
 
-        // 월별 최대 일수 계산
-        YearMonth yearMonthObject = YearMonth.of(year, month);
-        int daysInMonth = yearMonthObject.lengthOfMonth();
+        return responseMonthlySchedule;
+    }
 
-        // 일별로 수락된 스케줄 확인
-        for (int day = 1; day <= daysInMonth; day++) {
+    private int returnDaysInMonth(Integer year, Integer month){
+        YearMonth yearMonthObject = YearMonth.of(year, month);
+
+        return yearMonthObject.lengthOfMonth();
+    }
+
+    private void checkMonthlySchedule(int daysInMonth, List<MemberSchedule> acceptedMemberSchedules, Integer year, Integer month, ResponseMonthlySchedule responseMonthlySchedule){
+        for (int day = START_OF_MONTH; day <= daysInMonth; day++) {
             MonthlyScheduleResponseDTO monthlyScheduleResponseDTO = new MonthlyScheduleResponseDTO();
             monthlyScheduleResponseDTO.setDate(day);
 
@@ -243,8 +257,6 @@ public class ScheduleService {
             monthlyScheduleResponseDTO.setAmountSchedule(schedulesForTheDay.size());
             responseMonthlySchedule.getSchedules().add(monthlyScheduleResponseDTO);
         }
-
-        return responseMonthlySchedule;
     }
 
     /**
