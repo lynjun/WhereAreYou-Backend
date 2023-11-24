@@ -1,7 +1,6 @@
 package com.example.whereareyou.schedule.service;
 
 import com.example.whereareyou.global.domain.FcmToken;
-import com.example.whereareyou.global.dto.FirebaseCloudMessageDTO;
 import com.example.whereareyou.global.service.FcmTokenService;
 import com.example.whereareyou.global.service.FirebaseCloudMessageService;
 import com.example.whereareyou.member.domain.Member;
@@ -31,17 +30,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * packageName    : project.whereareyou.service
- * fileName       : ScheduleService
- * author         : pjh57
- * date           : 2023-09-16
- * description    : 일정 관련 비즈니스 로직
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2023-09-16        pjh57       최초 생성
- */
+import static com.example.whereareyou.global.constant.ExceptionConstant.*;
+import static com.example.whereareyou.schedule.constant.ScheduleConstant.*;
+
 @Service
 @Transactional
 public class ScheduleService {
@@ -69,36 +60,47 @@ public class ScheduleService {
     }
 
     /**
-     * Save response save schedule.
+     * Save Schedule And MemberSchedule
      *
      * @param requestSaveSchedule the request save schedule
      * @return the response save schedule
      */
     public ResponseSaveSchedule save(RequestSaveSchedule requestSaveSchedule) {
-        /*
-         예외처리
-         404 UserNotFoundException: MemberId Not Found
-         400 FriendListNotFoundException: FriendListNot Found
-         400 MemberIdCannotBeInFriendListException: FriendList have creatorId
-         401: Unauthorized (추후에 추가할 예정)
-         500: Server
-        */
-        Member creator = memberRepository.findById(requestSaveSchedule.getMemberId())
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        Member creator = returnMember(requestSaveSchedule.getMemberId());
+        List<Member> friends = returnScheduleFriends(creator, requestSaveSchedule);
 
+        Schedule schedule = saveSchedule(requestSaveSchedule, creator);
+        saveMemberSchedule(friends, schedule, creator);
+
+        ResponseSaveSchedule responseSaveSchedule = setResponseSaveSchedule(schedule);
+
+        makeFcmMessage(friends, creator);
+
+        return responseSaveSchedule;
+    }
+
+    private Member returnMember(String memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_EXCEPTION_MESSAGE));
+    }
+
+    private List<Member> returnScheduleFriends(Member creator, RequestSaveSchedule requestSaveSchedule) {
         List<String> friendList = requestSaveSchedule.getMemberIdList();
 
         if (friendList.contains(creator.getId()))
-            throw new MemberIdCannotBeInFriendListException("일정 친구 추가 시 본인의 ID는 들어갈 수 없습니다.");
+            throw new MemberIdCannotBeInFriendListException(MEMBER_ID_CANNOT_BE_IN_FRIEND_LIST);
 
         List<Member> friends = memberRepository.findAllById(friendList);
         if (friends.size() != friendList.size()) {
-            throw new UserNotFoundException("존재하지 않는 memberId입니다.");
+            throw new UserNotFoundException(USER_NOT_FOUND_EXCEPTION_MESSAGE);
         }
 
         friends.add(creator);
 
-        // Schedule Entity 생성
+        return friends;
+    }
+
+    private Schedule saveSchedule(RequestSaveSchedule requestSaveSchedule, Member creator) {
         Schedule schedule = Schedule.builder()
                 .start(requestSaveSchedule.getStart())
                 .end(requestSaveSchedule.getEnd())
@@ -109,42 +111,46 @@ public class ScheduleService {
                 .destinationLongitude(requestSaveSchedule.getDestinationLongitude())
                 .creator(creator)
                 .build();
-        // Schedule 저장
+
         scheduleRepository.save(schedule);
 
+        return schedule;
+    }
 
-        // friends 리스트를 사용하여 MemberSchedule 엔터티 생성 및 저장
+    private void saveMemberSchedule(List<Member> friends, Schedule schedule, Member creator) {
         List<MemberSchedule> memberSchedules = friends.stream()
                 .map(friend -> MemberSchedule.builder()
                         .schedule(schedule)
                         .member(friend)
-                        .accept(friend.equals(creator)) // creator에 대해서만 accept를 true로 설정
+                        .accept(friend.equals(creator))
                         .arrived(false)
                         .build())
                 .collect(Collectors.toList());
-        // MemberSchedule 저장
-        memberScheduleRepository.saveAll(memberSchedules);
 
-        // ResponseSaveSchedule 생성
+        memberScheduleRepository.saveAll(memberSchedules);
+    }
+
+    private ResponseSaveSchedule setResponseSaveSchedule(Schedule schedule) {
         ResponseSaveSchedule responseSaveSchedule = new ResponseSaveSchedule();
         responseSaveSchedule.setScheduleId(schedule.getId());
 
-        String title = "일정 요청이 들어왔습니다.";
+        return responseSaveSchedule;
+    }
+
+    private void makeFcmMessage(List<Member> friends, Member creator) {
         friends.stream()
-                .filter(friend -> !friend.equals(creator)) // 생성자를 제외한 친구들에게만 보냄
+                .filter(friend -> !friend.equals(creator))
                 .forEach(friend -> {
                     Optional<FcmToken> fcmTokenOpt = fcmTokenService.getTokenByMemberId(friend.getId());
                     fcmTokenOpt.ifPresent(token -> {
-                        String body = creator.getUserName() + "이(가) " + friend.getUserName() + "에게 일정 요청을 보냈습니다.";
+                        String body = creator.getUserName() + FCM_MESSAGE_FROM + friend.getUserName() + FCM_MESSAGE_TO;
                         try {
-                            firebaseCloudMessageService.sendMessageTo(token.getTargetToken(), title, body);
+                            firebaseCloudMessageService.sendMessageTo(token.getTargetToken(), FCM_MESSAGE_TITLE, body);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
                     });
                 });
-
-        return responseSaveSchedule;
     }
 
     /**
