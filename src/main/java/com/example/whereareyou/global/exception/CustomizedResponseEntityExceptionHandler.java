@@ -3,7 +3,12 @@ package com.example.whereareyou.global.exception;
 import com.example.whereareyou.friend.exception.AlreadyFriendsException;
 import com.example.whereareyou.friend.exception.AlreadySent;
 import com.example.whereareyou.friend.exception.FriendRequestNotFoundException;
+import com.example.whereareyou.friendGroup.exception.FriendGroupNotFoundException;
+import com.example.whereareyou.friendGroup.exception.GroupMemberEmptyException;
+import com.example.whereareyou.friendGroup.exception.GroupOwnerMismatchException;
+import com.example.whereareyou.friendGroupMember.exception.MemberNotInGroupException;
 import com.example.whereareyou.member.exception.*;
+import com.example.whereareyou.memberInfo.exception.InvalidRequestTimeException;
 import com.example.whereareyou.memberSchedule.exception.CreatorCannotRefuseSchedule;
 import com.example.whereareyou.refreshToken.exception.ExpiredJwt;
 import com.example.whereareyou.refreshToken.exception.JwtTokenMismatchException;
@@ -45,14 +50,6 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
 
     @ExceptionHandler(UserNotFoundException.class)
     public final ResponseEntity<Object> userNotFoundException(Exception ex, WebRequest request){
-        ExceptionResponse exceptionResponse =
-                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
-
-        return new ResponseEntity(exceptionResponse, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(FriendListNotFoundException.class)
-    public final ResponseEntity<Object> friendListNotFoundException(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse =
                 new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
 
@@ -221,6 +218,46 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
 
     @ExceptionHandler(CreatorCannotRefuseSchedule.class)
     public final ResponseEntity<Object> creatorCannotRefuseSchedule(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidRequestTimeException.class)
+    public final ResponseEntity<Object> invalidRequestTimeException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(FriendGroupNotFoundException.class)
+    public final ResponseEntity<Object> friendGroupNotFoundException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(GroupOwnerMismatchException.class)
+    public final ResponseEntity<Object> groupOwnerMismatchException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(GroupMemberEmptyException.class)
+    public final ResponseEntity<Object> groupMemberEmptyException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MemberNotInGroupException.class)
+    public final ResponseEntity<Object> memberNotInGroupException(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse =
                 new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
 
