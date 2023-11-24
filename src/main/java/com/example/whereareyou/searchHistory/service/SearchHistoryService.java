@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.example.whereareyou.global.constant.ExceptionConstant.SEARCH_HISTORY_NOT_FOUND_EXCEPTION_MESSAGE;
 import static com.example.whereareyou.global.constant.ExceptionConstant.USER_NOT_FOUND_EXCEPTION_MESSAGE;
 
 @Service
@@ -93,19 +94,15 @@ public class SearchHistoryService {
      * @param requestDeleteSearchHistory the request delete search history
      */
     public void deleteSearchHistory(RequestDeleteSearchHistory requestDeleteSearchHistory){
-        /*
-         예외처리
-         404 MemberNotFoundException: memberId Not Found
-         404 SearchHistoryNotFoundException: searchHistoryId Not Found
-         401: Unauthorized (추후에 추가할 예정)
-         500: Server
-        */
-        memberRepository.findById(requestDeleteSearchHistory.getMemberId())
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        returnMember(requestDeleteSearchHistory.getMemberId());
 
-        SearchHistory searchHistory = searchHistoryRepository.findById(requestDeleteSearchHistory.getSearchHistoryId())
-                .orElseThrow(() -> new SearchHistoryNotFoundException("존재하지 않는 searchHistoryId입니다."));
+        SearchHistory searchHistory = returnSearchHistory(requestDeleteSearchHistory.getSearchHistoryId());
 
         searchHistoryRepository.delete(searchHistory);
+    }
+
+    private SearchHistory returnSearchHistory(String searchHistoryId){
+        return searchHistoryRepository.findById(searchHistoryId)
+                .orElseThrow(() -> new SearchHistoryNotFoundException(SEARCH_HISTORY_NOT_FOUND_EXCEPTION_MESSAGE));
     }
 }
