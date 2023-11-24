@@ -4,8 +4,7 @@ import com.example.whereareyou.memberSchedule.request.RequestModifyMemberSchedul
 import com.example.whereareyou.memberSchedule.request.RequestRefuseSchedule;
 import com.example.whereareyou.memberSchedule.service.MemberScheduleService;
 import com.example.whereareyou.schedule.request.RequestScheduleAccept;
-import com.example.whereareyou.schedule.service.ScheduleService;
-import lombok.extern.slf4j.Slf4j;
+import com.example.whereareyou.schedule.response.ResponseGroupInvite;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,5 +50,12 @@ public class MemberScheduleController {
         memberScheduleService.refuseSchedule(refuseSchedule);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/invite")
+    public ResponseEntity<ResponseGroupInvite> getScheduleInvite(@RequestParam String memberId){
+        ResponseGroupInvite test = memberScheduleService.getScheduleInvite(memberId);
+
+        return ResponseEntity.ok().body(test);
     }
 }
