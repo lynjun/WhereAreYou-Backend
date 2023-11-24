@@ -10,17 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * packageName    : com.example.whereareyou.memberSchedule.controller
- * fileName       : MemberScheduleController
- * author         : pjh57
- * date           : 2023-11-05
- * description    : MemberScheduleController
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2023-11-05        pjh57       최초 생성
- */
 @RestController
 @RequestMapping("/memberschedule")
 public class MemberScheduleController {
@@ -31,6 +20,12 @@ public class MemberScheduleController {
         this.memberScheduleService = memberScheduleService;
     }
 
+    /**
+     * 일정 친구 수정
+     *
+     * @param requestModifyMemberSchedule the request modify member schedule
+     * @return the response entity
+     */
     @PutMapping()
     public ResponseEntity<Void> modifyMemberScheduleFriend(@RequestBody RequestModifyMemberSchedule requestModifyMemberSchedule){
         memberScheduleService.modifyMemberSchedule(requestModifyMemberSchedule);
@@ -38,6 +33,12 @@ public class MemberScheduleController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * 일정 수락
+     *
+     * @param requestScheduleAccept the request schedule accept
+     * @return the response entity
+     */
     @PutMapping("/accept")
     public ResponseEntity<Boolean> scheduleAccept(@RequestBody RequestScheduleAccept requestScheduleAccept){
         memberScheduleService.scheduleAccept(requestScheduleAccept);
@@ -45,6 +46,12 @@ public class MemberScheduleController {
         return ResponseEntity.status(HttpStatus.OK).body(true);
     }
 
+    /**
+     * 일정 거절(일정 생성자는 불가)
+     *
+     * @param refuseSchedule the refuse schedule
+     * @return the response entity
+     */
     @DeleteMapping("/refuse")
     public ResponseEntity<Void> refuseSchedule(@RequestBody RequestRefuseSchedule refuseSchedule){
         memberScheduleService.refuseSchedule(refuseSchedule);

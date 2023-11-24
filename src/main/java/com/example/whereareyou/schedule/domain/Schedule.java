@@ -13,17 +13,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * packageName    : project.whereareyou.domain
- * fileName       : Schedule
- * author         : pjh57
- * date           : 2023-09-14
- * description    : 일정 Entity
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2023-09-14        pjh57       최초 생성
- */
 @Entity
 @Data
 @AllArgsConstructor

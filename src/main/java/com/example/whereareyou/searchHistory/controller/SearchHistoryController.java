@@ -10,17 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * packageName    : com.example.whereareyou.controller
- * fileName       : SearchHistoryController
- * author         : pjh57
- * date           : 2023-10-11
- * description    : 검색
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2023-10-11        pjh57       최초 생성
- */
 @RestController
 @RequestMapping("/search")
 public class SearchHistoryController {

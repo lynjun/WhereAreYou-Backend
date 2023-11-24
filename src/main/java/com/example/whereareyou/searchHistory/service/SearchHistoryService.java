@@ -18,17 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * packageName    : com.example.whereareyou.service
- * fileName       : SearchHistoryService
- * author         : pjh57
- * date           : 2023-10-11
- * description    : 검색 Service
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2023-10-11        pjh57       최초 생성
- */
+import static com.example.whereareyou.global.constant.ExceptionConstant.SEARCH_HISTORY_NOT_FOUND_EXCEPTION_MESSAGE;
+import static com.example.whereareyou.global.constant.ExceptionConstant.USER_NOT_FOUND_EXCEPTION_MESSAGE;
+
 @Service
 @Transactional
 public class SearchHistoryService {
@@ -46,24 +38,26 @@ public class SearchHistoryService {
      *
      * @param requestSearchHistory the request search history
      */
-    public ResponseSaveSearchHistory setSearchHistory(RequestSearchHistory requestSearchHistory){
-        /*
-         예외처리
-         404 ScheduleNotFoundException: scheduleId Not Found
-         401: Unauthorized (추후에 추가할 예정)
-         500: Server
-        */
-        Member findMember = memberRepository.findById(requestSearchHistory.getMemberId())
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+    public ResponseSaveSearchHistory setSearchHistory(RequestSearchHistory requestSearchHistory) {
+        Member findMember = returnMember(requestSearchHistory.getMemberId());
 
+        SearchHistory savedSearchHistory = saveSearchHistory(requestSearchHistory, findMember);
+
+        return new ResponseSaveSearchHistory(savedSearchHistory.getId());
+    }
+
+    private Member returnMember(String memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_EXCEPTION_MESSAGE));
+    }
+
+    private SearchHistory saveSearchHistory(RequestSearchHistory requestSearchHistory, Member findMember) {
         SearchHistory searchHistory = SearchHistory.builder()
                 .searchHistory(requestSearchHistory.getSearchHistory())
                 .member(findMember)
                 .build();
 
-        SearchHistory savedSearchHistory = searchHistoryRepository.save(searchHistory);
-
-        return new ResponseSaveSearchHistory(savedSearchHistory.getId());
+        return searchHistoryRepository.save(searchHistory);
     }
 
     /**
@@ -73,20 +67,21 @@ public class SearchHistoryService {
      * @return the search history
      */
     public ResponseSearchHistory getSearchHistory(String memberId) {
-        /*
-         예외처리
-         404 ScheduleNotFoundException: scheduleId Not Found
-         401: Unauthorized (추후에 추가할 예정)
-         500: Server
-        */
-        Member findMember = memberRepository.findById(memberId)
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        Member findMember = returnMember(memberId);
 
+        List<String> searchHistoryList = findSearchHistories(findMember);
+
+        return setResponseSearchHistories(searchHistoryList);
+    }
+
+    private List<String> findSearchHistories(Member findMember) {
         List<SearchHistory> histories = searchHistoryRepository.findByMember(findMember);
-        List<String> searchHistoryList = histories.stream()
+        return histories.stream()
                 .map(SearchHistory::getSearchHistory)
                 .collect(Collectors.toList());
+    }
 
+    private ResponseSearchHistory setResponseSearchHistories(List<String> searchHistoryList) {
         ResponseSearchHistory response = new ResponseSearchHistory();
         response.setSearchHistoryList(new ArrayList<>(searchHistoryList));
 
@@ -99,19 +94,15 @@ public class SearchHistoryService {
      * @param requestDeleteSearchHistory the request delete search history
      */
     public void deleteSearchHistory(RequestDeleteSearchHistory requestDeleteSearchHistory){
-        /*
-         예외처리
-         404 MemberNotFoundException: memberId Not Found
-         404 SearchHistoryNotFoundException: searchHistoryId Not Found
-         401: Unauthorized (추후에 추가할 예정)
-         500: Server
-        */
-        memberRepository.findById(requestDeleteSearchHistory.getMemberId())
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        returnMember(requestDeleteSearchHistory.getMemberId());
 
-        SearchHistory searchHistory = searchHistoryRepository.findById(requestDeleteSearchHistory.getSearchHistoryId())
-                .orElseThrow(() -> new SearchHistoryNotFoundException("존재하지 않는 searchHistoryId입니다."));
+        SearchHistory searchHistory = returnSearchHistory(requestDeleteSearchHistory.getSearchHistoryId());
 
         searchHistoryRepository.delete(searchHistory);
+    }
+
+    private SearchHistory returnSearchHistory(String searchHistoryId){
+        return searchHistoryRepository.findById(searchHistoryId)
+                .orElseThrow(() -> new SearchHistoryNotFoundException(SEARCH_HISTORY_NOT_FOUND_EXCEPTION_MESSAGE));
     }
 }

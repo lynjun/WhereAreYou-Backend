@@ -11,17 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * packageName    : com.example.whereareyou.repository
- * fileName       : MemberInfoRepository
- * author         : pjh57
- * date           : 2023-10-11
- * description    : 위도 경도 Repository
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2023-10-11        pjh57       최초 생성
- */
 @Repository
 public interface MemberInfoRepository extends JpaRepository<MemberInfo, String> {
     Optional<MemberInfo> findByMemberId(String memberId);
