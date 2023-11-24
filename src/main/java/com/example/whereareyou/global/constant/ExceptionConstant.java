@@ -7,4 +7,5 @@ public class ExceptionConstant {
     public static final String SCHEDULE_CREATOR_MISMATCH_EXCEPTION_MESSAGE = "해당 schedule의 creator가 아닙니다.";
     public static final String UPDATE_QUERY_EXCEPTION_MESSAGE = "업데이트 실패";
     public static final int UPDATE_QUERY_EXCEPTION_SIZE = 0;
+    public static final String INVALID_MONTH_EXCEPTION = "월이 올바르지 않습니다.";
 }
