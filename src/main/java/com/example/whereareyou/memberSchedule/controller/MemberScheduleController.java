@@ -10,17 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * packageName    : com.example.whereareyou.memberSchedule.controller
- * fileName       : MemberScheduleController
- * author         : pjh57
- * date           : 2023-11-05
- * description    : MemberScheduleController
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2023-11-05        pjh57       최초 생성
- */
 @RestController
 @RequestMapping("/memberschedule")
 public class MemberScheduleController {

@@ -18,7 +18,6 @@ import com.example.whereareyou.schedule.exception.UpdateQueryException;
 import com.example.whereareyou.schedule.repository.ScheduleRepository;
 import com.example.whereareyou.schedule.request.RequestScheduleAccept;
 import com.example.whereareyou.schedule.response.ResponseGroupInvite;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,20 +29,8 @@ import java.util.stream.Collectors;
 import static com.example.whereareyou.global.constant.ExceptionConstant.*;
 import static com.example.whereareyou.schedule.constant.ScheduleConstant.*;
 
-/**
- * packageName    : com.example.whereareyou.memberSchedule.service
- * fileName       : MemberScheduleService
- * author         : pjh57
- * date           : 2023-11-05
- * description    : MemberSchedule Service
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2023-11-05        pjh57       최초 생성
- */
 @Service
 @Transactional
-@Slf4j
 public class MemberScheduleService {
     private final MemberRepository memberRepository;
 
