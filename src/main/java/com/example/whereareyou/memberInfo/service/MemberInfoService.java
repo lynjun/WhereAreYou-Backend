@@ -12,6 +12,7 @@ import com.example.whereareyou.member.repository.MemberRepository;
 import com.example.whereareyou.memberInfo.request.RequestMemberInfo;
 import com.example.whereareyou.memberInfo.response.ResponseMemberInfo;
 import com.example.whereareyou.schedule.repository.ScheduleRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
  */
 @Transactional
 @Service
+@Slf4j
 public class MemberInfoService {
     private final MemberRepository memberRepository;
     private final MemberInfoRepository memberInfoRepository;
@@ -104,7 +106,7 @@ public class MemberInfoService {
         }
 
         // 멤버 정보 조회 및 변환
-        List<MemberInfo> membersInfo = memberInfoRepository.findAllById(requestGetMemberInfo.getMemberId());
+        List<MemberInfo> membersInfo = memberInfoRepository.findByMemberIds(requestGetMemberInfo.getMemberId());
         if (membersInfo.size() != requestGetMemberInfo.getMemberId().size()) {
             throw new UserNotFoundException("하나 이상의 memberId가 존재하지 않습니다.");
         }
