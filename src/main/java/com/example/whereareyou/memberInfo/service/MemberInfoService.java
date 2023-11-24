@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.example.whereareyou.global.constant.ExceptionConstant.USER_NOT_FOUND_EXCEPTION_MESSAGE;
+import static com.example.whereareyou.global.constant.ExceptionConstant.*;
 import static com.example.whereareyou.schedule.constant.ScheduleConstant.ZERO;
 
 @Transactional
@@ -96,24 +96,40 @@ public class MemberInfoService {
      * @return the member infos
      */
     public List<ResponseMemberInfo> getMemberInfos(RequestGetMemberInfo requestGetMemberInfo) {
-        // 스케줄 유효성 검사
-        Schedule schedule = scheduleRepository.findById(requestGetMemberInfo.getScheduleId())
-                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
+        Schedule schedule = returnSchedule(requestGetMemberInfo.getScheduleId());
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime twoHoursBeforeStart = schedule.getStart().minusHours(2);
         LocalDateTime scheduleEnd = schedule.getEnd();
 
-        if (now.isBefore(twoHoursBeforeStart) || now.isAfter(scheduleEnd)) {
-            throw new InvalidRequestTimeException("요청 시간이 유효한 범위에 있지 않습니다.");
-        }
+        checkRequestTimeWithScheduleTime(now, twoHoursBeforeStart, scheduleEnd);
 
-        // 멤버 정보 조회 및 변환
+        List<MemberInfo> membersInfo = returnMemberInfos(requestGetMemberInfo);
+
+        return returnResponseMemberInfo(membersInfo);
+    }
+
+    private Schedule returnSchedule(String scheduleId) {
+        return scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new ScheduleNotFoundException(SCHEDULE_NOT_FOUND_EXCEPTION_MESSAGE));
+    }
+
+    private void checkRequestTimeWithScheduleTime(LocalDateTime now, LocalDateTime twoHoursBeforeStart, LocalDateTime scheduleEnd) {
+        if (now.isBefore(twoHoursBeforeStart) || now.isAfter(scheduleEnd)) {
+            throw new InvalidRequestTimeException(INVALID_REQUEST_TIME_EXCEPTION_MESSAGE);
+        }
+    }
+
+    private List<MemberInfo> returnMemberInfos(RequestGetMemberInfo requestGetMemberInfo) {
         List<MemberInfo> membersInfo = memberInfoRepository.findByMemberIds(requestGetMemberInfo.getMemberId());
         if (membersInfo.size() != requestGetMemberInfo.getMemberId().size()) {
-            throw new UserNotFoundException("하나 이상의 memberId가 존재하지 않습니다.");
+            throw new UserNotFoundException(EMPTY_LATITUDE_LONGITUDE_EXCEPTION_MESSAGE);
         }
 
+        return membersInfo;
+    }
+
+    private List<ResponseMemberInfo> returnResponseMemberInfo(List<MemberInfo> membersInfo) {
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
