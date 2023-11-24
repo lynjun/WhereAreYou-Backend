@@ -66,20 +66,21 @@ public class SearchHistoryService {
      * @return the search history
      */
     public ResponseSearchHistory getSearchHistory(String memberId) {
-        /*
-         예외처리
-         404 ScheduleNotFoundException: scheduleId Not Found
-         401: Unauthorized (추후에 추가할 예정)
-         500: Server
-        */
-        Member findMember = memberRepository.findById(memberId)
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        Member findMember = returnMember(memberId);
 
+        List<String> searchHistoryList = findSearchHistories(findMember);
+
+        return setResponseSearchHistories(searchHistoryList);
+    }
+
+    private List<String> findSearchHistories(Member findMember) {
         List<SearchHistory> histories = searchHistoryRepository.findByMember(findMember);
-        List<String> searchHistoryList = histories.stream()
+        return histories.stream()
                 .map(SearchHistory::getSearchHistory)
                 .collect(Collectors.toList());
+    }
 
+    private ResponseSearchHistory setResponseSearchHistories(List<String> searchHistoryList) {
         ResponseSearchHistory response = new ResponseSearchHistory();
         response.setSearchHistoryList(new ArrayList<>(searchHistoryList));
 
