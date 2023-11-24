@@ -200,7 +200,7 @@ public class ScheduleService {
      * @param month    the month
      * @return the response monthly schedule
      */
-    public ResponseMonthlySchedule getMonthSchedule(String memberId, Integer year, Integer month){
+    public ResponseMonthlySchedule getMonthSchedule(String memberId, Integer year, Integer month) {
         Member member = returnMember(memberId);
         checkDate(month);
 
@@ -215,13 +215,13 @@ public class ScheduleService {
         return responseMonthlySchedule;
     }
 
-    private void checkDate(Integer month){
-        if(month < START_OF_MONTH || month > END_OF_MONTH) {
+    private void checkDate(Integer month) {
+        if (month < START_OF_MONTH || month > END_OF_MONTH) {
             throw new InvalidYearOrMonthOrDateException(INVALID_MONTH_EXCEPTION);
         }
     }
 
-    private ResponseMonthlySchedule setResponseMonthlySchedule(Integer year, Integer month){
+    private ResponseMonthlySchedule setResponseMonthlySchedule(Integer year, Integer month) {
         ResponseMonthlySchedule responseMonthlySchedule = new ResponseMonthlySchedule();
         responseMonthlySchedule.setYear(year);
         responseMonthlySchedule.setMonth(month);
@@ -230,13 +230,13 @@ public class ScheduleService {
         return responseMonthlySchedule;
     }
 
-    private int returnDaysInMonth(Integer year, Integer month){
+    private int returnDaysInMonth(Integer year, Integer month) {
         YearMonth yearMonthObject = YearMonth.of(year, month);
 
         return yearMonthObject.lengthOfMonth();
     }
 
-    private void checkMonthlySchedule(int daysInMonth, List<MemberSchedule> acceptedMemberSchedules, Integer year, Integer month, ResponseMonthlySchedule responseMonthlySchedule){
+    private void checkMonthlySchedule(int daysInMonth, List<MemberSchedule> acceptedMemberSchedules, Integer year, Integer month, ResponseMonthlySchedule responseMonthlySchedule) {
         for (int day = START_OF_MONTH; day <= daysInMonth; day++) {
             MonthlyScheduleResponseDTO monthlyScheduleResponseDTO = new MonthlyScheduleResponseDTO();
             monthlyScheduleResponseDTO.setDate(day);
