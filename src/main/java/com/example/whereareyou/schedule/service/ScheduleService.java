@@ -321,30 +321,36 @@ public class ScheduleService {
     }
 
     /**
-     * Get detail schedule response detail schedule.
+     * Get detail schedule
      *
      * @param memberId   the member id
      * @param scheduleId the schedule id
      * @return the response detail schedule
      */
     public ResponseDetailSchedule getDetailSchedule(String memberId, String scheduleId) {
-        // 사용자 확인
-        Member findMember = memberRepository.findById(memberId)
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        Member findMember = returnMember(memberId);
+        Schedule findSchedule = returnMemberScheduleIfMemberAccept(findMember, scheduleId);
 
-        // 해당 Member가 수락한 MemberSchedule 중 특정 Schedule 찾기
+        List<String> friendIds = extractFriendIds(findSchedule);
+
+        return setResponseDetailSchedule(findSchedule, friendIds);
+    }
+
+    private Schedule returnMemberScheduleIfMemberAccept(Member findMember, String scheduleId) {
         MemberSchedule acceptedMemberSchedule = memberScheduleRepository.findByMemberAndScheduleIdAndAcceptIsTrue(findMember, scheduleId)
                 .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId이거나 회원이 수락하지 않은 일정입니다."));
 
-        Schedule findSchedule = acceptedMemberSchedule.getSchedule();
+        return acceptedMemberSchedule.getSchedule();
+    }
 
-        // 친구의 ID 목록 추출 (수락한 친구들만 포함)
-        List<String> friendsIdList = findSchedule.getMemberScheduleList().stream()
+    private List<String> extractFriendIds(Schedule findSchedule) {
+        return findSchedule.getMemberScheduleList().stream()
                 .filter(MemberSchedule::getAccept)
                 .map(memberSchedule -> memberSchedule.getMember().getId())
                 .collect(Collectors.toList());
+    }
 
-        // ResponseDetailSchedule 객체 반환
+    private ResponseDetailSchedule setResponseDetailSchedule(Schedule findSchedule, List<String> friendIds) {
         return ResponseDetailSchedule.builder()
                 .creatorId(findSchedule.getCreator().getId())
                 .start(findSchedule.getStart())
@@ -354,10 +360,9 @@ public class ScheduleService {
                 .memo(findSchedule.getMemo())
                 .destinationLatitude(findSchedule.getDestinationLatitude())
                 .destinationLongitude(findSchedule.getDestinationLongitude())
-                .friendsIdListDTO(friendsIdList)
+                .friendsIdListDTO(friendIds)
                 .build();
     }
-
 
     /**
      * Schedule arrived.
