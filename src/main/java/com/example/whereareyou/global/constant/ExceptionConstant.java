@@ -9,4 +9,5 @@ public class ExceptionConstant {
     public static final int UPDATE_QUERY_EXCEPTION_SIZE = 0;
     public static final String INVALID_MONTH_EXCEPTION = "월이 올바르지 않습니다.";
     public static final String SCHEDULE_NOT_FOUND_OR_MEMBER_DIDNT_ACCEPT_EXCEPTION_MESSAGE = "존재하지 않는 scheduleId이거나 회원이 수락하지 않은 일정입니다.";
+    public static final String MEMBER_NOT_IN_SCHEDULE_EXCEPTION_MESSAGE = "해당 Member는 Schedule에 존재하지 않습니다.";
 }
