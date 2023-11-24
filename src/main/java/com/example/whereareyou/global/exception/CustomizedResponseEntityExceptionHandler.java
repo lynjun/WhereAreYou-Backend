@@ -56,14 +56,6 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
         return new ResponseEntity(exceptionResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(FriendListNotFoundException.class)
-    public final ResponseEntity<Object> friendListNotFoundException(Exception ex, WebRequest request){
-        ExceptionResponse exceptionResponse =
-                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
-
-        return new ResponseEntity(exceptionResponse, HttpStatus.NOT_FOUND);
-    }
-
     @ExceptionHandler(MemberIdCannotBeInFriendListException.class)
     public final ResponseEntity<Object> memberIdCannotBeInFriendListException(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse =

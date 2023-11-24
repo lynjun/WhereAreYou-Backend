@@ -90,8 +90,6 @@ public class ScheduleService {
                 .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
 
         List<String> friendList = requestSaveSchedule.getMemberIdList();
-        if (friendList == null || friendList.isEmpty())
-            throw new FriendListNotFoundException("일정 추가 시 친구 설정은 필수 입니다.");
 
         if (friendList.contains(creator.getId()))
             throw new MemberIdCannotBeInFriendListException("일정 친구 추가 시 본인의 ID는 들어갈 수 없습니다.");
