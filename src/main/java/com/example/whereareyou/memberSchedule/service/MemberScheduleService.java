@@ -77,21 +77,14 @@ public class MemberScheduleService {
 
         checkScheduleCreatedByCreator(schedule, creator);
 
-        // 현재 MemberSchedule 목록 가져오기
         List<MemberSchedule> currentMemberSchedules = memberScheduleRepository.findMemberSchedulesBySchedule(schedule);
 
-        // 요청된 friendId 목록
         Set<String> requestedFriendIds = new HashSet<>(requestModifyMemberSchedule.getFriendId());
 
-        // 현재 MemberSchedule에 있는 멤버 ID 추출
         Set<String> currentMemberIds = returnMemberIdFromMemberSchedule(currentMemberSchedules);
 
-        // 요청된 멤버들 중 현재 MemberSchedule에 없는 멤버 추가
-        // 푸시알림을 추가적으로 날립니다.
         addToMemberScheduleNotInMemberSchedule(requestedFriendIds, currentMemberIds, creator, schedule);
 
-        // 요청에 없는 현재 MemberSchedule 삭제
-        // 여기서 creator의 MemberSchedule이 삭제되지 않도록 예외 처리
         deleteCurrentMemberScheduleNotInRequest(currentMemberSchedules, requestedFriendIds, creator);
     }
 
@@ -133,7 +126,7 @@ public class MemberScheduleService {
                                 .build();
                         memberScheduleRepository.save(newMemberSchedule);
 
-                        newFriends.add(member); // 새로운 멤버를 newFriends 리스트에 추가
+                        newFriends.add(member);
                     }
                 });
 
