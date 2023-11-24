@@ -182,23 +182,20 @@ public class MemberScheduleService {
      *
      * @param requestRefuseSchedule the request refuse schedule
      */
-    public void refuseSchedule(RequestRefuseSchedule requestRefuseSchedule){
-        // 거부하는 멤버 찾기
-        Member refuseMember = memberRepository.findById(requestRefuseSchedule.getRefuseMemberId())
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+    public void refuseSchedule(RequestRefuseSchedule requestRefuseSchedule) {
+        Member refuseMember = returnMember(requestRefuseSchedule.getRefuseMemberId());
+        Schedule findSchedule = returnSchedule(requestRefuseSchedule.getScheduleId());
 
-        // 거부 대상 스케줄 찾기
-        Schedule findSchedule = scheduleRepository.findById(requestRefuseSchedule.getScheduleId())
-                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
+        checkIfRefuseMemberIsCreator(refuseMember, findSchedule);
 
-        // 스케줄의 생성자인 경우 거부 불가
-        if(findSchedule.getCreator().equals(refuseMember)) {
-            throw new CreatorCannotRefuseSchedule("스케줄의 생성자는 스케줄을 거부할 수 없습니다.");
-        }
-
-        // 해당 MemberSchedule 찾기 및 삭제
         memberScheduleRepository.findByMemberAndSchedule(refuseMember, findSchedule)
                 .ifPresent(memberScheduleRepository::delete);
+    }
+
+    private void checkIfRefuseMemberIsCreator(Member refuseMember, Schedule findSchedule) {
+        if (findSchedule.getCreator().equals(refuseMember)) {
+            throw new CreatorCannotRefuseSchedule(CREATOR_CANNOT_REFUSE_SCHEDULE);
+        }
     }
 
     public ResponseGroupInvite getScheduleInvite(String memberId){
