@@ -54,8 +54,8 @@ public class MemberScheduleController {
 
     @GetMapping("/invite")
     public ResponseEntity<ResponseGroupInvite> getScheduleInvite(@RequestParam String memberId){
-        ResponseGroupInvite test = memberScheduleService.getScheduleInvite(memberId);
+        ResponseGroupInvite responseGroupInvite = memberScheduleService.getScheduleInvite(memberId);
 
-        return ResponseEntity.ok().body(test);
+        return ResponseEntity.ok().body(responseGroupInvite);
     }
 }
