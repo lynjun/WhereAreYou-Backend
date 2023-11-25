@@ -163,7 +163,7 @@ public class MemberScheduleService {
         List<Schedule> byId = scheduleRepository.findAllById(scheduleId);
 
         ResponseGroupInvite responseGroupInvite = new ResponseGroupInvite();
-        responseGroupInvite.setTestList(new ArrayList<>());
+        responseGroupInvite.setInviteList(new ArrayList<>());
 
         byId.forEach(schedule -> {
             ScheduleInviteDto scheduleInviteDto = new ScheduleInviteDto();
@@ -171,7 +171,7 @@ public class MemberScheduleService {
             scheduleInviteDto.setTitle(schedule.getTitle());
             scheduleInviteDto.setUserName(schedule.getCreator().getUserName());
             scheduleInviteDto.setStart(schedule.getStart());
-            responseGroupInvite.getTestList().add(scheduleInviteDto);
+            responseGroupInvite.getInviteList().add(scheduleInviteDto);
         });
 
         return responseGroupInvite;
