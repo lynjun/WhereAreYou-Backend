@@ -9,17 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-/**
- * packageName    : com.example.whereareyou.global.service
- * fileName       : FcmTokenService
- * author         : pjh57
- * date           : 2023-11-20
- * description    : FCM 토큰 기본 Service
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2023-11-20        pjh57       최초 생성
- */
 @Service
 @Transactional
 public class FcmTokenService {

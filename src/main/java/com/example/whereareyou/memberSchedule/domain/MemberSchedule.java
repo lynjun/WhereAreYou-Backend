@@ -10,17 +10,6 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 
-/**
- * packageName    : project.whereareyou.domain
- * fileName       : MemberSchedule
- * author         : pjh57
- * date           : 2023-09-14
- * description    : Member - Schedule 중간 Entity
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2023-09-14        pjh57       최초 생성
- */
 @Entity
 @Data
 @AllArgsConstructor

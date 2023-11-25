@@ -1,5 +1,6 @@
 package com.example.whereareyou.memberInfo.service;
 
+import com.example.whereareyou.member.domain.Member;
 import com.example.whereareyou.memberInfo.domain.MemberInfo;
 import com.example.whereareyou.memberInfo.exception.InvalidRequestTimeException;
 import com.example.whereareyou.memberInfo.request.RequestGetMemberInfo;
@@ -12,6 +13,7 @@ import com.example.whereareyou.member.repository.MemberRepository;
 import com.example.whereareyou.memberInfo.request.RequestMemberInfo;
 import com.example.whereareyou.memberInfo.response.ResponseMemberInfo;
 import com.example.whereareyou.schedule.repository.ScheduleRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,17 +24,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * packageName    : com.example.whereareyou.service
- * fileName       : MemberInfoService
- * author         : pjh57
- * date           : 2023-10-11
- * description    : 위도 경도
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2023-10-11        pjh57       최초 생성
- */
+import static com.example.whereareyou.global.constant.ExceptionConstant.*;
+import static com.example.whereareyou.schedule.constant.ScheduleConstant.ZERO;
+
 @Transactional
 @Service
 public class MemberInfoService {
@@ -47,42 +41,53 @@ public class MemberInfoService {
         this.scheduleRepository = scheduleRepository;
     }
 
-    public void setMemberInfo(RequestMemberInfo requestMemberInfo){
-        /*
-         예외처리
-         404 UserNotFoundException: memberId Not Found
-         401: Unauthorized (추후에 추가할 예정)
-         500 updateQueryException: update Fail
-         500: Server
-        */
+    /**
+     * Set member info.
+     *
+     * @param requestMemberInfo the request member info
+     */
+    public void setMemberInfo(RequestMemberInfo requestMemberInfo) {
+        checkMember(requestMemberInfo.getMemberId());
 
-        memberRepository.findById(requestMemberInfo.getMemberId())
-                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        MemberInfo existingMemberInfo = returnMemberInfoByMemberId(requestMemberInfo.getMemberId());
 
-        MemberInfo existingMemberInfo
-                = memberInfoRepository.findByMemberId(requestMemberInfo.getMemberId()).orElse(null);
-
-        if(existingMemberInfo != null) {
-            int update = memberInfoRepository.updateMemberInfoByMemberId(
-                    requestMemberInfo.getLatitude(),
-                    requestMemberInfo.getLongitude(),
-                    requestMemberInfo.getMemberId()
-            );
-
-            if(update == 0)
-                throw new UpdateQueryException("업데이트 실패");
-
-        } else{
-            MemberInfo memberInfo = MemberInfo.builder()
-                    .memberId(requestMemberInfo.getMemberId())
-                    .latitude(requestMemberInfo.getLatitude())
-                    .longitude(requestMemberInfo.getLongitude())
-                    .build();
-
-            memberInfoRepository.save(memberInfo);
+        if (existingMemberInfo != null) {
+            updateMemberInfo(requestMemberInfo);
+        } else {
+            saveMemberInfo(requestMemberInfo);
         }
     }
 
+    private void checkMember(String memberId) {
+        memberRepository.findById(memberId)
+                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_EXCEPTION_MESSAGE));
+    }
+
+    private MemberInfo returnMemberInfoByMemberId(String memberId) {
+        return memberInfoRepository.findByMemberId(memberId).orElse(null);
+    }
+
+    private void updateMemberInfo(RequestMemberInfo requestMemberInfo) {
+        int update = memberInfoRepository.updateMemberInfoByMemberId(
+                requestMemberInfo.getLatitude(),
+                requestMemberInfo.getLongitude(),
+                requestMemberInfo.getMemberId()
+        );
+
+        if (update == ZERO) {
+            throw new UpdateQueryException("업데이트 실패");
+        }
+    }
+
+    private void saveMemberInfo(RequestMemberInfo requestMemberInfo) {
+        MemberInfo memberInfo = MemberInfo.builder()
+                .memberId(requestMemberInfo.getMemberId())
+                .latitude(requestMemberInfo.getLatitude())
+                .longitude(requestMemberInfo.getLongitude())
+                .build();
+
+        memberInfoRepository.save(memberInfo);
+    }
 
     /**
      * Gets member infos.
@@ -91,24 +96,40 @@ public class MemberInfoService {
      * @return the member infos
      */
     public List<ResponseMemberInfo> getMemberInfos(RequestGetMemberInfo requestGetMemberInfo) {
-        // 스케줄 유효성 검사
-        Schedule schedule = scheduleRepository.findById(requestGetMemberInfo.getScheduleId())
-                .orElseThrow(() -> new ScheduleNotFoundException("존재하지 않는 scheduleId입니다."));
+        Schedule schedule = returnSchedule(requestGetMemberInfo.getScheduleId());
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime twoHoursBeforeStart = schedule.getStart().minusHours(2);
         LocalDateTime scheduleEnd = schedule.getEnd();
 
+        checkRequestTimeWithScheduleTime(now, twoHoursBeforeStart, scheduleEnd);
+
+        List<MemberInfo> membersInfo = returnMemberInfos(requestGetMemberInfo);
+
+        return returnResponseMemberInfo(membersInfo);
+    }
+
+    private Schedule returnSchedule(String scheduleId) {
+        return scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new ScheduleNotFoundException(SCHEDULE_NOT_FOUND_EXCEPTION_MESSAGE));
+    }
+
+    private void checkRequestTimeWithScheduleTime(LocalDateTime now, LocalDateTime twoHoursBeforeStart, LocalDateTime scheduleEnd) {
         if (now.isBefore(twoHoursBeforeStart) || now.isAfter(scheduleEnd)) {
-            throw new InvalidRequestTimeException("요청 시간이 유효한 범위에 있지 않습니다.");
+            throw new InvalidRequestTimeException(INVALID_REQUEST_TIME_EXCEPTION_MESSAGE);
         }
+    }
 
-        // 멤버 정보 조회 및 변환
-        List<MemberInfo> membersInfo = memberInfoRepository.findAllById(requestGetMemberInfo.getMemberId());
+    private List<MemberInfo> returnMemberInfos(RequestGetMemberInfo requestGetMemberInfo) {
+        List<MemberInfo> membersInfo = memberInfoRepository.findByMemberIds(requestGetMemberInfo.getMemberId());
         if (membersInfo.size() != requestGetMemberInfo.getMemberId().size()) {
-            throw new UserNotFoundException("하나 이상의 memberId가 존재하지 않습니다.");
+            throw new UserNotFoundException(EMPTY_LATITUDE_LONGITUDE_EXCEPTION_MESSAGE);
         }
 
+        return membersInfo;
+    }
+
+    private List<ResponseMemberInfo> returnResponseMemberInfo(List<MemberInfo> membersInfo) {
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 

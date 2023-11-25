@@ -8,17 +8,6 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 
-/**
- * packageName    : com.example.whereareyou.global.domain
- * fileName       : FcmToken
- * author         : pjh57
- * date           : 2023-11-20
- * description    : 토큰 관리 Entity
- * ===========================================================
- * DATE              AUTHOR             NOTE
- * -----------------------------------------------------------
- * 2023-11-20        pjh57       최초 생성
- */
 @Entity
 @Data
 @AllArgsConstructor

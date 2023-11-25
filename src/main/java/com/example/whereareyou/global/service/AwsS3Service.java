@@ -19,7 +19,6 @@ import java.util.UUID;
 
 @Service
 @Transactional
-@Slf4j
 public class AwsS3Service {
 
     @Value("${cloud.aws.s3.bucket}")
