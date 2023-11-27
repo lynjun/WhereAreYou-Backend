@@ -82,4 +82,16 @@ public class Member {
         this.email = email;
         this.profileImage = profileImage;
     }
+
+    @Override
+    public String toString() {
+        return "Member{" +
+                "id='" + id + '\'' +
+                ", userName='" + userName + '\'' +
+                ", userId='" + userId + '\'' +
+                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
+                ", profileImage='" + profileImage + '\'' +
+                '}';
+    }
 }
