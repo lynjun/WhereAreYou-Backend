@@ -112,5 +112,13 @@ public class MemberController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/info")
+    public ResponseEntity<ResponseMemberByUserId> getDetailMemberByUserId(@RequestParam String userId){
+
+        ResponseMemberByUserId detailMemberByUserId = memberService.getDetailMemberByUserId(userId);
+
+        return ResponseEntity.ok().body(detailMemberByUserId);
+    }
+
 }
 
