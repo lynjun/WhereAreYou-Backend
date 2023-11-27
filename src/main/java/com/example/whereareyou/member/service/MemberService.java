@@ -240,4 +240,18 @@ import java.util.Random;
         memberRepository.save(member);
 
     }
+
+    public ResponseMemberByUserId getDetailMemberByUserId(String userId){
+        Optional<Member> byId = memberRepository.findByUserId(userId);
+
+        Member member = byId.orElseThrow(() ->
+                new UserNotFoundException("존재하지 않는 memberId입니다."));
+
+        ResponseMemberByUserId responseMemberByUserId = new ResponseMemberByUserId();
+        responseMemberByUserId.setUserName(member.getUserName());
+        responseMemberByUserId.setUserId(member.getId());
+        responseMemberByUserId.setProfileImage(member.getProfileImage());
+
+        return responseMemberByUserId;
+    }
 }

@@ -9,5 +9,5 @@ import java.util.List;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseGroupInvite {
-    private List<ScheduleInviteDto> testList;
+    private List<ScheduleInviteDto> inviteList;
 }
