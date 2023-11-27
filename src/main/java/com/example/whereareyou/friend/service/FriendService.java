@@ -7,10 +7,12 @@ import com.example.whereareyou.friend.dto.*;
 import com.example.whereareyou.friend.exception.AlreadyFriendsException;
 import com.example.whereareyou.friend.exception.AlreadySent;
 import com.example.whereareyou.friend.exception.FriendRequestNotFoundException;
+import com.example.whereareyou.global.domain.FcmToken;
+import com.example.whereareyou.global.service.FcmTokenService;
+import com.example.whereareyou.global.service.FirebaseCloudMessageService;
 import com.example.whereareyou.member.domain.Member;
 import com.example.whereareyou.member.exception.MemberIdCannotBeInFriendListException;
 import com.example.whereareyou.member.exception.UserNotFoundException;
-import com.example.whereareyou.schedule.domain.Schedule;
 import com.example.whereareyou.friend.repository.FriendRepository;
 import com.example.whereareyou.FriendRequest.repository.FriendRequestRepository;
 import com.example.whereareyou.member.repository.MemberRepository;
@@ -21,7 +23,10 @@ import com.example.whereareyou.friend.response.ResponseFriendRequestList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.*;
+
+import static com.example.whereareyou.friend.constant.FriendConstant.*;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +36,8 @@ public class FriendService {
     private final MemberRepository memberRepository;
     private final FriendRequestRepository friendRequestRepository;
     private final ScheduleRepository scheduleRepository;
+    private final FirebaseCloudMessageService firebaseCloudMessageService;
+    private final FcmTokenService fcmTokenService;
 
     public void friendRequest(FriendRequestDto request) {
         Optional<Member> byId = memberRepository.findById(request.getMemberId());
@@ -65,6 +72,8 @@ public class FriendService {
                 .senderId(memberId)
                 .receiverId(friendId)
                 .build();
+
+        makeFcmMessage(memberId,friendId);
 
         friendRequestRepository.save(friendRequest);
 
@@ -118,6 +127,8 @@ public class FriendService {
         friendRepository.save(friend);
 
         friendRequestRepository.delete(friendRequest);
+
+        makeFcmMessage(owner);
 
     }
 
@@ -191,6 +202,33 @@ public class FriendService {
         friendRepository.delete(nofriend);
         friendRepository.delete(nono);
 
+    }
+
+    private void makeFcmMessage(Member friend, Member sender) {
+
+        Optional<FcmToken> fcmTokenOpt = fcmTokenService.getTokenByMemberId(sender.getId());
+        fcmTokenOpt.ifPresent(token -> {
+            String body = friend.getUserName() + FCM_MESSAGE_TO + FRIEND_BODY;
+            try {
+                firebaseCloudMessageService.sendMessageTo(token.getTargetToken(), FRIEND_REQUEST_MESSAGE_TITLE, body);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private void makeFcmMessage(Friend friend) {
+
+        Optional<FcmToken> fcmTokenOpt = fcmTokenService.getTokenByMemberId(friend.getOwner().getId());
+
+        fcmTokenOpt.ifPresent(token -> {
+            String body = friend.getFriends().getUserName() + FCM_MESSAGE_TO + ACCEPT_BODY;
+            try {
+                firebaseCloudMessageService.sendMessageTo(token.getTargetToken(), FRIEND_ACCEPT_MESSAGE_TITLE, body);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
 }
