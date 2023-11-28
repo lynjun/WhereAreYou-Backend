@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 /**
  * packageName    : project.whereareyou.domain
@@ -40,4 +41,6 @@ public class FriendRequest {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id")
     private Member receiverId;
+
+    private LocalDateTime createTime;
 }

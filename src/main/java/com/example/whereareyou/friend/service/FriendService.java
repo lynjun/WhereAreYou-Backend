@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.example.whereareyou.friend.constant.FriendConstant.*;
@@ -71,6 +72,7 @@ public class FriendService {
         FriendRequest friendRequest = FriendRequest.builder()
                 .senderId(memberId)
                 .receiverId(friendId)
+                .createTime(LocalDateTime.now())
                 .build();
 
         makeFcmMessage(memberId,friendId);
@@ -173,9 +175,7 @@ public class FriendService {
 
         if(byOwner != null) {
             byOwner.stream().map(Friend::getFriends).map(Member::getId).forEach(id -> {
-                FriendIdList friendIdList = new FriendIdList();
-                friendIdList.setFriendId(id);
-                responseFriendIdList.getFriendsIdList().add(friendIdList);
+                responseFriendIdList.getFriendsIdList().add(id);
             });
         }
 
