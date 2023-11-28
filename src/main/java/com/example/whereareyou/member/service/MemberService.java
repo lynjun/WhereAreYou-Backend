@@ -113,6 +113,8 @@ import java.util.Random;
     }
 
     private void sendAuthEmail(String email, String authKey){
+        EmailCode byEmail = emailCodeRepository.findByEmail(email);
+
         String subject = "제목";
         String text = "인증번호는 " + authKey + "입니다. <br/>";
 
@@ -127,12 +129,18 @@ import java.util.Random;
             throw new InvalidEmailException("이메일 형식이 유효 하지 않습니다.");
         }
 
-        EmailCode emailCode = EmailCode.builder()
-                .email(email)
-                .code(authKey)
-                .build();
+        if(byEmail != null){
+            byEmail.setCode(authKey);
+            emailCodeRepository.save(byEmail);
+        }
 
-        emailCodeRepository.save(emailCode);
+        if(byEmail == null ) {
+            EmailCode emailCode = EmailCode.builder()
+                    .email(email)
+                    .code(authKey)
+                    .build();
+            emailCodeRepository.save(emailCode);
+        }
     }
 
     public void verifyEmailCode(String email,String code){
