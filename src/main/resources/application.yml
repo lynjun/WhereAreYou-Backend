@@ -36,11 +36,6 @@ spring:
     username: admin
     password: whereareyou1!
 
-  redis:
-    host: 127.0.0.1
-    port: 6379
-
-
   main:
     allow-circular-references: true
 
