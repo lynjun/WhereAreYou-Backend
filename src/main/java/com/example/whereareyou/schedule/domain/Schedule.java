@@ -31,6 +31,7 @@ public class Schedule {
 
     private LocalDateTime start;
     private LocalDateTime end;
+    private LocalDateTime createTime;
 
     private String title;
     private String place;
