@@ -121,12 +121,7 @@ public class MemberInfoService {
     }
 
     private List<MemberInfo> returnMemberInfos(RequestGetMemberInfo requestGetMemberInfo) {
-        List<MemberInfo> membersInfo = memberInfoRepository.findByMemberIds(requestGetMemberInfo.getMemberId());
-        if (membersInfo.size() != requestGetMemberInfo.getMemberId().size()) {
-            throw new UserNotFoundException(EMPTY_LATITUDE_LONGITUDE_EXCEPTION_MESSAGE);
-        }
-
-        return membersInfo;
+        return memberInfoRepository.findByMemberIds(requestGetMemberInfo.getMemberId());
     }
 
     private List<ResponseMemberInfo> returnResponseMemberInfo(List<MemberInfo> membersInfo) {
