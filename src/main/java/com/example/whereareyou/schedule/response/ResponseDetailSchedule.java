@@ -20,4 +20,5 @@ public class ResponseDetailSchedule {
     private Double destinationLatitude;
     private Double destinationLongitude;
     private List<String> friendsIdListDTO;
+    private List<String> arrivedFriendsIdList;
 }
