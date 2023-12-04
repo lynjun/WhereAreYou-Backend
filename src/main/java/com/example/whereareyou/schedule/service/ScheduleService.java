@@ -102,8 +102,7 @@ public class ScheduleService {
 
     private Schedule saveSchedule(RequestSaveSchedule requestSaveSchedule, Member creator) {
         Schedule schedule = Schedule.builder()
-                .start(requestSaveSchedule.getStart())
-                .end(requestSaveSchedule.getEnd())
+                .appointmentTime(requestSaveSchedule.getAppointmentTime())
                 .title(requestSaveSchedule.getTitle())
                 .place(requestSaveSchedule.getPlace())
                 .memo(requestSaveSchedule.getMemo())
@@ -180,8 +179,7 @@ public class ScheduleService {
 
     private void updateSchedule(RequestModifySchedule requestModifySchedule, Member creator, Schedule schedule) {
         int updatedCount = scheduleRepository.updateSchedule(
-                requestModifySchedule.getStart(),
-                requestModifySchedule.getEnd(),
+                requestModifySchedule.getAppointmentTime(),
                 requestModifySchedule.getTitle(),
                 requestModifySchedule.getPlace(),
                 requestModifySchedule.getMemo(),
@@ -247,10 +245,8 @@ public class ScheduleService {
                     .map(MemberSchedule::getSchedule)
                     .filter(schedule -> {
                         LocalDate currentDate = LocalDate.of(year, month, finalDay);
-                        LocalDate scheduleStartDate = schedule.getStart().toLocalDate();
-                        LocalDate scheduleEndDate = schedule.getEnd().toLocalDate();
-                        return (currentDate.isEqual(scheduleStartDate) || currentDate.isAfter(scheduleStartDate)) &&
-                                (currentDate.isEqual(scheduleEndDate) || currentDate.isBefore(scheduleEndDate));
+                        LocalDate appointmentTime = schedule.getAppointmentTime().toLocalDate();
+                        return currentDate.isEqual(appointmentTime);
                     })
                     .collect(Collectors.toList());
 
@@ -271,7 +267,6 @@ public class ScheduleService {
 
         checkScheduleCreatedByCreator(schedule, creator);
 
-        memberScheduleRepository.deleteAllBySchedule(schedule);
         scheduleRepository.deleteById(requestDeleteSchedule.getScheduleId());
     }
 
@@ -307,15 +302,13 @@ public class ScheduleService {
     private void checkScheduleInGivenDate(LocalDate givenDate, List<MemberSchedule> acceptedMemberSchedules, ResponseBriefDateSchedule responseBriefDateSchedule) {
         for (MemberSchedule memberSchedule : acceptedMemberSchedules) {
             Schedule schedule = memberSchedule.getSchedule();
-            LocalDate startDate = schedule.getStart().toLocalDate();
-            LocalDate endDate = schedule.getEnd().toLocalDate();
+            LocalDate appointmentTime = schedule.getAppointmentTime().toLocalDate();
 
-            if (!givenDate.isBefore(startDate) && !givenDate.isAfter(endDate)) {
+            if (givenDate.isEqual(appointmentTime)) {
                 BriefDateScheduleDTO briefDateScheduleDTO = new BriefDateScheduleDTO();
                 briefDateScheduleDTO.setScheduleId(schedule.getId());
                 briefDateScheduleDTO.setTitle(schedule.getTitle());
-                briefDateScheduleDTO.setStart(schedule.getStart());
-                briefDateScheduleDTO.setEnd(schedule.getEnd());
+                briefDateScheduleDTO.setAppointmentTime(schedule.getAppointmentTime());
                 responseBriefDateSchedule.getBriefDateScheduleDTOList().add(briefDateScheduleDTO);
             }
         }
@@ -362,8 +355,7 @@ public class ScheduleService {
     private ResponseDetailSchedule setResponseDetailSchedule(Schedule findSchedule, List<String> friendIds, List<String> arrivedFriendIds) {
         return ResponseDetailSchedule.builder()
                 .creatorId(findSchedule.getCreator().getId())
-                .start(findSchedule.getStart())
-                .end(findSchedule.getEnd())
+                .appointmentTime(findSchedule.getAppointmentTime())
                 .title(findSchedule.getTitle())
                 .place(findSchedule.getPlace())
                 .memo(findSchedule.getMemo())
@@ -414,7 +406,7 @@ public class ScheduleService {
 
         for (MemberSchedule memberSchedule : memberSchedules) {
             Schedule schedule = memberSchedule.getSchedule();
-            String start = schedule.getStart().format(formatter);
+            String start = schedule.getAppointmentTime().format(formatter);
             String today = LocalDateTime.now().format(formatter);
 
             if (start.equals(today)) {

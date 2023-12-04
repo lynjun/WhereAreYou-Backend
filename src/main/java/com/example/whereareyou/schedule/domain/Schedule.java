@@ -29,8 +29,7 @@ public class Schedule {
     @Column(name = "schedule_id", updatable = false, nullable = false)
     private String id;
 
-    private LocalDateTime start;
-    private LocalDateTime end;
+    private LocalDateTime appointmentTime;
     private LocalDateTime createTime;
 
     private String title;

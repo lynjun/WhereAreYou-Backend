@@ -1,6 +1,5 @@
 package com.example.whereareyou.memberInfo.service;
 
-import com.example.whereareyou.member.domain.Member;
 import com.example.whereareyou.memberInfo.domain.MemberInfo;
 import com.example.whereareyou.memberInfo.exception.InvalidRequestTimeException;
 import com.example.whereareyou.memberInfo.request.RequestGetMemberInfo;
@@ -13,7 +12,6 @@ import com.example.whereareyou.member.repository.MemberRepository;
 import com.example.whereareyou.memberInfo.request.RequestMemberInfo;
 import com.example.whereareyou.memberInfo.response.ResponseMemberInfo;
 import com.example.whereareyou.schedule.repository.ScheduleRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,10 +97,10 @@ public class MemberInfoService {
         Schedule schedule = returnSchedule(requestGetMemberInfo.getScheduleId());
 
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime twoHoursBeforeStart = schedule.getStart().minusHours(2);
-        LocalDateTime scheduleEnd = schedule.getEnd();
+        LocalDateTime oneHoursBeforeAppointmentTime = schedule.getAppointmentTime().minusHours(1);
+        LocalDateTime oneHoursAfterAppointmentTime = schedule.getAppointmentTime().plusHours(1);
 
-        checkRequestTimeWithScheduleTime(now, twoHoursBeforeStart, scheduleEnd);
+        checkRequestTimeWithScheduleTime(now, oneHoursBeforeAppointmentTime, oneHoursAfterAppointmentTime);
 
         List<MemberInfo> membersInfo = returnMemberInfos(requestGetMemberInfo);
 
@@ -114,8 +112,8 @@ public class MemberInfoService {
                 .orElseThrow(() -> new ScheduleNotFoundException(SCHEDULE_NOT_FOUND_EXCEPTION_MESSAGE));
     }
 
-    private void checkRequestTimeWithScheduleTime(LocalDateTime now, LocalDateTime twoHoursBeforeStart, LocalDateTime scheduleEnd) {
-        if (now.isBefore(twoHoursBeforeStart) || now.isAfter(scheduleEnd)) {
+    private void checkRequestTimeWithScheduleTime(LocalDateTime now, LocalDateTime oneHoursBeforeAppointmentTime, LocalDateTime oneHoursAfterAppointmentTime) {
+        if (now.isBefore(oneHoursBeforeAppointmentTime) || now.isAfter(oneHoursAfterAppointmentTime)) {
             throw new InvalidRequestTimeException(INVALID_REQUEST_TIME_EXCEPTION_MESSAGE);
         }
     }

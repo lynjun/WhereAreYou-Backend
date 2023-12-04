@@ -12,8 +12,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseDetailSchedule {
     private String creatorId;
-    private LocalDateTime start;
-    private LocalDateTime end;
+    private LocalDateTime appointmentTime;
     private String title;
     private String place;
     private String memo;
