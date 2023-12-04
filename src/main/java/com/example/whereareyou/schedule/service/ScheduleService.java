@@ -330,14 +330,15 @@ public class ScheduleService {
      */
     public ResponseDetailSchedule getDetailSchedule(String memberId, String scheduleId) {
         Member findMember = returnMember(memberId);
-        Schedule findSchedule = returnMemberScheduleIfMemberAccept(findMember, scheduleId);
+        Schedule findSchedule = returnScheduleIfMemberAccept(findMember, scheduleId);
 
         List<String> friendIds = extractFriendIds(findSchedule);
+        List<String> arrivedFriendIs = extractArrivedFriendIds(findSchedule);
 
-        return setResponseDetailSchedule(findSchedule, friendIds);
+        return setResponseDetailSchedule(findSchedule, friendIds, arrivedFriendIs);
     }
 
-    private Schedule returnMemberScheduleIfMemberAccept(Member findMember, String scheduleId) {
+    private Schedule returnScheduleIfMemberAccept(Member findMember, String scheduleId) {
         MemberSchedule acceptedMemberSchedule = memberScheduleRepository.findByMemberAndScheduleIdAndAcceptIsTrue(findMember, scheduleId)
                 .orElseThrow(() -> new ScheduleNotFoundException(SCHEDULE_NOT_FOUND_OR_MEMBER_DIDNT_ACCEPT_EXCEPTION_MESSAGE));
 
@@ -351,7 +352,14 @@ public class ScheduleService {
                 .collect(Collectors.toList());
     }
 
-    private ResponseDetailSchedule setResponseDetailSchedule(Schedule findSchedule, List<String> friendIds) {
+    private List<String> extractArrivedFriendIds(Schedule findSchedule) {
+        return findSchedule.getMemberScheduleList().stream()
+                .filter(MemberSchedule::getArrived)
+                .map(memberSchedule -> memberSchedule.getMember().getId())
+                .collect(Collectors.toList());
+    }
+
+    private ResponseDetailSchedule setResponseDetailSchedule(Schedule findSchedule, List<String> friendIds, List<String> arrivedFriendIds) {
         return ResponseDetailSchedule.builder()
                 .creatorId(findSchedule.getCreator().getId())
                 .start(findSchedule.getStart())
@@ -362,6 +370,7 @@ public class ScheduleService {
                 .destinationLatitude(findSchedule.getDestinationLatitude())
                 .destinationLongitude(findSchedule.getDestinationLongitude())
                 .friendsIdListDTO(friendIds)
+                .arrivedFriendsIdList(arrivedFriendIds)
                 .build();
     }
 
