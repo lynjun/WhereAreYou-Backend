@@ -8,6 +8,6 @@ import lombok.Data;
 public class ResponseMemberByUserId {
 
     private String userName;
-    private String userId;
+    private String memberId;
     private String profileImage;
 }
