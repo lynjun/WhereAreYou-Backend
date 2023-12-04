@@ -8,8 +8,7 @@ import java.util.List;
 @Data
 public class RequestSaveSchedule {
     private String memberId;
-    private LocalDateTime start;
-    private LocalDateTime end;
+    private LocalDateTime appointmentTime;
     private String title;
     private String place;
     private String memo;

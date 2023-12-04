@@ -8,6 +8,5 @@ import java.time.LocalDateTime;
 public class BriefDateScheduleDTO {
     private String scheduleId;
     private String title;
-    private LocalDateTime start;
-    private LocalDateTime end;
+    private LocalDateTime appointmentTime;
 }

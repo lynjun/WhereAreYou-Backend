@@ -14,9 +14,8 @@ import java.util.List;
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, String> {
     @Modifying
-    @Query("UPDATE Schedule s SET s.start = :start, s.end = :end, s.title = :title, s.place = :place, s.memo = :memo, s.creator = :creator WHERE s.id = :scheduleId")
-    int updateSchedule(@Param("start") LocalDateTime start,
-                       @Param("end") LocalDateTime end,
+    @Query("UPDATE Schedule s SET s.appointmentTime = :appointmentTime, s.title = :title, s.place = :place, s.memo = :memo, s.creator = :creator WHERE s.id = :scheduleId")
+    int updateSchedule(@Param("appointmentTime") LocalDateTime start,
                        @Param("title") String title,
                        @Param("place") String place,
                        @Param("memo") String memo,
