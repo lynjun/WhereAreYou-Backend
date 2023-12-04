@@ -21,8 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -257,7 +255,7 @@ import java.util.Random;
 
         ResponseMemberByUserId responseMemberByUserId = new ResponseMemberByUserId();
         responseMemberByUserId.setUserName(member.getUserName());
-        responseMemberByUserId.setUserId(member.getId());
+        responseMemberByUserId.setMemberId(member.getId());
         responseMemberByUserId.setProfileImage(member.getProfileImage());
 
         return responseMemberByUserId;
