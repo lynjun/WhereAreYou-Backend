@@ -30,7 +30,6 @@ public class Schedule {
     private String id;
 
     private LocalDateTime appointmentTime;
-    private LocalDateTime createTime;
 
     private String title;
     private String place;
