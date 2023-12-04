@@ -14,8 +14,6 @@ import java.util.Optional;
 
 @Repository
 public interface MemberScheduleRepository extends JpaRepository<MemberSchedule, String> {
-    void deleteAllBySchedule(Schedule schedule);
-
     @Modifying
     @Query("UPDATE MemberSchedule ms SET ms.accept = true WHERE ms.member.id = :memberId AND ms.schedule.id = :scheduleId")
     int setAcceptTrueForMemberAndSchedule(@Param("memberId") String memberId, @Param("scheduleId") String scheduleId);

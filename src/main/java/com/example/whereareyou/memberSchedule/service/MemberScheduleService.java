@@ -206,7 +206,7 @@ public class MemberScheduleService {
             scheduleInviteDto.setScheduleId(schedule.getId());
             scheduleInviteDto.setTitle(schedule.getTitle());
             scheduleInviteDto.setUserName(schedule.getCreator().getUserName());
-            scheduleInviteDto.setStart(schedule.getStart());
+            scheduleInviteDto.setStart(schedule.getAppointmentTime());
             responseGroupInvite.getInviteList().add(scheduleInviteDto);
         });
 
