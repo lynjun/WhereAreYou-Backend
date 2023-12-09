@@ -29,11 +29,14 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" | base64 --decode > src/main/resources/application.yml
           find src
 
+      - name: Create Firebase Config Directory
+        run: mkdir -p src/main/resources/firebase
+      
       - name: create-json
         id: create-json
         uses: jsdaniell/create-json@v1.2.2
         with:
-          name: "firebase_service_key"
+          name: "firebase_service_key.json" # .json 확장자 추가
           json: ${{ secrets.FIREBASE_SERVICE_KEY }}
           dir: 'src/main/resources/firebase'
 
