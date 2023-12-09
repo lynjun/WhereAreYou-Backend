@@ -3,20 +3,27 @@ package com.example.whereareyou.global.service;
 import com.example.whereareyou.global.domain.FcmToken;
 import com.example.whereareyou.global.repository.FcmTokenRepository;
 import com.example.whereareyou.global.request.RequestFcmToken;
+import com.example.whereareyou.member.exception.UserNotFoundException;
+import com.example.whereareyou.member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+import static com.example.whereareyou.global.constant.ExceptionConstant.USER_NOT_FOUND_EXCEPTION_MESSAGE;
+
 @Service
 @Transactional
 public class FcmTokenService {
     private final FcmTokenRepository fcmTokenRepository;
+    private final MemberRepository memberRepository;
 
     @Autowired
-    public FcmTokenService(FcmTokenRepository fcmTokenRepository) {
+    public FcmTokenService(FcmTokenRepository fcmTokenRepository,
+                           MemberRepository memberRepository) {
         this.fcmTokenRepository = fcmTokenRepository;
+        this.memberRepository = memberRepository;
     }
 
     /**
@@ -51,5 +58,17 @@ public class FcmTokenService {
      */
     public Optional<FcmToken> getTokenByMemberId(String id){
         return fcmTokenRepository.findByMemberId(id);
+    }
+
+    /**
+     * Delete FCM Token by member ID
+     *
+     * @param memberId
+     */
+    public void deleteFcmToken(String memberId){
+        FcmToken fcmToken = fcmTokenRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_EXCEPTION_MESSAGE));
+
+        fcmTokenRepository.delete(fcmToken);
     }
 }
