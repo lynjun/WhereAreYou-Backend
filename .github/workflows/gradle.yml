@@ -29,11 +29,13 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" | base64 --decode > src/main/resources/application.yml
           find src
 
-      - name: Create firebase_service_key.json
-        run: |
-          mkdir -p src/main/resources/firebase
-          printf '%s' "${{ secrets.FIREBASE_SERVICE_KEY }}" > src/main/resources/firebase/firebase_service_key.json
-        shell: bash
+      - name: create-json
+        id: create-json
+        uses: jsdaniell/create-json@v1.2.2
+        with:
+          name: "firebase_service_key"
+          json: ${{ secrets.FIREBASE_SERVICE_KEY }}
+          dir: 'src/main/resources/firebase'
 
       - name: Build with Gradle
         run: ./gradlew clean build
