@@ -1,5 +1,6 @@
 package com.example.whereareyou.schedule.service;
 
+import com.example.whereareyou.global.constant.ExceptionConstant;
 import com.example.whereareyou.global.domain.FcmToken;
 import com.example.whereareyou.global.service.FcmTokenService;
 import com.example.whereareyou.global.service.FirebaseCloudMessageService;
@@ -92,7 +93,7 @@ public class ScheduleService {
 
         List<Member> friends = memberRepository.findAllById(friendList);
         if (friends.size() != friendList.size()) {
-            throw new UserNotFoundException(USER_NOT_FOUND_EXCEPTION_MESSAGE);
+            throw new UserNotFoundException(FRIEND_NOT_FOUND_EXCEPTION_MESSAGE);
         }
 
         friends.add(creator);
