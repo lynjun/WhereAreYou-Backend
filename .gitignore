@@ -4,7 +4,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-resources/firebase/firebase_service_key.json
+firebase_service_key.json
 application.yml
 
 ### STS ###
