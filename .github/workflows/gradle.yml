@@ -29,6 +29,24 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" | base64 --decode > src/main/resources/application.yml
           find src
 
+      - name: Set firebase_service_key.json
+        run: |
+          cat <<EOF > src/main/resources/firebase/firebase_service_key.json
+          {
+            "type": "${{ secrets.TYPE }}",
+            "project_id": "${{ secrets.PROJECT_ID }}",
+            "private_key_id": "${{ secrets.PRIVATE_KEY_ID }}",
+            "private_key": "${{ secrets.PRIVATE_KEY }}",
+            "client_email": "${{ secrets.CLIENT_EMAIL }}",
+            "client_id": "${{ secrets.CLIENT_ID }}",
+            "auth_uri": "${{ secrets.AUTH_URI }}",
+            "token_uri": "${{ secrets.TOKEN_URI }}",
+            "auth_provider_x509_cert_url": "${{ secrets.AUTH_PROVIDER_X509_CERT_URL }}",
+            "client_x509_cert_url": "${{ secrets.CLIENT_X509_CERT_URL }}",
+            "universe_domain": "${{ secrets.UNIVERSE_DOMAIN }}"
+          }
+          EOF
+
       - name: Build with Gradle
         run: ./gradlew clean build
         shell: bash
