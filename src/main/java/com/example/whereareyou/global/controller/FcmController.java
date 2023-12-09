@@ -1,15 +1,13 @@
 package com.example.whereareyou.global.controller;
 
 import com.example.whereareyou.global.dto.FirebaseCloudMessageDTO;
+import com.example.whereareyou.global.request.RequestDeleteFcmToken;
 import com.example.whereareyou.global.request.RequestFcmToken;
 import com.example.whereareyou.global.service.FcmTokenService;
 import com.example.whereareyou.global.service.FirebaseCloudMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -46,6 +44,18 @@ public class FcmController {
     @PostMapping()
     public ResponseEntity<Void> saveFcmToken(@RequestBody RequestFcmToken requestFcmToken){
         fcmTokenService.saveOrUpdateToken(requestFcmToken);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * FCM 토큰 삭제(로그아웃)
+     *
+     * @param requestDeleteFcmToken
+     */
+    @DeleteMapping()
+    public ResponseEntity<Void> deleteFcmToken(@RequestBody RequestDeleteFcmToken requestDeleteFcmToken){
+        fcmTokenService.deleteFcmToken(requestDeleteFcmToken.getMemberId());
 
         return ResponseEntity.noContent().build();
     }
