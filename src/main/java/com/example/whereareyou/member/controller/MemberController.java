@@ -120,5 +120,13 @@ public class MemberController {
         return ResponseEntity.ok().body(detailMemberByUserId);
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody String memberId){
+
+        memberService.logout(memberId);
+
+        return ResponseEntity.ok().build();
+    }
+
 }
 

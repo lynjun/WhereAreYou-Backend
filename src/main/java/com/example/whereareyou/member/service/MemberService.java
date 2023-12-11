@@ -3,6 +3,7 @@ package com.example.whereareyou.member.service;
 import com.example.whereareyou.emailCode.domain.EmailCode;
 import com.example.whereareyou.emailCode.repository.EmailCodeRepository;
 import com.example.whereareyou.friend.repository.FriendRepository;
+import com.example.whereareyou.global.repository.FcmTokenRepository;
 import com.example.whereareyou.member.domain.Member;
 import com.example.whereareyou.member.dto.*;
 import com.example.whereareyou.member.exception.*;
@@ -37,6 +38,7 @@ import java.util.Random;
     private final AwsS3Service awsS3Service;
     private final MemberInfoRepository memberInfoRepository;
     private final FriendRepository friendRepository;
+    private final FcmTokenRepository fcmTokenRepository;
 
     public Member join(String userName, String userId, String password, String email){
 
@@ -267,5 +269,11 @@ import java.util.Random;
         responseMemberByUserId.setProfileImage(member.getProfileImage());
 
         return responseMemberByUserId;
+    }
+
+    public void logout(String memberId){
+
+        fcmTokenRepository.deleteByMemberId(memberId);
+
     }
 }
