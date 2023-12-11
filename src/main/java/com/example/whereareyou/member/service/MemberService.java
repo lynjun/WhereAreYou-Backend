@@ -113,7 +113,7 @@ import java.util.Random;
     private void sendAuthEmail(String email, String authKey){
         EmailCode byEmail = emailCodeRepository.findByEmail(email);
 
-        String subject = "제목";
+        String subject = "지금어디 인증번호 입니다.";
         String text = "인증번호는 " + authKey + "입니다. <br/>";
 
         try{
@@ -185,6 +185,8 @@ import java.util.Random;
 
     public void passwordReset(CheckPasswordRequest request) {
 
+        checkPassword(request.getPassword(), request.getCheckPassword());
+
         Optional<Member> byUserId = memberRepository.findByUserId(request.getUserId());
 
         Member member = byUserId.orElseThrow(() ->
@@ -194,6 +196,12 @@ import java.util.Random;
 
         memberRepository.save(member);
 
+    }
+
+    private void checkPassword(String password, String checkPassword){
+        if(!password.equals(checkPassword)){
+            throw new PasswordMismatch("비밀번호가 일치하지 않습니다.");
+        }
     }
 
     public void deleteMember(DeleteMemberRequest deleteMemberRequest){
