@@ -4,6 +4,8 @@ import com.example.whereareyou.friendGroup.domain.FriendGroup;
 import com.example.whereareyou.friendGroupMember.domain.FriendGroupMember;
 import com.example.whereareyou.member.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -27,4 +29,6 @@ public interface FriendGroupMemberRepository extends JpaRepository<FriendGroupMe
     Optional<FriendGroupMember> findByFriendGroupAndMember(FriendGroup friendGroup, Member member);
 
     long countByFriendGroup(FriendGroup friendGroup);
+    @Query("select f FROM FriendGroupMember f where f.friendGroup IN :friendGroup and f.member =:member")
+    List<FriendGroupMember> findByFriendGroup(@Param("friendGroup") List<FriendGroup> friendGroup, @Param("member") Member member);
 }
