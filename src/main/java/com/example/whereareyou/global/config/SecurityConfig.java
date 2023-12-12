@@ -30,12 +30,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors().and()
                 .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
-                .antMatchers("/member/**").permitAll()
-                .antMatchers("/friend/**").permitAll()
+                .antMatchers("/member/details").permitAll()
+                .antMatchers("/member/info").permitAll()
+                .antMatchers("/member/myPage/modify").permitAll()
+                .antMatchers("/member/deleteMember").permitAll()
+
                 .antMatchers("/actuator/health").permitAll()
-                .antMatchers("/schedule/**").permitAll()
-                .antMatchers("/memberschedule/**").permitAll()
-                .antMatchers("/info/**").permitAll()
                 .anyRequest().authenticated();
 
         http.csrf().disable();
@@ -46,12 +46,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public JwtTokenFilter jwtTokenFilter() {
         List<String> permitAllEndpoints = Arrays.asList(
-                "/member/**",
-                "/actuator/health",
-                "/friend/**",
-                "/schedule/**",
-                "/memberschedule/**",
-                "/info/**"
+                "/member/details",
+                "/member/info",
+                "/member/myPage/modify",
+                "/member/deleteMember",
+                "/actuator/health"
         );
         return new JwtTokenFilter(jwtSecret, permitAllEndpoints);
     }
