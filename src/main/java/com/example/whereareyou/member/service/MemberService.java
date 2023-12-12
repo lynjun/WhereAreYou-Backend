@@ -214,6 +214,7 @@ import java.util.Random;
 
         refreshTokenRepository.deleteByMemberId(member.getId());
         memberInfoRepository.deleteByMemberId(member.getId());
+        fcmTokenRepository.deleteByMemberId(member.getId());
 
         memberRepository.deleteById(member.getId());
 
