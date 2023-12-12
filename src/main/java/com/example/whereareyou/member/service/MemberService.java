@@ -3,6 +3,7 @@ package com.example.whereareyou.member.service;
 import com.example.whereareyou.emailCode.domain.EmailCode;
 import com.example.whereareyou.emailCode.repository.EmailCodeRepository;
 import com.example.whereareyou.friend.repository.FriendRepository;
+import com.example.whereareyou.global.repository.FcmTokenRepository;
 import com.example.whereareyou.member.domain.Member;
 import com.example.whereareyou.member.dto.*;
 import com.example.whereareyou.member.exception.*;
@@ -37,6 +38,7 @@ import java.util.Random;
     private final AwsS3Service awsS3Service;
     private final MemberInfoRepository memberInfoRepository;
     private final FriendRepository friendRepository;
+    private final FcmTokenRepository fcmTokenRepository;
 
     public Member join(String userName, String userId, String password, String email){
 
@@ -113,7 +115,7 @@ import java.util.Random;
     private void sendAuthEmail(String email, String authKey){
         EmailCode byEmail = emailCodeRepository.findByEmail(email);
 
-        String subject = "제목";
+        String subject = "지금어디 인증번호 입니다.";
         String text = "인증번호는 " + authKey + "입니다. <br/>";
 
         try{
@@ -185,6 +187,8 @@ import java.util.Random;
 
     public void passwordReset(CheckPasswordRequest request) {
 
+        checkPassword(request.getPassword(), request.getCheckPassword());
+
         Optional<Member> byUserId = memberRepository.findByUserId(request.getUserId());
 
         Member member = byUserId.orElseThrow(() ->
@@ -196,6 +200,12 @@ import java.util.Random;
 
     }
 
+    private void checkPassword(String password, String checkPassword){
+        if(!password.equals(checkPassword)){
+            throw new PasswordMismatch("비밀번호가 일치하지 않습니다.");
+        }
+    }
+
     public void deleteMember(DeleteMemberRequest deleteMemberRequest){
 
         Optional<Member> byId = memberRepository.findById(deleteMemberRequest.getMemberId());
@@ -204,6 +214,7 @@ import java.util.Random;
 
         refreshTokenRepository.deleteByMemberId(member.getId());
         memberInfoRepository.deleteByMemberId(member.getId());
+        fcmTokenRepository.deleteByMemberId(member.getId());
 
         memberRepository.deleteById(member.getId());
 
@@ -259,5 +270,11 @@ import java.util.Random;
         responseMemberByUserId.setProfileImage(member.getProfileImage());
 
         return responseMemberByUserId;
+    }
+
+    public void logout(String memberId){
+
+        fcmTokenRepository.deleteByMemberId(memberId);
+
     }
 }

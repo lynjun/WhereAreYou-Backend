@@ -34,4 +34,6 @@ public interface MemberScheduleRepository extends JpaRepository<MemberSchedule, 
     @Query("SELECT ms.schedule.id FROM MemberSchedule ms WHERE ms.member = :member AND ms.accept = false")
     List<String> findByMemberAndAcceptIsFalse(@Param("member") Member member);
 
+    @Query("select ms FROM MemberSchedule ms where ms.schedule IN :schedules and ms.member =:member")
+    List<MemberSchedule> findByScheduleAndMember(@Param("schedules") List<Schedule> schedules, @Param("member") Member member);
 }

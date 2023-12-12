@@ -22,6 +22,6 @@ public interface ScheduleRepository extends JpaRepository<Schedule, String> {
                        @Param("creator") Member creator,
                        @Param("scheduleId") String scheduleId);
 
-    List<Schedule> findByCreatorId(String MemberId);
+    List<Schedule> findByCreator(Member MemberId);
 
 }
