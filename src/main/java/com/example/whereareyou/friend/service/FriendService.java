@@ -7,6 +7,10 @@ import com.example.whereareyou.friend.dto.*;
 import com.example.whereareyou.friend.exception.AlreadyFriendsException;
 import com.example.whereareyou.friend.exception.AlreadySent;
 import com.example.whereareyou.friend.exception.FriendRequestNotFoundException;
+import com.example.whereareyou.friendGroup.domain.FriendGroup;
+import com.example.whereareyou.friendGroup.repository.FriendGroupRepository;
+import com.example.whereareyou.friendGroupMember.domain.FriendGroupMember;
+import com.example.whereareyou.friendGroupMember.repository.FriendGroupMemberRepository;
 import com.example.whereareyou.global.domain.FcmToken;
 import com.example.whereareyou.global.service.FcmTokenService;
 import com.example.whereareyou.global.service.FirebaseCloudMessageService;
@@ -16,6 +20,9 @@ import com.example.whereareyou.member.exception.UserNotFoundException;
 import com.example.whereareyou.friend.repository.FriendRepository;
 import com.example.whereareyou.FriendRequest.repository.FriendRequestRepository;
 import com.example.whereareyou.member.repository.MemberRepository;
+import com.example.whereareyou.memberSchedule.domain.MemberSchedule;
+import com.example.whereareyou.memberSchedule.repository.MemberScheduleRepository;
+import com.example.whereareyou.schedule.domain.Schedule;
 import com.example.whereareyou.schedule.repository.ScheduleRepository;
 import com.example.whereareyou.friend.response.ResponseFriendIdList;
 import com.example.whereareyou.friend.response.ResponseFriendList;
@@ -39,6 +46,9 @@ public class FriendService {
     private final ScheduleRepository scheduleRepository;
     private final FirebaseCloudMessageService firebaseCloudMessageService;
     private final FcmTokenService fcmTokenService;
+    private final MemberScheduleRepository memberScheduleRepository;
+    private final FriendGroupRepository friendGroupRepository;
+    private final FriendGroupMemberRepository friendGroupMemberRepository;
 
     public void friendRequest(FriendRequestDto request) {
         Optional<Member> byId = memberRepository.findById(request.getMemberId());
@@ -183,6 +193,8 @@ public class FriendService {
 
     }
     public void deleteFriend(FriendDeleteDto friendDeleteDto){
+
+        //멤버 조회
         Optional<Member> byMemberId = memberRepository.findById(friendDeleteDto.getMemberId());
         Member member = byMemberId.orElseThrow(() ->
                 new UserNotFoundException("아이디가 존재하지 않습니다."));
@@ -191,16 +203,26 @@ public class FriendService {
         Member friend = byFriendId.orElseThrow(() ->
                 new UserNotFoundException("아이디가 존재하지 않습니다."));
 
-        Optional<Friend> byOwnerAndFriends = friendRepository.findByOwnerAndFriends(member, friend);
-        Friend nofriend = byOwnerAndFriends.orElseThrow(() ->
-                new RuntimeException("친구 아님"));
-        Optional<Friend> byOwnerAndFriends1 = friendRepository.findByOwnerAndFriends(friend, member);
-        Friend nono = byOwnerAndFriends1.orElseThrow(() ->
-                new RuntimeException("친구 아님 ㅇㅇ"));
+        //친구 삭제
+        friendRepository.deleteByOwnerAndFriends(member,friend);
+        friendRepository.deleteByOwnerAndFriends(friend,member);
 
+        //일정에서 삭제
+        List<Schedule> byCreator1 = scheduleRepository.findByCreator(member);
+        List<Schedule> byCreator = scheduleRepository.findByCreator(friend);
 
-        friendRepository.delete(nofriend);
-        friendRepository.delete(nono);
+        List<MemberSchedule> memberScheduleByMember = memberScheduleRepository.findByScheduleAndMember(byCreator,member);
+        List<MemberSchedule> memberScheduleByMember1 = memberScheduleRepository.findByScheduleAndMember(byCreator1,friend);
+
+        memberScheduleRepository.deleteAll(memberScheduleByMember1);
+        memberScheduleRepository.deleteAll(memberScheduleByMember);
+
+        //그룹에서 삭제
+        List<FriendGroup> byOwner = friendGroupRepository.findByOwner(member);
+
+        List<FriendGroupMember> byFriendGroup = friendGroupMemberRepository.findByFriendGroup(byOwner, friend);
+
+        friendGroupMemberRepository.deleteAll(byFriendGroup);
 
     }
 
