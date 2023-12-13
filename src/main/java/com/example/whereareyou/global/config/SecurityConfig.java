@@ -30,26 +30,32 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors().and()
                 .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
-                .antMatchers("/member/details").permitAll()
-                .antMatchers("/member/info").permitAll()
-                .antMatchers("/member/myPage/modify").permitAll()
-                .antMatchers("/member/deleteMember").permitAll()
+                .antMatchers("/member/checkId", "/member/checkEmail", "/member/email/send", "/member/email/verify",
+                        "/member/join", "/member/login", "/member/logout", "/member/tokenReissue",
+                        "/member/findId", "/member/email/verifyPassword", "/member/resetPassword", "/actuator/health")
+                .permitAll()
 
-                .antMatchers("/actuator/health").permitAll()
                 .anyRequest().authenticated();
 
         http.csrf().disable();
-
         http.headers().frameOptions().disable();
     }
 
     @Bean
     public JwtTokenFilter jwtTokenFilter() {
         List<String> permitAllEndpoints = Arrays.asList(
-                "/member/details",
-                "/member/info",
-                "/member/myPage/modify",
-                "/member/deleteMember",
+                // 토큰 검사가 필요 없는 경로 목록
+                "/member/checkId",
+                "/member/checkEmail",
+                "/member/email/send",
+                "/member/email/verify",
+                "/member/join",
+                "/member/login",
+                "/member/logout",
+                "/member/tokenReissue",
+                "/member/findId",
+                "/member/email/verifyPassword",
+                "/member/resetPassword",
                 "/actuator/health"
         );
         return new JwtTokenFilter(jwtSecret, permitAllEndpoints);
