@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -88,14 +89,24 @@ public class ScheduleService {
     private List<Member> returnScheduleFriends(Member creator, RequestSaveSchedule requestSaveSchedule) {
         List<String> friendList = requestSaveSchedule.getMemberIdList();
 
-        if (friendList.contains(creator.getId()))
-            throw new MemberIdCannotBeInFriendListException(MEMBER_ID_CANNOT_BE_IN_FRIEND_LIST);
+        // friendList가 null이거나 비어 있으면 creator만 포함된 리스트를 반환
+        if (friendList == null || friendList.isEmpty()) {
+            return Collections.singletonList(creator);
+        }
 
+        // memberIdList에 creator의 ID가 포함되어 있으면 예외 발생
+        if (friendList.contains(creator.getId())) {
+            throw new MemberIdCannotBeInFriendListException(MEMBER_ID_CANNOT_BE_IN_FRIEND_LIST);
+        }
+
+        // memberIdList에 해당하는 멤버 조회
         List<Member> friends = memberRepository.findAllById(friendList);
+        // 모든 친구가 찾아지지 않으면 예외 발생
         if (friends.size() != friendList.size()) {
             throw new UserNotFoundException(FRIEND_NOT_FOUND_EXCEPTION_MESSAGE);
         }
 
+        // creator를 친구 목록에 추가
         friends.add(creator);
 
         return friends;
