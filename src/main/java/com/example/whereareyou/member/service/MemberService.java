@@ -10,9 +10,12 @@ import com.example.whereareyou.member.exception.*;
 import com.example.whereareyou.memberInfo.repository.MemberInfoRepository;
 import com.example.whereareyou.member.repository.MemberRepository;
 import com.example.whereareyou.member.response.*;
+import com.example.whereareyou.memberSchedule.repository.MemberScheduleRepository;
 import com.example.whereareyou.refreshToken.repository.RefreshTokenRepository;
 import com.example.whereareyou.global.service.AwsS3Service;
 import com.example.whereareyou.global.service.JwtTokenService;
+import com.example.whereareyou.schedule.domain.Schedule;
+import com.example.whereareyou.schedule.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -22,8 +25,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +44,8 @@ import java.util.Random;
     private final MemberInfoRepository memberInfoRepository;
     private final FriendRepository friendRepository;
     private final FcmTokenRepository fcmTokenRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final MemberScheduleRepository memberScheduleRepository;
 
     public Member join(String userName, String userId, String password, String email){
 
@@ -212,10 +219,21 @@ import java.util.Random;
         Member member = byId.orElseThrow(() ->
                 new UserNotFoundException("존재하지 않는 memberId입니다."));
 
+        List<Schedule> schedulesByMember = scheduleRepository.findSchedulesByMember(member);
+        List<String> list = schedulesByMember.stream().map(Schedule::getId).collect(Collectors.toList());
+
+        memberRepository.deleteFriendRequestReceiverByMemberId(member);
+        memberRepository.deleteFriendFriendsByMemberId(member);
+        memberRepository.deleteFriendGroupByMemberId(member);
+        memberRepository.deleteFriendGroupMemberByMemberId(member);
+        memberScheduleRepository.deleteByAllId(list);
+        scheduleRepository.deleteByCreator(member);
+        memberRepository.deleteFriendOwnerByMemberId(member);
+        memberRepository.deleteSearchHistoryByMemberId(member);
+        memberRepository.deleteFriendRequestSenderIdByMemberId(member);
+        fcmTokenRepository.deleteByMemberId(member.getId());
         refreshTokenRepository.deleteByMemberId(member.getId());
         memberInfoRepository.deleteByMemberId(member.getId());
-        fcmTokenRepository.deleteByMemberId(member.getId());
-
         memberRepository.deleteById(member.getId());
 
     }
