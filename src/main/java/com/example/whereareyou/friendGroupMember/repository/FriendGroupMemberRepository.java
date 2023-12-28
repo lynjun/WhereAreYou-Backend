@@ -4,9 +4,11 @@ import com.example.whereareyou.friendGroup.domain.FriendGroup;
 import com.example.whereareyou.friendGroupMember.domain.FriendGroupMember;
 import com.example.whereareyou.member.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,4 +33,12 @@ public interface FriendGroupMemberRepository extends JpaRepository<FriendGroupMe
     long countByFriendGroup(FriendGroup friendGroup);
     @Query("select f FROM FriendGroupMember f where f.friendGroup IN :friendGroup and f.member =:member")
     List<FriendGroupMember> findByFriendGroup(@Param("friendGroup") List<FriendGroup> friendGroup, @Param("member") Member member);
+
+    @Query("select f from FriendGroupMember f join f.member on f.friendGroup.owner =:owner and f.member =:friend")
+    List<FriendGroupMember> findByOwnerAndFriend(@Param("owner") Member owner, @Param("friend") Member friend);
+
+    @Transactional
+    @Modifying
+    @Query("delete from FriendGroupMember f where f.id in :ids")
+    void deleteByAllId(@Param("ids") List<String> ids);
 }
