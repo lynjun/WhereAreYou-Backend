@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,4 +37,13 @@ public interface MemberScheduleRepository extends JpaRepository<MemberSchedule, 
 
     @Query("select ms FROM MemberSchedule ms where ms.schedule IN :schedules and ms.member =:member")
     List<MemberSchedule> findByScheduleAndMember(@Param("schedules") List<Schedule> schedules, @Param("member") Member member);
+
+    @Query("select ms from MemberSchedule ms join ms.schedule on ms.schedule.creator =:creator and ms.member =:friend")
+    List<MemberSchedule> findByCreatorAndMember(@Param("creator") Member creator, @Param("friend") Member friend);
+
+    @Transactional
+    @Modifying
+    @Query("delete from MemberSchedule ms where ms.schedule.id in :ids")
+    void deleteByAllId(@Param("ids") List<String> ids);
+
 }
