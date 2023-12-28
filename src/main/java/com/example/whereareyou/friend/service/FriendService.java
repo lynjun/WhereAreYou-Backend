@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.example.whereareyou.friend.constant.FriendConstant.*;
 
@@ -208,21 +209,27 @@ public class FriendService {
         friendRepository.deleteByOwnerAndFriends(friend,member);
 
         //일정에서 삭제
-        List<Schedule> byCreator1 = scheduleRepository.findByCreator(member);
-        List<Schedule> byCreator = scheduleRepository.findByCreator(friend);
+        List<MemberSchedule> byMemberAndFriend = memberScheduleRepository.findByCreatorAndMember(member, friend);
+        List<MemberSchedule> byFriendAndMember = memberScheduleRepository.findByCreatorAndMember(friend, member);
 
-        List<MemberSchedule> memberScheduleByMember = memberScheduleRepository.findByScheduleAndMember(byCreator,member);
-        List<MemberSchedule> memberScheduleByMember1 = memberScheduleRepository.findByScheduleAndMember(byCreator1,friend);
+        List<String> byMemberAndFriendIds = byMemberAndFriend.stream().map(MemberSchedule::getId).collect(Collectors.toList());
+        List<String> byFriendAndMemberIds = byFriendAndMember.stream().map(MemberSchedule::getId).collect(Collectors.toList());
 
-        memberScheduleRepository.deleteAll(memberScheduleByMember1);
-        memberScheduleRepository.deleteAll(memberScheduleByMember);
+        memberScheduleRepository.deleteByAllId(byMemberAndFriendIds);
+        memberScheduleRepository.deleteByAllId(byFriendAndMemberIds);
+
+
 
         //그룹에서 삭제
-        List<FriendGroup> byOwner = friendGroupRepository.findByOwner(member);
 
-        List<FriendGroupMember> byFriendGroup = friendGroupMemberRepository.findByFriendGroup(byOwner, friend);
+        List<FriendGroupMember> byOwnerAndFriend = friendGroupMemberRepository.findByOwnerAndFriend(member, friend);
+        List<FriendGroupMember> byFriendAndOwner = friendGroupMemberRepository.findByOwnerAndFriend(friend, member);
 
-        friendGroupMemberRepository.deleteAll(byFriendGroup);
+        List<String> byOwnerAndFriendIds = byOwnerAndFriend.stream().map(FriendGroupMember::getId).collect(Collectors.toList());
+        List<String> byFriendAndOwnerIds = byFriendAndOwner.stream().map(FriendGroupMember::getId).collect(Collectors.toList());
+
+        friendGroupMemberRepository.deleteByAllId(byOwnerAndFriendIds);
+        friendGroupMemberRepository.deleteByAllId(byFriendAndOwnerIds);
 
     }
 
