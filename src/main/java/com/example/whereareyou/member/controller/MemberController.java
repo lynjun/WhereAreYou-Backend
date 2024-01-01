@@ -106,8 +106,9 @@ public class MemberController {
     @PostMapping("/myPage/modify")
     public ResponseEntity<Void> modifyMyPage(@RequestPart(value = "memberId") String memberId,
                                          @RequestPart(value = "images",required = false) MultipartFile multipartFile,
-                                         @RequestPart(value = "newId",required = false) String newId) throws Exception {
-        memberService.modifyMyPage(multipartFile,memberId,newId);
+                                         @RequestPart(value = "newId",required = false) String newId,
+                                         @RequestPart(value = "newUserName",required = false) String userName) throws Exception {
+        memberService.modifyMyPage(multipartFile,memberId,newId,userName);
 
         return ResponseEntity.noContent().build();
     }

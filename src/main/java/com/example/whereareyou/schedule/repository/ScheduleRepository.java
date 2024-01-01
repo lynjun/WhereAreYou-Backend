@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +23,12 @@ public interface ScheduleRepository extends JpaRepository<Schedule, String> {
                        @Param("creator") Member creator,
                        @Param("scheduleId") String scheduleId);
 
-    List<Schedule> findByCreator(Member MemberId);
+    @Transactional
+    @Modifying
+    @Query("delete from Schedule s where s.creator = :member")
+    void deleteByCreator(Member member);
+
+    @Query("SELECT s FROM Schedule s WHERE s.creator = :member")
+    List<Schedule> findSchedulesByMember(@Param("member") Member member);
 
 }
