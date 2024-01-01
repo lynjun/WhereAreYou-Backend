@@ -117,6 +117,7 @@ public class ScheduleService {
                 .appointmentTime(requestSaveSchedule.getAppointmentTime())
                 .title(requestSaveSchedule.getTitle())
                 .place(requestSaveSchedule.getPlace())
+                .roadName(requestSaveSchedule.getRoadName())
                 .memo(requestSaveSchedule.getMemo())
                 .destinationLatitude(requestSaveSchedule.getDestinationLatitude())
                 .destinationLongitude(requestSaveSchedule.getDestinationLongitude())
@@ -193,6 +194,7 @@ public class ScheduleService {
                 requestModifySchedule.getAppointmentTime(),
                 requestModifySchedule.getTitle(),
                 requestModifySchedule.getPlace(),
+                requestModifySchedule.getRoadName(),
                 requestModifySchedule.getMemo(),
                 creator,
                 requestModifySchedule.getDestinationLatitude(),
@@ -371,6 +373,7 @@ public class ScheduleService {
                 .appointmentTime(findSchedule.getAppointmentTime())
                 .title(findSchedule.getTitle())
                 .place(findSchedule.getPlace())
+                .roadName(findSchedule.getRoadName())
                 .memo(findSchedule.getMemo())
                 .destinationLatitude(findSchedule.getDestinationLatitude())
                 .destinationLongitude(findSchedule.getDestinationLongitude())
