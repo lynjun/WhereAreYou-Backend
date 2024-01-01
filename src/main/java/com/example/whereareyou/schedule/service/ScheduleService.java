@@ -195,6 +195,8 @@ public class ScheduleService {
                 requestModifySchedule.getPlace(),
                 requestModifySchedule.getMemo(),
                 creator,
+                requestModifySchedule.getDestinationLatitude(),
+                requestModifySchedule.getDestinationLongitude(),
                 schedule.getId()
         );
 

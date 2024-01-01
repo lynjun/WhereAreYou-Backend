@@ -12,4 +12,6 @@ public class RequestModifySchedule {
     private String title;
     private String place;
     private String memo;
+    private Double destinationLatitude;
+    private Double destinationLongitude;
 }
