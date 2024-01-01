@@ -15,6 +15,7 @@ public class ResponseDetailSchedule {
     private LocalDateTime appointmentTime;
     private String title;
     private String place;
+    private String roadName;
     private String memo;
     private Double destinationLatitude;
     private Double destinationLongitude;

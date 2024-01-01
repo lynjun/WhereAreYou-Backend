@@ -15,10 +15,11 @@ import java.util.List;
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, String> {
     @Modifying
-    @Query("UPDATE Schedule s SET s.appointmentTime = :appointmentTime, s.title = :title, s.place = :place, s.memo = :memo, s.creator = :creator, s.destinationLatitude = :destinationLatitude, s.destinationLongitude = :destinationLongitude WHERE s.id = :scheduleId")
+    @Query("UPDATE Schedule s SET s.appointmentTime = :appointmentTime, s.title = :title, s.place = :place, s.roadName = :roadName, s.memo = :memo, s.creator = :creator, s.destinationLatitude = :destinationLatitude, s.destinationLongitude = :destinationLongitude WHERE s.id = :scheduleId")
     int updateSchedule(@Param("appointmentTime") LocalDateTime start,
                        @Param("title") String title,
                        @Param("place") String place,
+                       @Param("roadName") String roadName,
                        @Param("memo") String memo,
                        @Param("creator") Member creator,
                        @Param("destinationLatitude") Double destinationLatitude,
