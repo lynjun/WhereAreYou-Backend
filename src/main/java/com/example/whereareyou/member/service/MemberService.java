@@ -251,7 +251,7 @@ import java.util.stream.Collectors;
         return responseMember;
     }
 
-    public void modifyMyPage(MultipartFile multipartFile,String memberId,String newId) throws Exception {
+    public void modifyMyPage(MultipartFile multipartFile,String memberId,String newId,String userName) throws Exception {
         //멤버 찾기
         Optional<Member> byUserId = memberRepository.findById(memberId);
         Member member = byUserId.orElseThrow(() -> new UserNotFoundException("아이디가 없습니다"));
@@ -270,6 +270,10 @@ import java.util.stream.Collectors;
         if(multipartFile!=null){
             String upload = awsS3Service.upload(multipartFile);
             member.setProfileImage(upload);
+        }
+        //userName 변경
+        if(userName!=null){
+            member.setUserName(userName);
         }
         //저장
         memberRepository.save(member);
