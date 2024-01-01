@@ -32,7 +32,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/member/checkId", "/member/checkEmail", "/member/email/send", "/member/email/verify",
                         "/member/join", "/member/login", "/member/logout", "/member/tokenReissue",
-                        "/member/findId", "/member/email/verifyPassword", "/member/resetPassword", "/actuator/health")
+                        "/member/findId", "/member/email/verifyPassword", "/member/resetPassword", "/actuator/health", "/h2-console/**")
                 .permitAll()
 
                 .anyRequest().authenticated();
@@ -56,7 +56,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/member/findId",
                 "/member/email/verifyPassword",
                 "/member/resetPassword",
-                "/actuator/health"
+                "/actuator/health",
+                "/h2-console/**"
         );
         return new JwtTokenFilter(jwtSecret, permitAllEndpoints);
     }
