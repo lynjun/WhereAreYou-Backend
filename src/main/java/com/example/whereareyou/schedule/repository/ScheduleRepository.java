@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,14 +15,23 @@ import java.util.List;
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, String> {
     @Modifying
-    @Query("UPDATE Schedule s SET s.appointmentTime = :appointmentTime, s.title = :title, s.place = :place, s.memo = :memo, s.creator = :creator WHERE s.id = :scheduleId")
+    @Query("UPDATE Schedule s SET s.appointmentTime = :appointmentTime, s.title = :title, s.place = :place, s.roadName = :roadName, s.memo = :memo, s.creator = :creator, s.destinationLatitude = :destinationLatitude, s.destinationLongitude = :destinationLongitude WHERE s.id = :scheduleId")
     int updateSchedule(@Param("appointmentTime") LocalDateTime start,
                        @Param("title") String title,
                        @Param("place") String place,
+                       @Param("roadName") String roadName,
                        @Param("memo") String memo,
                        @Param("creator") Member creator,
+                       @Param("destinationLatitude") Double destinationLatitude,
+                       @Param("destinationLongitude") Double destinationLongitude,
                        @Param("scheduleId") String scheduleId);
 
-    List<Schedule> findByCreator(Member MemberId);
+    @Transactional
+    @Modifying
+    @Query("delete from Schedule s where s.creator = :member")
+    void deleteByCreator(Member member);
+
+    @Query("SELECT s FROM Schedule s WHERE s.creator = :member")
+    List<Schedule> findSchedulesByMember(@Param("member") Member member);
 
 }
