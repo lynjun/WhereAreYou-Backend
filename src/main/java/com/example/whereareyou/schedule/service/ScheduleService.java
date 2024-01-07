@@ -435,4 +435,14 @@ public class ScheduleService {
 
         return responseTodaySchedule;
     }
+
+    public void resetSchedule(RequestResetSchedule requestResetSchedule){
+        Member member = returnMember(requestResetSchedule.getMemberId());
+
+        memberScheduleRepository.deleteByMember(member);
+
+        List<Schedule> schedules = scheduleRepository.findSchedulesByMember(member);
+        scheduleRepository.deleteAll(schedules);
+    }
+
 }
