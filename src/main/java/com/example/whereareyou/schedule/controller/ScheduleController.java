@@ -131,4 +131,17 @@ public class ScheduleController {
 
         return ResponseEntity.ok().body(todaySchedule);
     }
+
+    /**
+     * 캘랜더 삭제
+     *
+     * @param requestResetSchedule
+     * @return
+     */
+    @DeleteMapping("/reset")
+    public ResponseEntity<Boolean> resetSchedule(@RequestBody RequestResetSchedule requestResetSchedule){
+        scheduleService.resetSchedule(requestResetSchedule);
+
+        return ResponseEntity.status(HttpStatus.OK).body(true);
+    }
 }

@@ -46,4 +46,7 @@ public interface MemberScheduleRepository extends JpaRepository<MemberSchedule, 
     @Query("delete from MemberSchedule ms where ms.schedule.id in :ids")
     void deleteByAllId(@Param("ids") List<String> ids);
 
+    @Transactional
+    @Modifying
+    void deleteByMember(Member member);
 }
