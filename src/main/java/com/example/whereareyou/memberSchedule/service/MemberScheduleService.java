@@ -33,9 +33,7 @@ import static com.example.whereareyou.schedule.constant.ScheduleConstant.*;
 @Transactional
 public class MemberScheduleService {
     private final MemberRepository memberRepository;
-
     private final ScheduleRepository scheduleRepository;
-
     private final MemberScheduleRepository memberScheduleRepository;
     private final FcmTokenService fcmTokenService;
     private final FirebaseCloudMessageService firebaseCloudMessageService;
@@ -185,19 +183,22 @@ public class MemberScheduleService {
         }
     }
 
-    public ResponseGroupInvite getScheduleInvite(String memberId){
-        Optional<Member> byId = memberRepository.findById(memberId);
-        Member member = byId.orElseThrow(() -> new UserNotFoundException("존재하지 않는 userId 입니다."));
+    public ResponseGroupInvite getScheduleInvite(String memberId) {
+        Member member = returnMember(memberId);
 
         List<String> scheduleId = memberScheduleRepository.findByMemberAndAcceptIsFalse(member);
 
         return getScheduleInvite(scheduleId);
     }
 
-    private ResponseGroupInvite getScheduleInvite(List<String> scheduleId){
+    private ResponseGroupInvite getScheduleInvite(List<String> scheduleId) {
 
         List<Schedule> byId = scheduleRepository.findAllById(scheduleId);
 
+        return setResponseGroupInvite(byId);
+    }
+
+    private static ResponseGroupInvite setResponseGroupInvite(List<Schedule> byId) {
         ResponseGroupInvite responseGroupInvite = new ResponseGroupInvite();
         responseGroupInvite.setInviteList(new ArrayList<>());
 
@@ -209,7 +210,6 @@ public class MemberScheduleService {
             scheduleInviteDto.setStart(schedule.getAppointmentTime());
             responseGroupInvite.getInviteList().add(scheduleInviteDto);
         });
-
         return responseGroupInvite;
     }
 }
