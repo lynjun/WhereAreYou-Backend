@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, String> {
 
-    RefreshToken findByRefreshToken(String token);
     RefreshToken findByMemberId(String memberId);
 
     @Transactional
