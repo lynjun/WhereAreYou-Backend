@@ -31,8 +31,6 @@ public interface FriendGroupMemberRepository extends JpaRepository<FriendGroupMe
     Optional<FriendGroupMember> findByFriendGroupAndMember(FriendGroup friendGroup, Member member);
 
     long countByFriendGroup(FriendGroup friendGroup);
-    @Query("select f FROM FriendGroupMember f where f.friendGroup IN :friendGroup and f.member =:member")
-    List<FriendGroupMember> findByFriendGroup(@Param("friendGroup") List<FriendGroup> friendGroup, @Param("member") Member member);
 
     @Query("select f from FriendGroupMember f join f.member on f.friendGroup.owner =:owner and f.member =:friend")
     List<FriendGroupMember> findByOwnerAndFriend(@Param("owner") Member owner, @Param("friend") Member friend);

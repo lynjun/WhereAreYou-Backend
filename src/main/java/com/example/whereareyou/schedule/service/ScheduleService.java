@@ -1,6 +1,5 @@
 package com.example.whereareyou.schedule.service;
 
-import com.example.whereareyou.global.constant.ExceptionConstant;
 import com.example.whereareyou.global.domain.FcmToken;
 import com.example.whereareyou.global.service.FcmTokenService;
 import com.example.whereareyou.global.service.FirebaseCloudMessageService;
@@ -42,7 +41,6 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final MemberRepository memberRepository;
     private final FirebaseCloudMessageService firebaseCloudMessageService;
-
     private final FcmTokenService fcmTokenService;
 
     /**
@@ -413,13 +411,24 @@ public class ScheduleService {
     }
 
     public ResponseTodaySchedule getTodaySchedule(String memberId) {
-        Optional<Member> optionalMember = memberRepository.findById(memberId);
-        Member member = optionalMember.orElseThrow(() -> new UserNotFoundException("존재하지 않는 memberId입니다."));
+        Member member = returnMember(memberId);
 
         List<MemberSchedule> memberSchedules = memberScheduleRepository.findByMemberAndAcceptIsTrue(member);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-        int todayScheduleCount = 0;
 
+        int todayScheduleCount = setTodayScheduleCount(memberSchedules);
+
+        return setResponseTodaySchedule(todayScheduleCount);
+    }
+
+    private static ResponseTodaySchedule setResponseTodaySchedule(int todayScheduleCount) {
+        ResponseTodaySchedule responseTodaySchedule = new ResponseTodaySchedule();
+        responseTodaySchedule.setTodaySchedule(todayScheduleCount);
+        return responseTodaySchedule;
+    }
+
+    private static int setTodayScheduleCount(List<MemberSchedule> memberSchedules) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        int todayScheduleCount = ZERO;
         for (MemberSchedule memberSchedule : memberSchedules) {
             Schedule schedule = memberSchedule.getSchedule();
             String start = schedule.getAppointmentTime().format(formatter);
@@ -429,11 +438,7 @@ public class ScheduleService {
                 todayScheduleCount++;
             }
         }
-
-        ResponseTodaySchedule responseTodaySchedule = new ResponseTodaySchedule();
-        responseTodaySchedule.setTodaySchedule(todayScheduleCount);
-
-        return responseTodaySchedule;
+        return todayScheduleCount;
     }
 
     public void resetSchedule(RequestResetSchedule requestResetSchedule){
