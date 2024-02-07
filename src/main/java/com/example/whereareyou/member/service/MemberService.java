@@ -16,9 +16,10 @@ import com.example.whereareyou.global.service.JwtTokenService;
 import com.example.whereareyou.schedule.domain.Schedule;
 import com.example.whereareyou.schedule.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -339,7 +340,13 @@ import java.util.stream.Collectors;
     }
 
     public ResponseMemberByUserId getDetailMemberByUserId(String userId){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String name = authentication.getName();
         Member member = returnMember(userId);
+
+        if(member.getId().equals(name)){
+            throw new SelfSearchException("본인의 ID는 검색할 수 없습니다.");
+        }
 
         return setResponseMemberByUserId(member);
     }
