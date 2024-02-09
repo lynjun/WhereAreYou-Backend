@@ -13,7 +13,6 @@ import java.util.Optional;
 public interface FriendRepository extends JpaRepository<Friend, String > {
     List<Friend> findByOwner(Member memberId);
 
-    Optional<Friend> findByOwnerAndFriends(Member memberId,Member friendId);
     @Transactional
     void deleteByOwnerAndFriends(Member memberId, Member friendId);
 }
