@@ -126,6 +126,7 @@ public class FriendService {
             FriendRequestList friendRequestList = new FriendRequestList();
             friendRequestList.setFriendRequestId(friendRequest.getId());
             friendRequestList.setSenderId(senderId.getId());
+            friendRequestList.setCreateTime(friendRequest.getCreateTime());
             responseFriendRequestList.getFriendsRequestList().add(friendRequestList);
         });
     }

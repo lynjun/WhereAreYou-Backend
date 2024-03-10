@@ -120,6 +120,7 @@ public class ScheduleService {
                 .destinationLatitude(requestSaveSchedule.getDestinationLatitude())
                 .destinationLongitude(requestSaveSchedule.getDestinationLongitude())
                 .creator(creator)
+                .createTime(LocalDateTime.now())
                 .build();
 
         scheduleRepository.save(schedule);
