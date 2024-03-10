@@ -45,6 +45,8 @@ public class Schedule {
     @JoinColumn(name = "member_id")
     private Member creator;
 
+    private LocalDateTime createTime;
+
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MemberSchedule> memberScheduleList = new ArrayList<>();
 }
