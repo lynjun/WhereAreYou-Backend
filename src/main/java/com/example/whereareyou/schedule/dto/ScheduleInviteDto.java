@@ -17,5 +17,6 @@ public class ScheduleInviteDto {
     private String title;
     private String userName;
     private LocalDateTime start;
+    private LocalDateTime createTime;
 
 }
