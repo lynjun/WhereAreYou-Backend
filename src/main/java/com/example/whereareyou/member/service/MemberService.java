@@ -257,7 +257,7 @@ import java.util.stream.Collectors;
 
     public void deleteMember(DeleteMemberRequest deleteMemberRequest){
 
-        Member member = returnMember(deleteMemberRequest.getMemberId());
+        Member member = findById(deleteMemberRequest.getMemberId());
 
         List<String> list = extractScheduleId(member);
 
@@ -285,9 +285,15 @@ import java.util.stream.Collectors;
     }
 
     public ResponseMember getDetailMember(String memberId){
-        Member member = returnMember(memberId);
+        Member member = findById(memberId);
 
         return setResponseMember(member);
+    }
+
+    private Member findById(String memberId) {
+        Optional<Member> memberOptional = memberRepository.findById(memberId);
+        return memberOptional.orElseThrow(() ->
+                new MemberIdNotFoundException("존재하지 않는 memberId 입니다."));
     }
 
     private static ResponseMember setResponseMember(Member member) {
@@ -301,8 +307,7 @@ import java.util.stream.Collectors;
 
     public void modifyMyPage(MultipartFile multipartFile,String memberId,String newId,String userName) throws Exception {
         //멤버 찾기
-        Member member = returnMember(memberId);
-
+        Member member = findById(memberId);
         //아이디 변경
         modifyUserId(newId, member);
         //프로필 사진
