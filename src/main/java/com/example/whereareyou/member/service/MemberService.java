@@ -1,7 +1,5 @@
 package com.example.whereareyou.member.service;
 
-import com.example.whereareyou.emailCode.domain.EmailCode;
-import com.example.whereareyou.emailCode.repository.EmailCodeRepository;
 import com.example.whereareyou.global.repository.FcmTokenRepository;
 import com.example.whereareyou.member.domain.Member;
 import com.example.whereareyou.member.dto.*;
@@ -16,6 +14,7 @@ import com.example.whereareyou.global.service.JwtTokenService;
 import com.example.whereareyou.schedule.domain.Schedule;
 import com.example.whereareyou.schedule.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.Authentication;
@@ -29,6 +28,7 @@ import javax.mail.internet.MimeMessage;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,13 +39,13 @@ import java.util.stream.Collectors;
     private final BCryptPasswordEncoder encoder;
     private final JavaMailSender javaMailSender;
     private final JwtTokenService jwtTokenService;
-    private final EmailCodeRepository emailCodeRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final AwsS3Service awsS3Service;
     private final MemberInfoRepository memberInfoRepository;
     private final FcmTokenRepository fcmTokenRepository;
     private final ScheduleRepository scheduleRepository;
     private final MemberScheduleRepository memberScheduleRepository;
+    private final RedisTemplate<String, String> redisTemplate;
 
     public void join(String userName, String userId, String password, String email){
         //저장
@@ -147,8 +147,6 @@ import java.util.stream.Collectors;
     }
 
     private void sendAuthEmail(String email, String authKey){
-        EmailCode byEmail = emailCodeRepository.findByEmail(email);
-
         String subject = "지금어디 인증번호 입니다.";
         String text = "인증번호는 " + authKey + "입니다. <br/>";
 
@@ -163,32 +161,25 @@ import java.util.stream.Collectors;
             throw new InvalidEmailException("이메일 형식이 유효 하지 않습니다.");
         }
 
-        saveCode(email, authKey, byEmail);
+        saveCode(email, authKey);
     }
 
-    private void saveCode(String email, String authKey, EmailCode byEmail) {
-        if(byEmail != null){
-            byEmail.setCode(authKey);
-            emailCodeRepository.save(byEmail);
-        }
-
-        if(byEmail == null ) {
-            EmailCode emailCode = EmailCode.builder()
-                    .email(email)
-                    .code(authKey)
-                    .build();
-            emailCodeRepository.save(emailCode);
-        }
+    private void saveCode(String email, String authKey) {
+        redisTemplate.opsForValue().set(
+                email,
+                authKey,
+                300000,
+                TimeUnit.MILLISECONDS
+        );
     }
 
     public void verifyEmailCode(String email,String code){
-        EmailCode byEmail = emailCodeRepository.findByEmail(email);
-        String verifyCode = byEmail.getCode();
+        String verifyCode = redisTemplate.opsForValue().get(email);
 
         if (!verifyCode.equals(code)){
             throw new InvalidCode("코드가 일치하지 않습니다.");
         }
-        emailCodeRepository.delete(byEmail);
+        redisTemplate.delete(email);
     }
 
     public ResponseResetPassword verifyResetPasswordEmailCode(PasswordReset reset){
