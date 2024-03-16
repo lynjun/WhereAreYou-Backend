@@ -26,7 +26,7 @@ jobs:
       - name: Set YML
         run: |
           mkdir -p src/main/resources
-          echo "${{ secrets.APPLICATION_YML_ACTIVE_LOCAL }}" | base64 --decode > src/main/resources/application.yml
+          echo "${{ secrets.APPLICATION_YML }}" | base64 --decode > src/main/resources/application.yml
           find src
 
       - name: Set YML LOCAL
@@ -83,7 +83,7 @@ jobs:
           aws_access_key: ${{secrets.AWS_ACCESS_KEY_ID}}
           aws_secret_key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
           application_name: WhereAreYou
-          environment_name: WhereAreYou-env-dev-v1
+          environment_name: WhereAreYou-env-v13
           version_label: github-action-${{steps.current-time.outputs.formattedTime}}
           region: ap-northeast-2
           deployment_package: deploy/deploy.zip
