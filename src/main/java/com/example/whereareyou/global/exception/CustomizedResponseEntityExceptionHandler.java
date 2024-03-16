@@ -88,7 +88,7 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
     @ExceptionHandler(JwtTokenMismatchException.class)
     public final ResponseEntity<Object> jwtTokenMismatchException(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse =
-                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false),"H001");
 
         return new ResponseEntity(exceptionResponse, HttpStatus.FORBIDDEN);
     }
@@ -184,7 +184,7 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
     @ExceptionHandler(InvalidEmailException.class)
     public final ResponseEntity<Object> invalidEmailException(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse =
-                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false),"A019");
 
         return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
     }
@@ -256,8 +256,16 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
     @ExceptionHandler(SelfSearchException.class)
     public final ResponseEntity<Object> selfSearchException(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse =
-                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false),"A020");
 
         return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MemberIdNotFoundException.class)
+    public final ResponseEntity<Object> MemberIdNotFoundException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false), "C002");
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.NOT_FOUND);
     }
 }
