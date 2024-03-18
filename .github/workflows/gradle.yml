@@ -2,8 +2,9 @@ name: where-are-you CI/CD
 
 on:
   push:
-    branches:
-      - master
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
   workflow_dispatch:
 
 jobs:
