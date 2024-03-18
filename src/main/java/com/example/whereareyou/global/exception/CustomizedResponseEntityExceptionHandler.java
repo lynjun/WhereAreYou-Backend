@@ -88,7 +88,7 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
     @ExceptionHandler(JwtTokenMismatchException.class)
     public final ResponseEntity<Object> jwtTokenMismatchException(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse =
-                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false),"H001");
 
         return new ResponseEntity(exceptionResponse, HttpStatus.FORBIDDEN);
     }
@@ -184,7 +184,7 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
     @ExceptionHandler(InvalidEmailException.class)
     public final ResponseEntity<Object> invalidEmailException(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse =
-                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false),"A020");
 
         return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
     }
@@ -216,7 +216,7 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
     @ExceptionHandler(InvalidRequestTimeException.class)
     public final ResponseEntity<Object> invalidRequestTimeException(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse =
-                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false), "A018");
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false), "A019");
 
         return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
     }
@@ -224,7 +224,7 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
     @ExceptionHandler(FriendGroupNotFoundException.class)
     public final ResponseEntity<Object> friendGroupNotFoundException(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse =
-                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false), "A014");
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false), "A015");
 
         return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
     }
@@ -232,7 +232,7 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
     @ExceptionHandler(GroupOwnerMismatchException.class)
     public final ResponseEntity<Object> groupOwnerMismatchException(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse =
-                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false), "A015");
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false), "A016");
 
         return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
     }
@@ -240,7 +240,7 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
     @ExceptionHandler(GroupMemberEmptyException.class)
     public final ResponseEntity<Object> groupMemberEmptyException(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse =
-                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false), "A016");
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false), "A017");
 
         return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
     }
@@ -248,7 +248,7 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
     @ExceptionHandler(MemberNotInGroupException.class)
     public final ResponseEntity<Object> memberNotInGroupException(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse =
-                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false), "A017");
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false), "A018");
 
         return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
     }
@@ -256,8 +256,16 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
     @ExceptionHandler(SelfSearchException.class)
     public final ResponseEntity<Object> selfSearchException(Exception ex, WebRequest request){
         ExceptionResponse exceptionResponse =
-                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false),"A021");
 
         return new ResponseEntity(exceptionResponse,HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MemberIdNotFoundException.class)
+    public final ResponseEntity<Object> MemberIdNotFoundException(Exception ex, WebRequest request){
+        ExceptionResponse exceptionResponse =
+                new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false), "C002");
+
+        return new ResponseEntity(exceptionResponse,HttpStatus.NOT_FOUND);
     }
 }
