@@ -1,27 +1,26 @@
 package com.example.whereareyou.global.service;
 
-import com.example.whereareyou.refreshToken.domain.RefreshToken;
 import com.example.whereareyou.member.dto.TokenDto;
 import com.example.whereareyou.refreshToken.exception.ExpiredJwt;
 import com.example.whereareyou.refreshToken.exception.JwtTokenMismatchException;
 import com.example.whereareyou.refreshToken.exception.TokenNotFound;
-import com.example.whereareyou.refreshToken.exception.UsedTokenException;
-import com.example.whereareyou.refreshToken.repository.RefreshTokenRepository;
 import com.example.whereareyou.member.response.ResponseTokenReissue;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
 @Component
 public class JwtTokenService {
 
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -57,18 +56,12 @@ public class JwtTokenService {
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
 
-        RefreshToken tokenId = refreshTokenRepository.findByMemberId(memberId);
-
-        if(tokenId != null){
-            refreshTokenRepository.delete(tokenId);
-        }
-
-        RefreshToken token = RefreshToken.builder()
-                .memberId(memberId)
-                .refreshToken(refreshToken)
-                .build();
-
-        refreshTokenRepository.save(token);
+        redisTemplate.opsForValue().set(
+                memberId,
+                refreshToken,
+                refreshTokenExpiration,
+                TimeUnit.MILLISECONDS
+        );
 
         return refreshToken;
 
@@ -125,12 +118,7 @@ public class JwtTokenService {
 
         String memberId = getMemberId(reissue.getRefreshToken());
 
-        RefreshToken byMemberId = refreshTokenRepository.findByMemberId(memberId);
-        String refreshToken = byMemberId.getRefreshToken();
-
-        if(!refreshToken.equals(reissue.getRefreshToken())){
-            throw new UsedTokenException("이미 사용된 토큰 입니다");
-        }
+        redisTemplate.delete(reissue.getRefreshToken());
 
         ResponseTokenReissue responseTokenReissue = new ResponseTokenReissue();
         responseTokenReissue.setAccessToken(generateAccessToken(memberId));
