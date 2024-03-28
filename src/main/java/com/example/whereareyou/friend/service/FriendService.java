@@ -134,7 +134,7 @@ public class FriendService {
     public void acceptFriend(AcceptFriend acceptFriend) {
         Member memberId = returnMember(acceptFriend.getMemberId());
 
-        Member friendId = returnMember(acceptFriend.getFriendRequestId());
+        Member friendId = returnMember(acceptFriend.getSenderId());
 
         FriendRequest friendRequest = returnFriendRequest(acceptFriend.getFriendRequestId());
 
